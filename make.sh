@@ -76,17 +76,16 @@ run() {
     python manage.py runserver
 }
 
-initpostgres() {
-    # Prepare the permissions of a persistent volume of postgres container.
-    sudo chown 1024:1024 ./pgserv_data
-}
-
 postgres() {
     # PG database for development.
     # Use the host network for other containers.
 
     cd $PGWD
     docker build -t pgserv .
+
+    # Run this to fix the permissions of a persistent volume.
+    # sudo chown 1024:1024 ./pgserv_data
+
 
     # Remove previous if any.
     docker stop pgserv && docker container rm pgserv
@@ -109,6 +108,15 @@ postgres() {
     docker logs -f pgserv
 }
 
+pgshell() {
+    docker exec -it pgserv bash
+}
+
+config() {
+    # Create/Update yaml config file.
+    python $CWD/backend/conf.py    
+}
+
 
 ## EXECUTE OR SHOW USAGE.
 ## -----------------------------------------------------------------------------
@@ -119,10 +127,11 @@ if [[ "$#" -lt 1 ]]; then
     echo -e "build              - Run build on server backend and frontend."
     echo -e "run                - Run the server locally."
 
-    echo -e "dockerdev          - Run the server in docker."
     echo -e "postgres           - Run the postgres docker container."
+    echo -e "pgshell            - Login to the running postgres server."
 
     echo -e "install            - Run conda and npm installation."
+    echo -e "config             - Create or update config file."
     echo -e "update             - Run update."
     echo -e "install_nodejs     - Install nvm, node, npm in HOME."
     echo -e "update_nodejs      - Update node and npm using nvm."
