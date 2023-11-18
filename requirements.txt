@@ -1,0 +1,11 @@
+django
+whitenoise
+bokeh==3.3.1
+django-ninja
+psycopg[binary]
+psycopg[pool]
+matplotlib
+joblib
+scipy
+gunicorn
+numpy
