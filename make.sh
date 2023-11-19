@@ -91,7 +91,7 @@ postgres() {
     docker stop pgserv && docker container rm pgserv
 
     # Run in background using volume for persistence.
-    docker run -itd -v $CWD/pgserv_data:/data/ --net=host \
+    docker run -itd -v $CWD/postgres/pg_data/:/data/ --net=host \
         --name pgserv pgserv
 
     # Check running.

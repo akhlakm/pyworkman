@@ -3,8 +3,8 @@ FROM        postgres:16
 RUN         mkdir -p /postgres
 WORKDIR     /postgres
 
-RUN         groupadd -g 1024 pguser
-RUN         useradd -l -m -u 1024 -g pguser pguser
+RUN         groupadd -g 1000 pguser
+RUN         useradd -l -m -u 1000 -g pguser pguser
 
 EXPOSE      5454
 ENV         POSTGRES_PORT=5454
