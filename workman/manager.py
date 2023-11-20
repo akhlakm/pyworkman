@@ -46,7 +46,7 @@ class Manager(object):
         while True:
             try:
                 frames = self._socket.recv_multipart()
-                return pr.parse(frames)
+                return pr.Message.parse(frames)
             except zmq.error.Again:
                 if self._socket is None or self._stop:
                     return

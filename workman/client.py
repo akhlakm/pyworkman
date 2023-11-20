@@ -2,9 +2,9 @@ import zmq
 from workman import protocol as pr
 
 class Client(object):
-    def __init__(self, manager_url, identity = None, zmq_context=None):
+    def __init__(self, manager_url, clientid = None, zmq_context=None):
         self.manager_url = manager_url
-        self.identity = identity
+        self.identity = clientid
         self._socket : zmq.Socket = None
         self._zmq_context = zmq_context if zmq_context else zmq.Context.instance()
         self._expect_reply = False
@@ -72,7 +72,7 @@ class Client(object):
             if socks.get(self._socket) == zmq.POLLIN:
                 self._expect_reply = False
                 frames = self._socket.recv_multipart()
-                return pr.parse(frames)
+                return pr.Message.parse(frames)
             else:
                 print("Error! Timed out waiting for reply from manager.")
         finally:

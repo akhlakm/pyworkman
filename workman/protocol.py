@@ -55,9 +55,9 @@ class Message(object):
     def frames(self) -> list[bytes]:
         """ Create a payload for sending via socket. """
         body = []
-        if self.address:
-            # Address needed for the router 
-            body += [self.address]
+        if self.identity:
+            # identity needed for the router 
+            body += [self.identity]
 
         body += [
             b'',
@@ -79,9 +79,9 @@ class Message(object):
         assert len(frames) >= 5, "Invalid message, not enough frames"
 
         if frames[0] != b'':
-            address = frames.pop(0)
+            identity = frames.pop(0)
         else:
-            address = None
+            identity = None
 
         assert frames.pop(0) == b'', "Invalid message, non-empty first frame"
         sender      = frames[0]
@@ -91,7 +91,7 @@ class Message(object):
         message     = [decode(f) for f in frames[4:]]
 
         msg = cls(sender, action, service, job, message)
-        msg.set_identity(address)
+        msg.set_identity(identity)
         return msg
 
     @staticmethod
