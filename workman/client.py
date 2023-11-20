@@ -2,8 +2,9 @@ import zmq
 from workman import protocol as pr
 
 class Client(object):
-    def __init__(self, manager_url, zmq_context=None):
+    def __init__(self, manager_url, identity = None, zmq_context=None):
         self.manager_url = manager_url
+        self.identity = identity
         self._socket : zmq.Socket = None
         self._zmq_context = zmq_context if zmq_context else zmq.Context.instance()
         self._expect_reply = False
@@ -27,7 +28,8 @@ class Client(object):
 
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
-        self._socket.setsockopt(zmq.IDENTITY, b'TESTClient')
+        if self.identity:
+            self._socket.setsockopt(zmq.IDENTITY, pr.encode(self.identity))
         self._socket.connect(self.manager_url)
         self._expect_reply = False
 

@@ -42,15 +42,15 @@ class Message(object):
         if action not in self.allowed_action[sender]:
             raise ValueError("Invalid action", action)
 
-        self.address : bytes = None
+        self.identity : bytes = None
         self.sender : bytes = sender
         self.action : bytes = action
         self.service : str = service
         self.job : str = job
         self.message : str = message
 
-    def set_addr(self, addr):
-        self.address = addr
+    def set_identity(self, iden : bytes):
+        self.identity = iden
 
     def frames(self) -> list[bytes]:
         """ Create a payload for sending via socket. """
@@ -70,7 +70,30 @@ class Message(object):
 
         print("Message:", body)
         return body
-    
+
+    @classmethod
+    def parse(cls, frames : list[bytes]):
+        """ Parse a payload received via socket. """
+
+        print("Replied:", frames)
+        assert len(frames) >= 5, "Invalid message, not enough frames"
+
+        if frames[0] != b'':
+            address = frames.pop(0)
+        else:
+            address = None
+
+        assert frames.pop(0) == b'', "Invalid message, non-empty first frame"
+        sender      = frames[0]
+        action      = frames[1]
+        service     = decode(frames[2])
+        job         = decode(frames[3])
+        message     = [decode(f) for f in frames[4:]]
+
+        msg = cls(sender, action, service, job, message)
+        msg.set_identity(address)
+        return msg
+
     @staticmethod
     def actions() -> dict:
         """ Nicely formatted names for the actions. """
@@ -104,27 +127,6 @@ class Message(object):
         return f"Message({str(self.items())})"
 
 
-def parse(frames : list[bytes]) -> Message:
-    """ Parse a payload received via socket. """
-
-    print("Replied:", frames)
-    assert len(frames) >= 5, "Invalid message, not enough frames"
-
-    if frames[0] != b'':
-        address = frames.pop(0)
-    else:
-        address = None
-
-    assert frames.pop(0) == b'', "Invalid message, non-empty first frame"
-    sender      = frames[0]
-    action      = frames[1]
-    service     = decode(frames[2])
-    job         = decode(frames[3])
-    message     = [decode(f) for f in frames[4:]]
-
-    msg = Message(sender, action, service, job, message)
-    msg.set_addr(address)
-    return msg
 
 def encode(s : str) -> bytes:
     if type(s) == bytes:

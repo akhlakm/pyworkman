@@ -55,7 +55,7 @@ class Manager(object):
         # echo
         reply = pr.Message(
             pr.MANAGER, pr.REPLY, msg.service, msg.job, msg.message)
-        reply.set_addr(msg.address)
+        reply.set_identity(msg.identity)
         self._socket.send_multipart(reply.frames())
         print("Message handled.")
 
