@@ -28,7 +28,7 @@ class Message(object):
         MANAGER: (REPLY, HBEAT, ABORT)
     }
 
-    def __init__(self, sender, action, service, identifier, message = None):
+    def __init__(self, sender, action, service, job, message = None):
         if message is None:
             message = []
 
@@ -39,7 +39,7 @@ class Message(object):
             raise ValueError("Invalid action", action)
 
         self.address = None
-        self.id = identifier
+        self.job = job
         self.sender = sender
         self.action = action
         self.service = service
@@ -60,19 +60,43 @@ class Message(object):
             encode(self.sender),
             encode(self.action),
             encode(self.service),
-            encode(self.id),
+            encode(self.job),
         ]
         body += [encode(m) for m in self.message]
 
         print("Message:", body)
         return body
     
-    def __repr__(self) -> str:
-        items = {
-            k: v for k, v in self.__dict__.items()
-            if not k.startswith("_")
+    @staticmethod
+    def actions() -> dict:
+        """ Nicely formatted names for the actions. """
+        return {
+            "ready" : READY,
+            "request" : REQUEST,
+            "heartbeat" : HBEAT,
+            "reply" : REPLY,
+            "update" : UPDATE,
+            "abort" : ABORT,
+            "done" : DONE,
+            "status" : STATUS,
         }
-        return f"Message({ str(items) })"
+
+    def items(self) -> dict:
+        action = encode(self.action)
+        for k, v in Message.actions().items():
+            if v == action:
+                action = k
+        items = {
+            'sender': self.sender,
+            'action': action,
+            'service': self.service,
+            'job': self.job,
+            'message': " ".join(self.message),
+        }
+        return items
+    
+    def __repr__(self) -> str:
+        return f"Message({str(self.items())})"
 
 
 def parse(frames : list[bytes]) -> Message:
@@ -90,10 +114,10 @@ def parse(frames : list[bytes]) -> Message:
     sender      = decode(frames[0])
     action      = decode(frames[1])
     service     = decode(frames[2])
-    identifier  = decode(frames[3])
+    job  = decode(frames[3])
     message     = [decode(f) for f in frames[4:]]
 
-    msg = Message(sender, action, service, identifier, message)
+    msg = Message(sender, action, service, job, message)
     msg.set_addr(address)
     return msg
 

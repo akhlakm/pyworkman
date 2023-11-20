@@ -37,18 +37,18 @@ class Client(object):
         self._socket = None
         self._expect_reply = False
 
-    def request(self, service, identifier, message = None):
-        msg = pr.Message(pr.CLIENT, pr.REQUEST, service, identifier, message)
+    def request(self, service, job, message = None):
+        msg = pr.Message(pr.CLIENT, pr.REQUEST, service, job, message)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
-    def status(self, service, identifier):
-        msg = pr.Message(pr.CLIENT, pr.STATUS, service, identifier)
+    def status(self, service, job):
+        msg = pr.Message(pr.CLIENT, pr.STATUS, service, job)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
-    def abort(self, service, identifier):
-        msg = pr.Message(pr.CLIENT, pr.ABORT, service, identifier)
+    def abort(self, service, job):
+        msg = pr.Message(pr.CLIENT, pr.ABORT, service, job)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 

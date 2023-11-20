@@ -1,4 +1,5 @@
 import zmq
+import signal
 from workman import protocol as pr
 
 class Manager(object):
@@ -52,14 +53,13 @@ class Manager(object):
     def handle(self, msg : pr.Message):
         # echo
         reply = pr.Message(
-            pr.MANAGER, pr.REPLY, msg.service, msg.id, msg.message)
+            pr.MANAGER, pr.REPLY, msg.service, msg.job, msg.message)
         reply.set_addr(msg.address)
         self._socket.send_multipart(reply.frames())
-        print("Message handled")
+        print("Message handled.")
+
 
 def main():
-    import signal
-
     mgr = Manager()
 
     def _sig_handler(sig, _):
