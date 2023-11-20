@@ -19,6 +19,7 @@ HBEAT_TIMEOUT = 10
 HBEAT_INTERVAL = 2.5
 WORKER_BUSY_TIMEOUT = 900
 
+
 class Message(object):
     allowed_sender = (CLIENT, WORKER, MANAGER)
     allowed_action = {
@@ -27,8 +28,7 @@ class Message(object):
         MANAGER: (REPLY, HBEAT, ABORT)
     }
 
-    def __init__(self, sender, action, service, identifier, message = None,
-                 address = None):
+    def __init__(self, sender, action, service, identifier, message = None):
         if message is None:
             message = []
 
@@ -38,14 +38,18 @@ class Message(object):
         if encode(action) not in self.allowed_action[encode(sender)]:
             raise ValueError("Invalid action", action)
 
-        self.address = address
+        self.address = None
         self.id = identifier
         self.sender = sender
         self.action = action
         self.service = service
         self.message = message
 
+    def set_addr(self, addr):
+        self.address = addr
+
     def frames(self) -> list[bytes]:
+        """ Create a payload for sending via socket. """
         body = []
         if self.address:
             # Address needed for the router 
@@ -60,16 +64,20 @@ class Message(object):
         ]
         body += [encode(m) for m in self.message]
 
-        print("Payload:", body)
+        print("Message:", body)
         return body
     
     def __repr__(self) -> str:
-        items = [f"{k}: {v}"
-                 for k, v in self.__dict__.items()
-                 if not k.startswith("_")]
-        return "Message: " +" ".join(items)
+        items = {
+            k: v for k, v in self.__dict__.items()
+            if not k.startswith("_")
+        }
+        return f"Message({ str(items) })"
+
 
 def parse(frames : list[bytes]) -> Message:
+    """ Parse a payload received via socket. """
+
     print("Replied:", frames)
     assert len(frames) >= 5, "Invalid message, not enough frames"
 
@@ -84,8 +92,10 @@ def parse(frames : list[bytes]) -> Message:
     service     = decode(frames[2])
     identifier  = decode(frames[3])
     message     = [decode(f) for f in frames[4:]]
-    return Message(sender, action, service, identifier, message,
-                   address=address)
+
+    msg = Message(sender, action, service, identifier, message)
+    msg.set_addr(address)
+    return msg
 
 def encode(s : str) -> bytes:
     if type(s) == bytes:

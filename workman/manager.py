@@ -52,8 +52,8 @@ class Manager(object):
     def handle(self, msg : pr.Message):
         # echo
         reply = pr.Message(
-            pr.MANAGER, pr.REPLY,
-            msg.service, msg.id, msg.message, address=msg.address)
+            pr.MANAGER, pr.REPLY, msg.service, msg.id, msg.message)
+        reply.set_addr(msg.address)
         self._socket.send_multipart(reply.frames())
         print("Message handled")
 
