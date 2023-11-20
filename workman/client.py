@@ -19,12 +19,15 @@ class Client(object):
         self.close()
 
     def connect(self, reconnect=False):
-        if self._is_connected():
-            if not reconnect:
-                return
+        if reconnect:
             self.close()
+
+        if self._is_connected():
+            return
+
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
+        self._socket.setsockopt(zmq.IDENTITY, b'TESTClient')
         self._socket.connect(self.manager_url)
         self._expect_reply = False
 
@@ -52,11 +55,11 @@ class Client(object):
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
-    def reply(self, timeout = None) -> pr.Message:
+    def reply(self, timeout_sec : int = None) -> pr.Message:
         if not self._expect_reply:
             return None
         
-        timeout = int(timeout * 1000) if timeout else None
+        timeout = int(timeout_sec * 1000) if timeout_sec else None
 
         poller = zmq.Poller()
         poller.register(self._socket, zmq.POLLIN)

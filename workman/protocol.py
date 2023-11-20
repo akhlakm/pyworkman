@@ -12,6 +12,7 @@ UPDATE  = b'\005'
 ABORT   = b'\006'
 DONE    = b'\007'
 STATUS  = b'\008'
+GONE    = b'\009'
 
 # Timing
 ZMQ_LINGER = 2000
@@ -24,26 +25,29 @@ class Message(object):
     allowed_sender = (CLIENT, WORKER, MANAGER)
     allowed_action = {
         CLIENT: (REQUEST, STATUS, ABORT),
-        WORKER: (READY, HBEAT, UPDATE, DONE),
-        MANAGER: (REPLY, HBEAT, ABORT)
+        MANAGER: (REPLY, HBEAT, ABORT),
+        WORKER: (READY, HBEAT, UPDATE, DONE, GONE, REPLY),
     }
 
-    def __init__(self, sender, action, service, job, message = None):
+    def __init__(self, sender, action, service, job = None, message = None):
         if message is None:
             message = []
 
-        if encode(sender) not in self.allowed_sender:
+        sender = encode(sender)
+        action = encode(action)
+
+        if sender not in self.allowed_sender:
             raise ValueError("Invalid sender", sender)
 
-        if encode(action) not in self.allowed_action[encode(sender)]:
+        if action not in self.allowed_action[sender]:
             raise ValueError("Invalid action", action)
 
-        self.address = None
-        self.job = job
-        self.sender = sender
-        self.action = action
-        self.service = service
-        self.message = message
+        self.address : bytes = None
+        self.sender : bytes = sender
+        self.action : bytes = action
+        self.service : str = service
+        self.job : str = job
+        self.message : str = message
 
     def set_addr(self, addr):
         self.address = addr
@@ -57,8 +61,8 @@ class Message(object):
 
         body += [
             b'',
-            encode(self.sender),
-            encode(self.action),
+            self.sender,
+            self.action,
             encode(self.service),
             encode(self.job),
         ]
@@ -79,15 +83,16 @@ class Message(object):
             "abort" : ABORT,
             "done" : DONE,
             "status" : STATUS,
+            "disconnect": GONE,
         }
 
     def items(self) -> dict:
-        action = encode(self.action)
+        action = decode(self.action)
         for k, v in Message.actions().items():
-            if v == action:
+            if v == self.action:
                 action = k
         items = {
-            'sender': self.sender,
+            'sender': decode(self.sender),
             'action': action,
             'service': self.service,
             'job': self.job,
@@ -111,10 +116,10 @@ def parse(frames : list[bytes]) -> Message:
         address = None
 
     assert frames.pop(0) == b'', "Invalid message, non-empty first frame"
-    sender      = decode(frames[0])
-    action      = decode(frames[1])
+    sender      = frames[0]
+    action      = frames[1]
     service     = decode(frames[2])
-    job  = decode(frames[3])
+    job         = decode(frames[3])
     message     = [decode(f) for f in frames[4:]]
 
     msg = Message(sender, action, service, job, message)
