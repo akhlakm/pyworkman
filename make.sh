@@ -65,14 +65,6 @@ build() {
 }
 
 run() {
-    cd $BWD
-    export WS_USE_PG=0
-
-    if [[ -n $WS_USE_PG && -z $WS_DB_PSWD ]]; then
-        echo "Plase export WS_DB_PSWD with pgdev install password."
-        exit 20
-    fi
-
     python manage.py runserver
 }
 
