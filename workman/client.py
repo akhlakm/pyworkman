@@ -80,7 +80,7 @@ class Client(object):
 
 
 if __name__ == '__main__':
-    with Client('tcp://127.0.0.1:5555') as client:
+    with Client('tcp://127.0.0.1:5555', clientid='test-client') as client:
         client.request('test', '12', ['hello'])
         msg = client.reply(10)
         print(msg)
