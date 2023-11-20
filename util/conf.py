@@ -123,6 +123,13 @@ class _ws:
 WebServer = new_config(_ws)
 
 
+@dataclass
+class _wm:
+    mgr_url : str = 'tcp://127.0.0.1:5555'
+
+WorkMan = new_config(_wm)
+
+
 if __name__ == '__main__':
     load_config()
     save_config()

@@ -1,9 +1,10 @@
 import zmq
 import signal
+from util import conf
 from workman import protocol as pr
 
 class Manager(object):
-    def __init__(self, bind_url = "tcp://127.0.0.1:5555", zmq_context = None) -> None:
+    def __init__(self, bind_url, zmq_context = None) -> None:
         self._bind_url = bind_url
         self._context = zmq_context if zmq_context else zmq.Context.instance()
         self._socket : zmq.Socket = None
@@ -60,7 +61,7 @@ class Manager(object):
 
 
 def main():
-    mgr = Manager()
+    mgr = Manager(bind_url=conf.WorkMan.mgr_url)
 
     def _sig_handler(sig, _):
         print("\nShutting down ...")
