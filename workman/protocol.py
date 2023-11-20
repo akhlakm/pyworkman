@@ -4,20 +4,20 @@ WORKER    = b'W'
 MANAGER   = b'M'
 
 # Action bit
-READY   = b'\001'
-REQUEST = b'\002'
-HBEAT   = b'\003'
-REPLY   = b'\004'
-UPDATE  = b'\005'
-ABORT   = b'\006'
-DONE    = b'\007'
-STATUS  = b'\008'
-GONE    = b'\009'
+READY   = b'\x001'
+REQUEST = b'\x002'
+HBEAT   = b'\x003'
+REPLY   = b'\x004'
+UPDATE  = b'\x005'
+ABORT   = b'\x006'
+DONE    = b'\x007'
+STATUS  = b'\x008'
+GONE    = b'\x009'
 
 # Timing
 ZMQ_LINGER = 2000
-HBEAT_TIMEOUT = 10
-HBEAT_INTERVAL = 2.5
+HBEAT_TIMEOUT = 60
+HBEAT_INTERVAL = 10
 WORKER_BUSY_TIMEOUT = 900
 
 
@@ -25,7 +25,7 @@ class Message(object):
     allowed_sender = (CLIENT, WORKER, MANAGER)
     allowed_action = {
         CLIENT: (REQUEST, STATUS, ABORT),
-        MANAGER: (REPLY, HBEAT, ABORT),
+        MANAGER: (REPLY, HBEAT, REQUEST, ABORT),
         WORKER: (READY, HBEAT, UPDATE, DONE, GONE, REPLY),
     }
 

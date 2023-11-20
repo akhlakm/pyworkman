@@ -1,6 +1,5 @@
 import zmq
 import signal
-from util import conf
 from workman import protocol as pr
 
 class Manager(object):
@@ -52,15 +51,17 @@ class Manager(object):
                     return
                 
     def handle(self, msg : pr.Message):
-        # echo
-        reply = pr.Message(
-            pr.MANAGER, pr.REPLY, msg.service, msg.job, msg.message)
-        reply.set_identity(msg.identity)
-        self._socket.send_multipart(reply.frames())
+        if msg.action == pr.REQUEST:
+            # echo
+            reply = pr.Message(
+                pr.MANAGER, pr.REPLY, msg.service, msg.job, msg.message)
+            reply.set_identity(msg.identity)
+            self._socket.send_multipart(reply.frames())
         print("Message handled.")
 
 
 def main():
+    from util import conf
     mgr = Manager(bind_url=conf.WorkMan.mgr_url)
 
     def _sig_handler(sig, _):
