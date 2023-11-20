@@ -13,6 +13,7 @@ if [[ $(basename "${0}") != "make.sh" ]]; then
     # Script sourced, load or create condaenv
     if conda info --envs | grep -q $CONDAENV; then
         conda activate $CONDAENV
+        export PYTHONPATH=.
     else
         echo "Setting up $CONDAENV conda environment."
         conda create -n $CONDAENV python=3.10 -c conda-forge
