@@ -111,6 +111,7 @@ class _pg:
     db_user : str = 'pguser'
     db_pswd : str = ''
     db_name : str = 'django'
+    db_textgen : str = 'textgen'
 
 PostGres = new_config(_pg)
 
