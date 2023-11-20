@@ -106,7 +106,7 @@ pgshell() {
 
 config() {
     # Create/Update yaml config file.
-    python $CWD/backend/conf.py    
+    python $CWD/util/conf.py    
 }
 
 
