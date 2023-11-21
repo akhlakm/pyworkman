@@ -12,7 +12,7 @@ class ServiceJob(object):
         self.running = False
         self.complete = False
         self.cancelled = False
-        self.abondoned = False
+        self.abandoned = False
         self.workerid = None
         self.updates = []
         self.result = None
@@ -42,8 +42,8 @@ class ServiceJob(object):
         self.workerid = workerid
         self.queued = False
 
-    def set_abondoned(self):
-        self.abondoned = True
+    def set_abandoned(self):
+        self.abandoned = True
         self.queued = True
 
     def set_update(self, update):
@@ -123,7 +123,7 @@ class Service(object):
             "running": [k for k, job in self.jobs.items() if job.running],
             "done": [k for k, job in self.jobs.items() if job.complete],
             "cancelled": [k for k, job in self.jobs.items() if job.cancelled],
-            "abodoned": [k for k, job in self.jobs.items() if job.abondoned],
+            "abandoned": [k for k, job in self.jobs.items() if job.abandoned],
         }
         return items
     
@@ -209,9 +209,9 @@ class Service(object):
         if worker.idle:
             worker.set_ready()
         else:
-            self.log.error("Previous job abondoned by worker: {}", worker.id)
+            self.log.error("Previous job abandoned by worker: {}", worker.id)
             job = self.jobs[worker.jobid]
-            job.set_abondoned()
+            job.set_abandoned()
             worker.set_ready()
 
 
@@ -251,7 +251,7 @@ class Service(object):
         if worker:
             if worker.jobid:
                 job = self.jobs[worker.jobid]
-                job.set_abondoned()
+                job.set_abandoned()
             worker.set_gone()
             del self.workers[msg.identity]
     
