@@ -1,4 +1,6 @@
 <script>
+  import AcInput from "./lib/ACInput.svelte";
+
   const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   let tadata = "";
   let service = 'echo';
@@ -36,14 +38,17 @@
 
 <main>
   <center>
-
+    
     <form class="jobform" on:submit|preventDefault={handleRequest}>
       <span>Service</span>
-      <input class="textinput" type="text" bind:value={service} placeholder="service name">
+      <AcInput bind:inputValue={service} placeholder="Service name ..." />
+
       <span>Job ID</span>
-      <input class="textinput" type="text" bind:value={job} placeholder="job id">
+      <AcInput bind:inputValue={job} placeholder="Job id ..." />
+
       <span>Payload</span>
-      <input class="textinput" type="text" bind:value={message} placeholder="message">
+      <AcInput bind:inputValue={message} placeholder="Payload ..." />
+
       <div class="col-start-2 col-span-3">
         <input class="btn" type="submit" name="submit" value="Submit Job" />
         <input class="btn" type="submit" name="status" value="Check Status" />
@@ -58,15 +63,9 @@
 
 <style>
 
-
   .jobform {
     @apply grid grid-cols-5 mx-auto w-11/12;
     @apply items-center;
-  }
-
-  .textinput {
-    @apply m-1 py-1 px-3 w-9/12 left-0 right-auto col-span-4;
-    @apply border rounded border-black;
   }
 
 </style>
