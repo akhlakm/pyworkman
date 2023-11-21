@@ -104,8 +104,7 @@ class ServiceWorker(object):
         self.idle = False
 
     def set_done(self):
-        # Do not set idle even if done.
-        # Wait for the ready event.
+        # Do not set idle even if done. Wait for the ready event.
         self._last_received = time.time()
         self.jobtask = None
         self.jobid = None
@@ -144,8 +143,8 @@ class Service(object):
         joblist = [j for j in self.jobs.values() if j.queued]
         workerlist = [w for w in self.workers.values() if w.idle]
 
-        self.log.trace("Execute Joblist: {}", joblist)
-        self.log.trace("Execute Workers: {}", workerlist)
+        # self.log.trace("Execute Joblist: {}", joblist)
+        # self.log.trace("Execute Workers: {}", workerlist)
 
         job = None
         if joblist:
@@ -162,11 +161,9 @@ class Service(object):
 
 
     def run(self):
-        # t1 = self.log.trace("Running service: {}", self.name)
         self._execute()
         for name, worker in self.workers.items():
             worker.send_hbeat()
-        # t1.done("Service {}: run complete.", self.name)
 
 
     def client_new_job(self, msg : pr.Message) -> str:
@@ -221,7 +218,6 @@ class Service(object):
 
 
     def worker_beat(self, msg : pr.Message):
-        # self.log.trace("New heartbeat: {}", msg.identity)
         worker = self.workers.get(msg.identity)
         if worker:
             worker.new_hbeat()
@@ -251,7 +247,7 @@ class Service(object):
 
 
     def worker_gone(self, msg : pr.Message):
-        self.log.info("Worker {} gone", msg.identity)
+        self.log.warn("Worker {} gone", msg.identity)
         worker = self.workers.get(msg.identity)
         if worker:
             if worker.jobid:
