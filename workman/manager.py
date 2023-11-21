@@ -74,7 +74,7 @@ class Manager(object):
         svc = self._services[msg.service]
 
         if msg.action == pr.READY:
-            svc.worker_register(msg)
+            svc.worker_ready(msg)
 
         elif msg.action == pr.HBEAT:
             svc.worker_beat(msg)

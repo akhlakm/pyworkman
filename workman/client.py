@@ -88,6 +88,7 @@ class Client(object):
 if __name__ == '__main__':
     import time
     with Client('tcp://127.0.0.1:5555', 'echo', clientid='test-client') as client:
-        client.request('job1', ['hello'])
+        for i in range(1, 6):
+            client.request(f'job-{i}', f'hello from {i}')
         msg = client.reply(10)
         print(msg)

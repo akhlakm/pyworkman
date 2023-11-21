@@ -40,9 +40,12 @@ class ServiceJob(object):
         self.queued = False
         self.running = True
 
-    def set_abandoned(self):
-        self.abandoned = True
+    def requeue(self):
         self.queued = True
+
+    def set_abandoned(self):
+        # Do not requeue, as we are not sure if the job was complete.
+        self.abandoned = True
 
     def set_update(self, update):
         self.updates.append(update)
@@ -97,13 +100,15 @@ class ServiceWorker(object):
         self.idle = True
 
     def set_gone(self):
+        self._last_received = time.time()
         self.idle = False
 
     def set_done(self):
+        # Do not set idle even if done.
+        # Wait for the ready event.
         self._last_received = time.time()
         self.jobtask = None
         self.jobid = None
-        self.idle = True
 
 
 class Service(object):
@@ -138,6 +143,9 @@ class Service(object):
         """ Execute a single job. """
         joblist = [j for j in self.jobs.values() if j.queued]
         workerlist = [w for w in self.workers.values() if w.idle]
+
+        self.log.trace("Execute Joblist: {}", joblist)
+        self.log.trace("Execute Workers: {}", workerlist)
 
         job = None
         if joblist:
@@ -196,21 +204,20 @@ class Service(object):
             job.set_cancel()
 
 
-    def worker_register(self, msg : pr.Message):
+    def worker_ready(self, msg : pr.Message):
         if msg.identity not in self.workers:
             worker = ServiceWorker(msg.identity, msg.service, self._socket)
             self.workers[worker.id] = worker
-            self.log.info("Worker register for: {}", msg.identity, msg.service)
+            self.log.info("Worker {} register for: {}", msg.identity, msg.service)
         else:
             worker = self.workers[msg.identity]
         
-        if worker.idle:
-            worker.set_ready()
-        else:
-            self.log.error("Previous job abandoned by worker: {}", worker.id)
+        if worker.jobid:
+            # job done was not called.
             job = self.jobs[worker.jobid]
             job.set_abandoned()
-            worker.set_ready()
+
+        worker.set_ready()
 
 
     def worker_beat(self, msg : pr.Message):
