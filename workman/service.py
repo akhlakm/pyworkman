@@ -1,6 +1,7 @@
 import zmq
 import time
 import json
+import pylogg
 from workman import protocol as pr
 
 class ServiceJob(object):
@@ -104,10 +105,12 @@ class ServiceWorker(object):
 
 
 class Service(object):
-    def __init__(self, socket) -> None:
+    def __init__(self, name, socket) -> None:
+        self.name = name
         self._socket : zmq.Socket = socket
         self.jobs : dict[bytes, ServiceJob] = {}
         self.workers : dict[bytes, ServiceWorker] = {}
+        self.log = pylogg.New(self.name)
 
     def list_jobs(self):
         return self.jobs.keys()
@@ -129,22 +132,27 @@ class Service(object):
             worker = workerlist.pop(0)
 
         if job and worker:
+            self.log.info("Executing job {} on worker {}", job.id, worker.id)
             job.set_worker(worker.id)
             worker.execute(job.id, job.task)
 
     def client_new_job(self, msg : pr.Message):
         job = ServiceJob(msg.job, msg.service, msg.message)
         self.jobs[job.id] = job
+        self.log.info("Client {} new job {}", msg.identity, job.id)
 
     def client_query_job(self, msg : pr.Message) -> bytes:
         """ Return job status """
+        self.log.info("Client {} query job {}", msg.identity, msg.job)
         if msg.job not in self.jobs:
             r = {'error': 'Job not found'}
+            self.log.error("Invalid job query: {}", msg.job)
         else:
             r = self.jobs[msg.job].status()
         return pr.encode(json.dumps(r))
 
     def client_cancel_job(self, msg : pr.Message):
+        self.log.info("Client {} cancel job {}", msg.identity, msg.job)
         job = self.jobs.get(msg.job)
         if job:
             if job.running:
@@ -155,13 +163,16 @@ class Service(object):
     def worker_register(self, msg : pr.Message):
         worker = ServiceWorker(msg.identity, msg.service, self._socket)
         self.workers[worker.id] = worker
+        self.log.info("Worker register for: {}", msg.identity, msg.service)
 
     def worker_beat(self, msg : pr.Message):
+        self.log.trace("New heartbeat: {}", msg.identity)
         worker = self.workers.get(msg.identity)
         if worker:
             worker.new_hbeat()
     
     def worker_update(self, msg : pr.Message):
+        self.log.trace("Worker {} job update: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)
         assert worker, "Update received from unknown worker"
 
@@ -171,6 +182,7 @@ class Service(object):
         job.set_update(msg.message)
 
     def worker_done(self, msg : pr.Message):
+        self.log.info("Worker {} job done: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)
         assert worker, "Done received from unknown worker"
 
@@ -181,6 +193,7 @@ class Service(object):
         job.set_done()
 
     def worker_gone(self, msg : pr.Message):
+        self.log.info("Worker {} gone", msg.identity)
         worker = self.workers.get(msg.identity)
         if worker:
             if worker.jobid:
@@ -190,6 +203,7 @@ class Service(object):
             del self.workers[msg.identity]
     
     def worker_reply(self, msg : pr.Message):
+        self.log.trace("Worker {} job result: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)
         assert worker, "Reply received from unknown worker"
 

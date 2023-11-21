@@ -1,5 +1,6 @@
 import zmq
 import signal
+import pylogg as log
 from workman import protocol as pr
 from workman.service import Service
 
@@ -19,7 +20,7 @@ class Manager(object):
         self._socket = self._context.socket(zmq.ROUTER)
         self._socket.rcvtimeo = int(pr.HBEAT_INTERVAL * 1000)
         self._socket.bind(self._bind_url)
-        print("Manager listening on", self._bind_url)
+        log.info("Manager listening on {}", self._bind_url)
 
         try:
             while not self._stop:
@@ -31,16 +32,16 @@ class Manager(object):
                         elif msg.sender == pr.WORKER:
                             self._handle_worker_message(msg)
                         else:
-                            print("Unknown sender")
+                            log.warn("Unknown sender: {}", msg.sender)
                 except Exception as err:
-                    print("Message handling failed:", err)
-                    raise
+                    log.error("Message handling failed: {}", err)
 
         finally:
             self.close()
     
     def shutdown(self):
         self._stop = True
+        log.note("Manager shutdown.")
 
     def close(self):
         if not self._socket:
@@ -54,15 +55,15 @@ class Manager(object):
             try:
                 frames = self._socket.recv_multipart()
                 return pr.Message.parse(frames)
-            except zmq.error.Again:
-                print("Manager receive error.")
+            except Exception as err:
                 if self._socket is None or self._stop:
                     return
 
     def _handle_worker_message(self, msg : pr.Message):
+        log.trace("Received from worker: {}", msg.identity)
         # Get the associated service.
         if msg.service not in self._services:
-            self._services[msg.service] = Service(self._socket)
+            self._services[msg.service] = Service(msg.service, self._socket)
         svc = self._services[msg.service]
 
         if msg.action == pr.READY:
@@ -89,9 +90,10 @@ class Manager(object):
         self._socket.send_multipart(msg.frames())
 
     def _handle_client_message(self, msg : pr.Message):
+        log.trace("Received from client: {}", msg.identity)
         # Get the associated service.
         if msg.service not in self._services:
-            self._services[msg.service] = Service(self._socket)
+            self._services[msg.service] = Service(msg.service, self._socket)
         svc = self._services[msg.service]
 
         # New job
@@ -110,6 +112,8 @@ class Manager(object):
 
 def main():
     from util import conf
+    log.init(log.Level.DEBUG)
+
     mgr = Manager(bind_url=conf.WorkMan.mgr_url)
 
     def _sig_handler(sig, _):
