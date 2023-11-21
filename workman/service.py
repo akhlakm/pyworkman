@@ -18,6 +18,9 @@ class ServiceJob(object):
         self.updates = []
         self.result = None
 
+    def __repr__(self) -> str:
+        return str(self.id)
+
     def status(self) -> dict:
         items = {
             k : v for k,v in self.__dict__.items()
@@ -26,21 +29,19 @@ class ServiceJob(object):
         return items
 
     def set_start(self):
-        self.queued = False
         self.running = True
 
     def set_done(self):
-        self.queued = False
         self.running = False
         self.complete = True
 
     def set_cancel(self):
         self.cancelled = True
-        self.queued = False
         self.running = False
 
     def set_worker(self, workerid):
         self.workerid = workerid
+        self.queued = False
 
     def set_abondoned(self):
         self.abondoned = True
@@ -63,8 +64,11 @@ class ServiceWorker(object):
         self._socket : zmq.Socket = socket
         self._hb_timeout = pr.HBEAT_TIMEOUT
         self._hb_interval = pr.HBEAT_INTERVAL
-        self._last_sent = time.time()
-        self._last_received = time.time()
+        self._last_sent = 0.0
+        self._last_received = 0.0
+
+    def __repr__(self) -> str:
+        return str(self.id)
 
     def _send(self, action, jobid = None, message = None):
         msg = pr.Message(pr.MANAGER, action, self.service, jobid, message)
@@ -73,6 +77,7 @@ class ServiceWorker(object):
         self._socket.send_multipart(msg.frames())
 
     def execute(self, jobid, jobtask):
+        self.idle = False
         self.jobid = jobid
         self.jobtask = jobtask
         self._send(pr.REQUEST, self.jobid, self.jobtask)
@@ -136,6 +141,13 @@ class Service(object):
             job.set_worker(worker.id)
             worker.execute(job.id, job.task)
 
+    def run(self):
+        # t1 = self.log.trace("Running service: {}", self.name)
+        self._execute()
+        for name, worker in self.workers.items():
+            worker.send_hbeat()
+        # t1.done("Service {}: run complete.", self.name)
+
     def client_new_job(self, msg : pr.Message):
         job = ServiceJob(msg.job, msg.service, msg.message)
         self.jobs[job.id] = job
@@ -149,7 +161,7 @@ class Service(object):
             self.log.error("Invalid job query: {}", msg.job)
         else:
             r = self.jobs[msg.job].status()
-        return pr.encode(json.dumps(r))
+        return pr.serialize(r)
 
     def client_cancel_job(self, msg : pr.Message):
         self.log.info("Client {} cancel job {}", msg.identity, msg.job)
@@ -161,12 +173,23 @@ class Service(object):
             job.set_cancel()
 
     def worker_register(self, msg : pr.Message):
-        worker = ServiceWorker(msg.identity, msg.service, self._socket)
-        self.workers[worker.id] = worker
-        self.log.info("Worker register for: {}", msg.identity, msg.service)
+        if msg.identity not in self.workers:
+            worker = ServiceWorker(msg.identity, msg.service, self._socket)
+            self.workers[worker.id] = worker
+            self.log.info("Worker register for: {}", msg.identity, msg.service)
+        else:
+            worker = self.workers[msg.identity]
+        
+        if worker.idle:
+            worker.set_ready()
+        else:
+            self.log.error("Previous job abondoned by worker: {}", worker.id)
+            job = self.jobs[worker.jobid]
+            job.set_abondoned()
+            worker.set_ready()
 
     def worker_beat(self, msg : pr.Message):
-        self.log.trace("New heartbeat: {}", msg.identity)
+        # self.log.trace("New heartbeat: {}", msg.identity)
         worker = self.workers.get(msg.identity)
         if worker:
             worker.new_hbeat()

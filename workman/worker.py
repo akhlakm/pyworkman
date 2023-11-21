@@ -44,7 +44,6 @@ class Worker(object):
 
         self._poller = zmq.Poller()
         self._poller.register(self._socket, zmq.POLLIN)
-        self._send_ready()
 
     def close(self):
         if not self._is_connected():
@@ -70,11 +69,13 @@ class Worker(object):
     def _send_gone(self):
         self._send(pr.GONE)
 
-    def _send_hbeat(self):
-        if (time.time() - self._last_sent) > self._hb_interval:
+    def send_hbeat(self):
+        if not self._is_busy:
+            self._send_ready()
+        elif (time.time() - self._last_sent) > self._hb_interval:
             self._send(pr.HBEAT)
 
-    def _send_done(self, job):
+    def done(self, job):
         self._is_busy = False
         self._send(pr.DONE, job)
 
@@ -99,11 +100,8 @@ class Worker(object):
         if not self._is_connected():
             raise RuntimeError("Not connected")
         
-        if self._is_busy:
-            self._send_done()
-
         while True:
-            self._send_hbeat()
+            self.send_hbeat()
 
             try:
                 timeout = self._get_poll_timeout()
@@ -147,5 +145,6 @@ if __name__ == '__main__':
                 msg = worker.receive()
                 worker.update(msg.job, "Preparing response.")
                 worker.reply(msg.job, msg.message)
+                worker.done(msg.job)
         except KeyboardInterrupt:
             print("\nShutting down worker.")

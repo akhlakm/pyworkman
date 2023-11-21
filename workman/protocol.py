@@ -15,9 +15,9 @@ STATUS  = b'\x008'
 GONE    = b'\x009'
 
 # Timing
-ZMQ_LINGER = 2000
-HBEAT_TIMEOUT = 60
-HBEAT_INTERVAL = 10
+ZMQ_LINGER = 2000   # msec
+HBEAT_TIMEOUT = 60  # sec
+HBEAT_INTERVAL = 10 # sec
 WORKER_BUSY_TIMEOUT = 900
 
 
@@ -29,9 +29,14 @@ class Message(object):
         WORKER: (READY, HBEAT, UPDATE, DONE, GONE, REPLY),
     }
 
-    def __init__(self, sender, action, service, job = None, message = None):
+    def __init__(self, sender, action, service, job : str = None,
+                 message : str = None):
         if message is None:
-            message = []
+            message = ""
+        elif type(message) == list:
+            message = " ".join(message)
+
+        assert type(message) == str, "Message must be str"
 
         sender = encode(sender)
         action = encode(action)
@@ -65,8 +70,8 @@ class Message(object):
             self.action,
             encode(self.service),
             encode(self.job),
+            encode(self.message)
         ]
-        body += [encode(m) for m in self.message]
 
         print("Message:", body)
         return body
@@ -75,7 +80,7 @@ class Message(object):
     def parse(cls, frames : list[bytes]):
         """ Parse a payload received via socket. """
 
-        print("Replied:", frames)
+        # print("Replied:", frames)
         assert len(frames) >= 5, "Invalid message, not enough frames"
 
         if frames[0] != b'':
@@ -88,7 +93,7 @@ class Message(object):
         action      = frames[1]
         service     = decode(frames[2])
         job         = decode(frames[3])
-        message     = [decode(f) for f in frames[4:]]
+        message     = decode(frames[4])
 
         msg = cls(sender, action, service, job, message)
         msg.set_identity(identity)
@@ -119,7 +124,7 @@ class Message(object):
             'action': action,
             'service': self.service,
             'job': self.job,
-            'message': " ".join(self.message),
+            'message': self.message,
         }
         return items
     
@@ -137,3 +142,12 @@ def decode(b : bytes) -> str:
     if type(b) == str:
         return b
     return b.decode('utf-8', errors='ignore')
+
+def serialize(items : dict) -> str:
+    import json
+    class JSONSerializer(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, (bytes, bytearray)):
+                return decode(obj)
+            return json.JSONEncoder.default(self, obj)
+    return json.dumps(items, cls=JSONSerializer)

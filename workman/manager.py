@@ -52,6 +52,12 @@ class Manager(object):
 
     def receive(self):
         while True:
+            for name, svc in self._services.items():
+                try:
+                    svc.run()
+                except Exception as err:
+                    log.error("Service {} run failed: {}", name, err)
+
             try:
                 frames = self._socket.recv_multipart()
                 return pr.Message.parse(frames)
@@ -60,7 +66,7 @@ class Manager(object):
                     return
 
     def _handle_worker_message(self, msg : pr.Message):
-        log.trace("Received from worker: {}", msg.identity)
+        # log.trace("Received from worker: {}", msg.identity)
         # Get the associated service.
         if msg.service not in self._services:
             self._services[msg.service] = Service(msg.service, self._socket)
@@ -87,10 +93,10 @@ class Manager(object):
     def reply_client(self, msg, response):
         reply = pr.Message(pr.MANAGER, pr.REPLY, msg.service, msg.job, response)
         reply.set_identity(msg.identity)
-        self._socket.send_multipart(msg.frames())
+        self._socket.send_multipart(reply.frames())
 
     def _handle_client_message(self, msg : pr.Message):
-        log.trace("Received from client: {}", msg.identity)
+        # log.trace("Received from client: {}", msg.identity)
         # Get the associated service.
         if msg.service not in self._services:
             self._services[msg.service] = Service(msg.service, self._socket)
