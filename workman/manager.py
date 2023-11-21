@@ -126,13 +126,13 @@ class Manager(object):
             svclist = {}
             for name, svc in self._services.items():
                 svclist[name] = {
+                    'jobs': svc.list_jobs(),
                     'workers': svc.list_workers(),
-                    'jobs': svc.list_jobs()
                 }
         else:
             svclist = {
                 'jobs': [],
-                'workers': []
+                'workers': [],
             }
             if msg.service in self._services:
                 svc = self._services[msg.service]

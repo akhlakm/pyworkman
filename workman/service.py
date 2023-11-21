@@ -118,11 +118,22 @@ class Service(object):
 
 
     def list_jobs(self):
-        return [k for k in self.jobs.keys()]
+        items = {
+            "queued": [k for k, job in self.jobs.items() if job.queued],
+            "running": [k for k, job in self.jobs.items() if job.running],
+            "done": [k for k, job in self.jobs.items() if job.complete],
+            "cancelled": [k for k, job in self.jobs.items() if job.cancelled],
+            "abodoned": [k for k, job in self.jobs.items() if job.abondoned],
+        }
+        return items
     
 
     def list_workers(self):
-        return [k for k in self.workers.keys()]
+        items = {
+            "ready": [k for k, worker in self.workers.items() if worker.idle],
+            "busy": [k for k, worker in self.workers.items() if not worker.idle],
+        }
+        return items
     
 
     def _execute(self):
