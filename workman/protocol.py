@@ -15,9 +15,9 @@ STATUS  = b'\x008'
 GONE    = b'\x009'
 
 # Timing
-ZMQ_LINGER = 2000   # msec
-HBEAT_TIMEOUT = 60  # sec
-HBEAT_INTERVAL = 10 # sec
+ZMQ_LINGER          = 2000  # msec
+HBEAT_TIMEOUT       = 300   # sec
+HBEAT_INTERVAL      = 60    # sec
 WORKER_BUSY_TIMEOUT = 900
 
 
