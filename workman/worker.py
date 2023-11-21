@@ -11,6 +11,7 @@ class Worker(object):
         self._socket : zmq.Socket = None
         self._poller : zmq.Poller = None
         self._abort = False
+        self._jobid = None
         self._is_busy = False
         self._hb_timeout = pr.HBEAT_TIMEOUT
         self._hb_interval = pr.HBEAT_INTERVAL
@@ -64,20 +65,11 @@ class Worker(object):
 
     def _send_ready(self):
         self._is_busy = False
+        self._jobid = None
         self._send(pr.READY)
 
     def _send_gone(self):
         self._send(pr.GONE)
-
-    def send_hbeat(self):
-        if not self._is_busy:
-            self._send_ready()
-        elif (time.time() - self._last_sent) > self._hb_interval:
-            self._send(pr.HBEAT)
-
-    def done(self, job):
-        self._is_busy = False
-        self._send(pr.DONE, job)
 
     def _get_poll_timeout(self) -> int:
         """Return the poll timeout for the current iteration in milliseconds
@@ -85,11 +77,21 @@ class Worker(object):
         wait = self._hb_interval + self._last_sent - time.time() # sec
         return max(0, int(1000 * wait))
     
-    def reply(self, job, message):
-        self._send(pr.REPLY, job, message)
+    def reply(self, message : str):
+        self._send(pr.REPLY, self._jobid, message)
 
-    def update(self, job, message):
-        self._send(pr.UPDATE, job, message)
+    def update(self, message : str):
+        self._send(pr.UPDATE, self._jobid, message)
+
+    def done(self):
+        self._is_busy = False
+        self._send(pr.DONE, self._jobid)
+
+    def send_hbeat(self):
+        if not self._is_busy:
+            self._send_ready()
+        elif (time.time() - self._last_sent) > self._hb_interval:
+            self._send(pr.HBEAT)
 
     def receive(self) -> pr.Message:
         """ Waits forever to receive a single request.
@@ -132,6 +134,7 @@ class Worker(object):
             elif msg.action == pr.REQUEST:
                 self._abort = False
                 self._is_busy = True
+                self._jobid = msg.job
                 return msg
 
 
@@ -143,8 +146,8 @@ if __name__ == '__main__':
         try:
             while True:
                 msg = worker.receive()
-                worker.update(msg.job, "Preparing response.")
-                worker.reply(msg.job, msg.message)
-                worker.done(msg.job)
+                worker.update("Preparing response.")
+                worker.reply(msg.message)
+                worker.done()
         except KeyboardInterrupt:
             print("\nShutting down worker.")

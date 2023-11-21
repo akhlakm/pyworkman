@@ -4,15 +4,15 @@ WORKER    = b'W'
 MANAGER   = b'M'
 
 # Action bit
-READY   = b'\x001'
-REQUEST = b'\x002'
-HBEAT   = b'\x003'
-REPLY   = b'\x004'
-UPDATE  = b'\x005'
-ABORT   = b'\x006'
-DONE    = b'\x007'
-STATUS  = b'\x008'
-GONE    = b'\x009'
+READY   = b'\x01'
+REQUEST = b'\x02'
+HBEAT   = b'\x03'
+REPLY   = b'\x04'
+UPDATE  = b'\x05'
+ABORT   = b'\x06'
+DONE    = b'\x07'
+STATUS  = b'\x08'
+GONE    = b'\x09'
 
 # Timing
 ZMQ_LINGER          = 2000  # msec
@@ -73,7 +73,7 @@ class Message(object):
             encode(self.message)
         ]
 
-        print("Message:", body)
+        # print("Message:", body)
         return body
 
     @classmethod

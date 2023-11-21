@@ -160,8 +160,9 @@ class Service(object):
             r = job.status()
         else:
             job = self.jobs[msg.job]
+            r = job.status()
+            r['error'] = 'Job exists'
             self.log.warn("Client {} duplicate job {}", msg.identity, job.id)
-            r = {'error': 'Job exists'}
         return pr.serialize(r)
 
 
