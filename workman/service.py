@@ -27,9 +27,6 @@ class ServiceJob(object):
         }
         return items
 
-    def set_start(self):
-        self.running = True
-
     def set_done(self):
         self.running = False
         self.complete = True
@@ -38,9 +35,10 @@ class ServiceJob(object):
         self.cancelled = True
         self.running = False
 
-    def set_worker(self, workerid):
+    def set_start(self, workerid):
         self.workerid = workerid
         self.queued = False
+        self.running = True
 
     def set_abandoned(self):
         self.abandoned = True
@@ -151,7 +149,7 @@ class Service(object):
 
         if job and worker:
             self.log.info("Executing job {} on worker {}", job.id, worker.id)
-            job.set_worker(worker.id)
+            job.set_start(worker.id)
             worker.execute(job.id, job.task)
 
 
