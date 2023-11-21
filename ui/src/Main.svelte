@@ -37,12 +37,17 @@
 <main>
   <center>
 
-    <form on:submit|preventDefault={handleRequest}>
-      <input type="text" bind:value={service} placeholder="service name">
-      <input type="text" bind:value={job} placeholder="job id">
-      <input type="text" bind:value={message} placeholder="message">
-      <input class="btn" type="submit" name="submit" value="Submit Job" />
-      <input class="btn" type="submit" name="status" value="Check Status" />
+    <form class="jobform" on:submit|preventDefault={handleRequest}>
+      <span>Service</span>
+      <input class="textinput" type="text" bind:value={service} placeholder="service name">
+      <span>Job ID</span>
+      <input class="textinput" type="text" bind:value={job} placeholder="job id">
+      <span>Payload</span>
+      <input class="textinput" type="text" bind:value={message} placeholder="message">
+      <div class="col-start-2 col-span-3">
+        <input class="btn" type="submit" name="submit" value="Submit Job" />
+        <input class="btn" type="submit" name="status" value="Check Status" />
+      </div>
     </form>
     
     <div>{tadata}</div>
@@ -50,13 +55,16 @@
 </main>
 
 <style>
-  .btn {
-    @apply px-2 py-1 m-1 border drop-shadow bg-blue-500 text-white cursor-pointer;
-    @apply rounded;
+
+
+  .jobform {
+    @apply grid grid-cols-5 mx-auto w-11/12;
+    @apply items-center;
   }
 
-  .btn:hover {
-    @apply drop-shadow-md bg-slate-700 text-amber-400;
+  .textinput {
+    @apply m-1 py-1 px-3 w-9/12 left-0 right-auto col-span-4;
+    @apply border rounded border-black;
   }
 
 </style>
