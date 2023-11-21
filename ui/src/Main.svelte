@@ -41,7 +41,7 @@
       <input type="text" bind:value={service} placeholder="service name">
       <input type="text" bind:value={job} placeholder="job id">
       <input type="text" bind:value={message} placeholder="message">
-      <input class="m-3 border-2" type="submit" name="submit" value="Submit Job" />
+      <input class="btn" type="submit" name="submit" value="Submit Job" />
       <input class="btn" type="submit" name="status" value="Check Status" />
     </form>
     
@@ -51,6 +51,12 @@
 
 <style>
   .btn {
-    @apply m-3 border-2;
+    @apply px-2 py-1 m-1 border drop-shadow bg-blue-500 text-white cursor-pointer;
+    @apply rounded;
   }
+
+  .btn:hover {
+    @apply drop-shadow-md bg-slate-700 text-amber-400;
+  }
+
 </style>
