@@ -46,6 +46,7 @@ class Manager(object):
     def close(self):
         if not self._socket:
             return
+        self._socket.setsockopt(zmq.LINGER, 0)
         self._socket.disconnect(self._bind_url)
         self._socket.close()
         self._socket = None
@@ -90,13 +91,16 @@ class Manager(object):
         elif msg.action == pr.REPLY:
             svc.worker_reply(msg)
 
-    def reply_client(self, msg, response):
+    def reply_client(self, msg, response : str):
         reply = pr.Message(pr.MANAGER, pr.REPLY, msg.service, msg.job, response)
         reply.set_identity(msg.identity)
         self._socket.send_multipart(reply.frames())
 
     def _handle_client_message(self, msg : pr.Message):
         # log.trace("Received from client: {}", msg.identity)
+        if msg.action == pr.LIST:
+            return self._handle_list_request(msg)
+    
         # Get the associated service.
         if msg.service not in self._services:
             self._services[msg.service] = Service(msg.service, self._socket)
@@ -115,6 +119,28 @@ class Manager(object):
         # Cancel job
         elif msg.action == pr.ABORT:
             svc.client_cancel_job(msg)
+
+    def _handle_list_request(self, msg : pr.Message):
+        if msg.service in [None, "None", ""]:
+            # List all items
+            svclist = {}
+            for name, svc in self._services.items():
+                svclist[name] = {
+                    'workers': svc.list_workers(),
+                    'jobs': svc.list_jobs()
+                }
+        else:
+            svclist = {
+                'jobs': [],
+                'workers': []
+            }
+            if msg.service in self._services:
+                svc = self._services[msg.service]
+                svclist['jobs'] = svc.list_jobs()
+                svclist['workers'] = svc.list_workers()
+
+        reply = pr.serialize(svclist)
+        self.reply_client(msg, reply)
 
 
 def main():

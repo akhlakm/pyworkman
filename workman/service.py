@@ -118,11 +118,11 @@ class Service(object):
 
 
     def list_jobs(self):
-        return self.jobs.keys()
+        return [k for k in self.jobs.keys()]
     
 
     def list_workers(self):
-        return self.workers.keys()
+        return [k for k in self.workers.keys()]
     
 
     def _execute(self):

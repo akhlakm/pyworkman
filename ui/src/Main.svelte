@@ -47,6 +47,8 @@
       <div class="col-start-2 col-span-3">
         <input class="btn" type="submit" name="submit" value="Submit Job" />
         <input class="btn" type="submit" name="status" value="Check Status" />
+        <input class="btn" type="submit" name="list" value="List All" />
+        <input class="btn" type="submit" name="cancel" value="Cancel Job" />
       </div>
     </form>
     

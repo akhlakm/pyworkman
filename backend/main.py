@@ -4,6 +4,7 @@ from util import conf
 from workman.client import Client
 
 def index(request : HttpRequest):
+    timeout = 10 # secs
     post = json.loads(request.body)
     action = post.get('action', 'submit')
     service = post.get('service', 'echo')
@@ -16,10 +17,13 @@ def index(request : HttpRequest):
     with Client(conf.WorkMan.mgr_url, service, identity) as client:
         if action == 'submit':
             client.request(jobid, message)
-            msg = client.reply(10)
+            msg = client.reply(timeout)
         elif action == 'status':
             client.status(jobid)
-            msg = client.reply(10)
+            msg = client.reply(timeout)
+        elif action == 'list':
+            client.list_items(service.strip())
+            msg = client.reply(timeout)
         elif action == 'cancel':
             client.abort(jobid)
         else:

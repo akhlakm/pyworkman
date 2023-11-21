@@ -13,6 +13,7 @@ ABORT   = b'\x06'
 DONE    = b'\x07'
 STATUS  = b'\x08'
 GONE    = b'\x09'
+LIST    = b'\x10'
 
 # Timing
 ZMQ_LINGER          = 2000  # msec
@@ -24,7 +25,7 @@ WORKER_BUSY_TIMEOUT = 900
 class Message(object):
     allowed_sender = (CLIENT, WORKER, MANAGER)
     allowed_action = {
-        CLIENT: (REQUEST, STATUS, ABORT),
+        CLIENT: (REQUEST, STATUS, ABORT, LIST),
         MANAGER: (REPLY, HBEAT, REQUEST, ABORT),
         WORKER: (READY, HBEAT, UPDATE, DONE, GONE, REPLY),
     }
