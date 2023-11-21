@@ -10,3 +10,4 @@ scipy
 gunicorn
 numpy
 pyzmq
+git+https://github.com/akhlakm/python-logg.git
