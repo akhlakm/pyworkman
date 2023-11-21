@@ -46,6 +46,7 @@ class Client(object):
     def request(self, job, message = None):
         msg = pr.Message(pr.CLIENT, pr.REQUEST, self.service, job, message)
         self._socket.send_multipart(msg.frames())
+        self._expect_reply = True
 
     def status(self, job):
         msg = pr.Message(pr.CLIENT, pr.STATUS, self.service, job)
@@ -55,6 +56,7 @@ class Client(object):
     def abort(self, job):
         msg = pr.Message(pr.CLIENT, pr.ABORT, self.service, job)
         self._socket.send_multipart(msg.frames())
+        self._expect_reply = False
 
     def reply(self, timeout_sec : int = None) -> pr.Message:
         if not self._expect_reply:
@@ -82,7 +84,5 @@ if __name__ == '__main__':
     import time
     with Client('tcp://127.0.0.1:5555', 'echo', clientid='test-client') as client:
         client.request('job1', ['hello'])
-        time.sleep(2)
-        client.status('job1')
         msg = client.reply(10)
         print(msg)

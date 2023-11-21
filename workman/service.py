@@ -117,12 +117,15 @@ class Service(object):
         self.workers : dict[bytes, ServiceWorker] = {}
         self.log = pylogg.New(self.name)
 
+
     def list_jobs(self):
         return self.jobs.keys()
     
+
     def list_workers(self):
         return self.workers.keys()
     
+
     def _execute(self):
         """ Execute a single job. """
         joblist = [j for j in self.jobs.values() if j.queued]
@@ -141,6 +144,7 @@ class Service(object):
             job.set_worker(worker.id)
             worker.execute(job.id, job.task)
 
+
     def run(self):
         # t1 = self.log.trace("Running service: {}", self.name)
         self._execute()
@@ -148,12 +152,21 @@ class Service(object):
             worker.send_hbeat()
         # t1.done("Service {}: run complete.", self.name)
 
-    def client_new_job(self, msg : pr.Message):
-        job = ServiceJob(msg.job, msg.service, msg.message)
-        self.jobs[job.id] = job
-        self.log.info("Client {} new job {}", msg.identity, job.id)
 
-    def client_query_job(self, msg : pr.Message) -> bytes:
+    def client_new_job(self, msg : pr.Message) -> str:
+        if msg.job not in self.jobs:
+            job = ServiceJob(msg.job, msg.service, msg.message)
+            self.jobs[job.id] = job
+            self.log.info("Client {} new job {}", msg.identity, job.id)
+            r = job.status()
+        else:
+            job = self.jobs[msg.job]
+            self.log.warn("Client {} duplicate job {}", msg.identity, job.id)
+            r = {'error': 'Job exists'}
+        return pr.serialize(r)
+
+
+    def client_query_job(self, msg : pr.Message) -> str:
         """ Return job status """
         self.log.info("Client {} query job {}", msg.identity, msg.job)
         if msg.job not in self.jobs:
@@ -163,6 +176,7 @@ class Service(object):
             r = self.jobs[msg.job].status()
         return pr.serialize(r)
 
+
     def client_cancel_job(self, msg : pr.Message):
         self.log.info("Client {} cancel job {}", msg.identity, msg.job)
         job = self.jobs.get(msg.job)
@@ -171,6 +185,7 @@ class Service(object):
                 worker = self.workers[job.workerid]
                 worker.send_abort(msg.job)
             job.set_cancel()
+
 
     def worker_register(self, msg : pr.Message):
         if msg.identity not in self.workers:
@@ -188,12 +203,14 @@ class Service(object):
             job.set_abondoned()
             worker.set_ready()
 
+
     def worker_beat(self, msg : pr.Message):
         # self.log.trace("New heartbeat: {}", msg.identity)
         worker = self.workers.get(msg.identity)
         if worker:
             worker.new_hbeat()
     
+
     def worker_update(self, msg : pr.Message):
         self.log.trace("Worker {} job update: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)
@@ -203,6 +220,7 @@ class Service(object):
         assert job, "Update received for unknown job"
         assert worker.jobid == job.id, "Update received from unassigned worker"
         job.set_update(msg.message)
+
 
     def worker_done(self, msg : pr.Message):
         self.log.info("Worker {} job done: {}", msg.identity, msg.job)
@@ -215,6 +233,7 @@ class Service(object):
         worker.set_done()
         job.set_done()
 
+
     def worker_gone(self, msg : pr.Message):
         self.log.info("Worker {} gone", msg.identity)
         worker = self.workers.get(msg.identity)
@@ -225,6 +244,7 @@ class Service(object):
             worker.set_gone()
             del self.workers[msg.identity]
     
+
     def worker_reply(self, msg : pr.Message):
         self.log.trace("Worker {} job result: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)

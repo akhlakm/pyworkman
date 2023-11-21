@@ -104,7 +104,8 @@ class Manager(object):
 
         # New job
         if msg.action == pr.REQUEST:
-            svc.client_new_job(msg)
+            reply = svc.client_new_job(msg)
+            self.reply_client(msg, reply)
 
         # Job status
         elif msg.action == pr.STATUS:
