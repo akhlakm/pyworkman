@@ -44,7 +44,7 @@ class Client(object):
         self._expect_reply = False
 
     def list_items(self, service = None):
-        msg = pr.Message(pr.CLIENT, pr.LIST, self.service)
+        msg = pr.Message(pr.CLIENT, pr.LIST, service)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
