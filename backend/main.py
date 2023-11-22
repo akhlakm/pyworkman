@@ -21,7 +21,10 @@ def index(request : HttpRequest):
         elif action == 'status':
             client.status(jobid)
             msg = client.reply(timeout)
-        elif action == 'list':
+        elif action == 'listall':
+            client.list_items(service="")
+            msg = client.reply(timeout)
+        elif action == 'listsvc':
             client.list_items(service.strip())
             msg = client.reply(timeout)
         elif action == 'cancel':
