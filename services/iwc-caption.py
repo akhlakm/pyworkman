@@ -252,6 +252,10 @@ class IWCBrowser(SeleniumBrowser):
                 By.XPATH, "//div[@class='pop-hitarea']//a[@class='click-hit']")
         ]
 
+        if not innerpages:
+            self.log.E("No innerpages found: {}", self.url)
+            return
+
         referer = self.url
         old = None
 
@@ -321,21 +325,18 @@ if __name__ == '__main__':
         worker.define(
             "IWC", "Crawl IWC pages",
             page = dict(type=str, help="Page/URL to crawl."),
-            media = dict(default="No", help="Download media or not."),
+            media = dict(default=False, help="Download media or not."),
         )
-        try:
-            while True:
-                request = worker.receive()
-                media = request.media.lower() not in ["", "no", "false"]
-                browser.log.add_callback(worker.update)
 
-                try:
-                    browser.gotoPage(request.page, media=media)
-                except Exception as err:
-                    browser.log.Q("Exception raised: {}", err)
-                finally:
-                    worker.done()
-                    browser.log.callback = None
+        while True:
+            request = worker.receive()
+            media = request.media.lower() not in ["", "no", "false", "0"]
+            browser.log.add_callback(worker.update)
 
-        except KeyboardInterrupt:
-            print("\nShutting down worker:", workerid)
+            try:
+                browser.gotoPage(request.page, media=media)
+            except Exception as err:
+                browser.log.Q("Exception raised: {}", err)
+            finally:
+                worker.done(f"Done: {request.page}")
+                browser.log.callback = None
