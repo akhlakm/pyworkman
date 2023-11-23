@@ -57,14 +57,10 @@ class Client(object):
         if rep: rep = rep.message
         return rep
 
-    def request_string(self, job, message = None):
+    def request(self, job, message = None):
         msg = pr.Message(pr.CLIENT, pr.REQUEST, self.service, job, message)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
-
-    def request(self, job, payload : dict):
-        message = pr.serialize(payload)
-        self.request_string(job, message)
 
     def status(self, job):
         msg = pr.Message(pr.CLIENT, pr.STATUS, self.service, job)

@@ -36,14 +36,14 @@
     <span class="col-span-4">{status["workerid"]}</span>
     <span class="font-bold">Input:</span>
     <span class="col-span-4">{status["task"]}</span>
-    <div class="row">
-        <span class="font-bold">Logs:</span>
-        <ul class="my-8 px-4 text-sm">
+    <span class="font-bold">Logs:</span>
+    <span class="col-span-4">
+        <ul class="my-8 text-sm flex flex-col justify-start">
             {#each status["updates"] as item, i}
                 <li><pre class="wrap">{item}</pre></li>
             {/each}
         </ul>
-    </div>
+    </span>
     <span class="font-bold">Output:</span>
     <span class="col-span-4">{status["result"]}</span>
     {#if status["error"]}
@@ -53,11 +53,8 @@
 </div>
 
 <style>
-    .wrap {
-        white-space: pre-wrap;
-    }
     .status {
-        @apply grid grid-cols-5 w-8/12 mx-auto my-4;
+        @apply grid grid-cols-5 w-11/12 mx-auto my-4;
     }
     .row {
         @apply col-span-5;

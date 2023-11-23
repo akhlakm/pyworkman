@@ -10,3 +10,7 @@
 .btn:hover {
     @apply drop-shadow-md bg-red-700;
 }
+
+.wrap {
+    white-space: pre-wrap;
+}

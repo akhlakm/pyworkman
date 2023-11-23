@@ -12,6 +12,8 @@ def index(request : HttpRequest):
     message = post.get('message', 'hello')
     identity = post.get('identity', 'django')
 
+    print("Message:", message)
+
     msg = None
 
     with Client(conf.WorkMan.mgr_url, service, identity) as client:

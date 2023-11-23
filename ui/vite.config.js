@@ -18,7 +18,7 @@ export default defineConfig({
             fileName: (fmt, ent) => basename(ent) + '.js',
         },
         watch: true,
-        sourcemap: false,
+        sourcemap: true,
     },
     optimizeDeps: {
         // needed for tailwindcss to parse

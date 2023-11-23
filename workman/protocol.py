@@ -76,7 +76,7 @@ class Message(object):
             encode(self.message)
         ]
 
-        # print("Message:", body)
+        print("--  Sending:", body)
         return body
 
     @classmethod

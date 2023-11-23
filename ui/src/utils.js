@@ -44,18 +44,16 @@ function handle_response(action, response) {
         for (var type in response['jobs']) {
             jobitems = jobitems.concat(response['jobs'][type]);
         }
-        console.log("jobitems:", jobitems);
+
         store.job_list.set(jobitems);
+        if (response['definition']) {
+            store.job_definition.set(response['definition']);
+        }
     }
 
     else {
         console.log("Response for unknown action:", action);
     }
-
-    store.job_list.update((d) => {
-        console.log("job list:", d);
-        return d;
-    })
 }
 
 export function send(action, service, job, message) {
