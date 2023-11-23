@@ -226,12 +226,8 @@ class Service(object):
         defn = None
         keys = [k for k in self.workers.keys()]
         if keys:
-            # The latest one (all should be the same).
             defn = self.workers[keys[-1]].definition
-        if defn:
-            return defn
-        else:
-            return "{}"
+        return defn
 
 
     def _get_or_create_worker(self, msg : pr.Message) -> ServiceWorker:

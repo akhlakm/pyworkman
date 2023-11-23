@@ -1,5 +1,6 @@
 import zmq
 import time
+from collections import namedtuple
 from workman import protocol as pr
 
 
@@ -8,7 +9,7 @@ class Worker(object):
         self.identity = workerid
         self.service = service
         self.manager_url = manager_url
-        self.definition = {}
+        self.definition = None
         self._zmq_context = context if context else zmq.Context.instance()
         self._socket : zmq.Socket = None
         self._poller : zmq.Poller = None
@@ -79,36 +80,88 @@ class Worker(object):
         wait = self._hb_interval + self._last_sent - time.time() # sec
         return max(0, int(1000 * wait))
     
-    def define(self, **kwargs):
-        """ Define the payload json. """
-        for key in ["name", "desc", "fields"]:
-            assert key in kwargs, f"{key} required"
-        assert type(kwargs['fields']) == dict
-        for field, obj in kwargs['fields'].items():
-            for key in ["value", "type", "help"]:
-                assert key in obj, f"{key} required in {field} field"
-        self.definition = kwargs
+    def define(self, svcName : str, svcDesc : str, **fields):
+        """ Define the payload json.
+            >>> worker.define("Echo Service", "Echo the sent message",
+                    message = dict(help="Required message", type=str),
+                    name = dict(default="world", help="Optional name"),
+                )
+        """
+        for field, obj in fields.items():
+            assert type(obj) == dict, f"Dict required for {field} definition"
+
+            # must specify a help string
+            assert "help" in obj, f"Help string required in {field} field"
+
+            # if no default specified, it is a required field.
+            if not "default" in obj: obj["required"] = 1
+
+            if not "type" in obj:
+                # determine the type from the default value.
+                assert "default" in obj and obj["default"] is not None, \
+                    f"Type must be set for field {field}"
+                obj['type'] = type(obj["default"]).__name__
+            elif type(obj["type"]) != str:
+                # use the name of the callable
+                obj['type'] = obj['type'].__name__
+
+        self.definition = {
+            "name": svcName, "desc": svcDesc, "fields": fields
+        }
         self._send_ready()
 
+    def _parse_payload(self, msg : pr.Message) -> namedtuple:
+        assert self.definition, "Payload definition not set, define() first"
+        payload = pr.unserialize(msg.message)
+        if not type(payload) == dict:
+            self.done_with_error(
+                f"Invalid payload type: '{type(payload)}', dict expected.")
+            return None
+        else:
+            name = self.definition["name"]
+            fields = self.definition["fields"]
+            for name, field in fields.items():
+                if name not in payload:
+                    if "required" in field and field['required']:
+                        self.done_with_error(f"Field {name} is required")
+                        return None
+                    elif "default" in field:
+                        # assign the default one.
+                        payload[name] = field["default"]
+
+            payload["job"] = msg.job
+            defn = namedtuple(name, [k for k in payload.keys()])
+            return defn(**payload)
+
     def reply(self, message : str):
+        assert self._is_busy, "Cannot reply after done"
         self._send(pr.REPLY, self._jobid, message)
 
     def update(self, message : str):
+        assert self._is_busy, "Cannot update after done"
         self._send(pr.UPDATE, self._jobid, message)
 
-    def done(self):
+    def done(self, reply : str = None):
+        assert self._is_busy, "Cannot send done twice"
+        if reply: self.reply(reply)
         self._is_busy = False
         self._send(pr.DONE, self._jobid)
+
+    def done_with_error(self, error_message : str):
+        self.reply(error_message)
+        self.done()
 
     def send_hbeat(self):
         if (time.time() - self._last_sent) > self._hb_interval:
             self._send(pr.HBEAT)
 
-    def receive(self) -> pr.Message:
+    def receive(self) -> namedtuple:
         """ Waits forever to receive a single request.
-            Returns the received message object.
+            Returns the received payload object parsed using definition.
         """
         msg = None
+
+        assert self.definition, "Payload definition not set, call define()"
 
         if not self._is_connected():
             raise RuntimeError("Not connected")
@@ -148,7 +201,10 @@ class Worker(object):
                 self._abort = False
                 self._is_busy = True
                 self._jobid = msg.job
-                return msg
+                # parse with definition or reply with error.
+                payload = self._parse_payload(msg)
+                if payload:
+                    return payload
 
 
 if __name__ == '__main__':
@@ -157,21 +213,18 @@ if __name__ == '__main__':
 
     with Worker(conf.WorkMan.mgr_url, 'echo', 'worker-1') as worker:
         worker.define(
-            name="Echo Service",
-            desc="Echo the sent message",
-            fields = {
-                'value': dict(
-                    value="hello", type="string", help="Value to send",
-                    required=1
-                )
-            }
+            "Echo Service", "Echo the sent message",
+            message = dict(help="Required message to send", type=str),
+            name = dict(default="world", help="Optional name"),
         )
+
+        print(worker.definition)
 
         try:
             while True:
-                msg = worker.receive()
+                payload = worker.receive()
+                print("Payload:", payload)
                 worker.update("Preparing response.")
-                worker.reply(msg.message)
-                worker.done()
+                worker.done(payload.message + " " + str(payload.name))
         except KeyboardInterrupt:
             print("\nShutting down worker.")

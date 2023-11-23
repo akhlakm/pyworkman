@@ -1,3 +1,5 @@
+import json
+
 # Header bit
 CLIENT    = b'C'
 WORKER    = b'W'
@@ -145,10 +147,12 @@ def decode(b : bytes) -> str:
     return b.decode('utf-8', errors='ignore')
 
 def serialize(items : dict) -> str:
-    import json
     class JSONSerializer(json.JSONEncoder):
         def default(self, obj):
             if isinstance(obj, (bytes, bytearray)):
                 return decode(obj)
             return json.JSONEncoder.default(self, obj)
     return json.dumps(items, cls=JSONSerializer)
+
+def unserialize(message : str) -> dict:
+    return json.loads(message)

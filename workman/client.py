@@ -48,15 +48,23 @@ class Client(object):
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
-    def definition(self):
+    def definition(self, timeout_sec : int = None) -> str:
+        """ Ask for definition, and wait for the reply. """
         msg = pr.Message(pr.CLIENT, pr.READY, self.service)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
+        rep = self.reply(timeout_sec)
+        if rep: rep = rep.message
+        return rep
 
-    def request(self, job, message = None):
+    def request_string(self, job, message = None):
         msg = pr.Message(pr.CLIENT, pr.REQUEST, self.service, job, message)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
+
+    def request(self, job, payload : dict):
+        message = pr.serialize(payload)
+        self.request_string(job, message)
 
     def status(self, job):
         msg = pr.Message(pr.CLIENT, pr.STATUS, self.service, job)
@@ -86,14 +94,20 @@ class Client(object):
                 return pr.Message.parse(frames)
             else:
                 print("Error! Timed out waiting for reply from manager.")
+                return None
         finally:
             poller.unregister(self._socket)
+
 
 
 if __name__ == '__main__':
     import time
     with Client('tcp://127.0.0.1:5555', 'echo', clientid='test-client') as client:
-        for i in range(1, 6):
-            client.request(f'job-{i}', f'hello from {i}')
-        msg = client.reply(10)
-        print(msg)
+        defn = client.definition(10)
+        print("Definition:", defn)
+        if defn:
+            for i in range(1, 6):
+                payload = {"message": f"hello", "name": i}
+                client.request(f'job-{i}', payload)
+            msg = client.reply(10)
+            print(msg)
