@@ -87,7 +87,7 @@ class ServiceWorker(object):
         self._send(pr.REQUEST, self.jobid, self.jobtask)
 
     def alive(self) -> bool:
-        return (time.time() - self._last_sent) < self._hb_timeout
+        return (time.time() - self._last_received) < self._hb_timeout
 
     def send_hbeat(self):
         if (time.time() - self._last_sent) > self._hb_interval:
@@ -164,8 +164,8 @@ class Service(object):
             w for w in self.workers.values() if w.idle and w.alive()
         ]
 
-        # self.log.trace("Execute Joblist: {}", joblist)
-        # self.log.trace("Execute Workers: {}", workerlist)
+        self.log.trace("Execute Joblist: {}", joblist)
+        self.log.trace("Execute Workers: {}", workerlist)
 
         job = None
         if joblist:
