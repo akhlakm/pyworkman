@@ -285,7 +285,7 @@ class IWCBrowser(SeleniumBrowser):
         self.saveOnly()
 
 
-    def gotoPage(self, page, i = 0):
+    def gotoPage(self, page, *, i = 0, media=False):
         url = page
         while url in self.visited:
             i += 1
@@ -296,7 +296,8 @@ class IWCBrowser(SeleniumBrowser):
             url = page + pagesuffix
         
         self.navigate(url)
-        # self.parseMediaLinks(page)
+        if media:
+            self.parseMediaLinks(page)
         self.parseMediaDesc(page)
         self.saveOnly()
 
@@ -317,14 +318,19 @@ if __name__ == '__main__':
     browser.init()
 
     with Worker(conf.WorkMan.mgr_url, 'iwc-caption', workerid) as worker:
+        worker.define(
+            "IWC", "Crawl IWC pages",
+            page = dict(type=str, help="Page/URL to crawl."),
+            media = dict(default="No", help="Download media or not."),
+        )
         try:
             while True:
-                msg = worker.receive()
-                page = msg.message
+                request = worker.receive()
+                media = request.media.lower() not in ["", "no", "false"]
                 browser.log.add_callback(worker.update)
 
                 try:
-                    browser.gotoPage(page)
+                    browser.gotoPage(request.page, media=media)
                 except Exception as err:
                     browser.log.Q("Exception raised: {}", err)
                 finally:
