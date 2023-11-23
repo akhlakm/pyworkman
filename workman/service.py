@@ -35,6 +35,7 @@ class ServiceJob(object):
     def set_cancel(self):
         self.cancelled = True
         self.running = False
+        self.queued = False
 
     def set_start(self, workerid):
         self.workerid = workerid
@@ -83,6 +84,9 @@ class ServiceWorker(object):
         self.jobid = jobid
         self.jobtask = jobtask
         self._send(pr.REQUEST, self.jobid, self.jobtask)
+
+    def alive(self) -> bool:
+        return (time.time() - self._last_sent) < self._hb_timeout
 
     def send_hbeat(self):
         if (time.time() - self._last_sent) > self._hb_interval:
@@ -134,8 +138,17 @@ class Service(object):
 
     def list_workers(self):
         items = {
-            "ready": [k for k, worker in self.workers.items() if worker.idle],
-            "busy": [k for k, worker in self.workers.items() if not worker.idle],
+            "ready": [
+                k for k, worker in self.workers.items()
+                if worker.idle and worker.alive()
+            ],
+            "busy": [
+                k for k, worker in self.workers.items()
+                if not worker.idle and worker.alive()
+            ],
+            "disconnected": [
+                k for k, worker in self.workers.items() if not worker.alive()
+            ],
         }
         return items
     
@@ -143,7 +156,9 @@ class Service(object):
     def _execute(self):
         """ Execute a single job. """
         joblist = [j for j in self.jobs.values() if j.queued]
-        workerlist = [w for w in self.workers.values() if w.idle]
+        workerlist = [
+            w for w in self.workers.values() if w.idle and w.alive()
+        ]
 
         # self.log.trace("Execute Joblist: {}", joblist)
         # self.log.trace("Execute Workers: {}", workerlist)
@@ -203,14 +218,16 @@ class Service(object):
             job.set_cancel()
 
 
-    def worker_ready(self, msg : pr.Message):
+    def _get_or_create_worker(self, msg : pr.Message) -> ServiceWorker:
         if msg.identity not in self.workers:
             worker = ServiceWorker(msg.identity, msg.service, self._socket)
             self.workers[worker.id] = worker
             self.log.info("Worker {} register for: {}", msg.identity, msg.service)
-        else:
-            worker = self.workers[msg.identity]
-        
+        return self.workers[msg.identity]
+
+
+    def worker_ready(self, msg : pr.Message):
+        worker = self._get_or_create_worker(msg)
         if worker.jobid:
             # job done was not called.
             job = self.jobs[worker.jobid]
@@ -220,38 +237,43 @@ class Service(object):
 
 
     def worker_beat(self, msg : pr.Message):
-        worker = self.workers.get(msg.identity)
-        if worker:
-            worker.new_hbeat()
-    
+        worker = self._get_or_create_worker(msg)
+        worker.new_hbeat()    
+
 
     def worker_update(self, msg : pr.Message):
-        self.log.trace("Worker {} job update: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)
-        assert worker, "Update received from unknown worker"
-
-        job = self.jobs.get(msg.job)
-        assert job, "Update received for unknown job"
-        assert worker.jobid == job.id, "Update received from unassigned worker"
-        job.set_update(msg.message)
+        if not worker:
+            self.log.error("Update received from unknown worker: {}",
+                           pr.decode(msg.identity))
+        else:
+            job = self.jobs.get(msg.job)
+            assert job, "Update received for unknown job"
+            assert worker.jobid == job.id, "Update received from unassigned worker"
+            job.set_update(msg.message)
 
 
     def worker_done(self, msg : pr.Message):
-        self.log.note("Worker {} job done: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)
-        assert worker, "Done received from unknown worker"
-
-        job = self.jobs.get(msg.job)
-        assert job, "Done received for unknown job"
-        assert worker.jobid == job.id, "Done message from unassigned worker"
-        worker.set_done()
-        job.set_done()
+        if not worker:
+            self.log.error("Done received from unknown worker: {}",
+                           pr.decode(msg.identity))
+        else:
+            self.log.note("Worker {} job done: {}", msg.identity, msg.job)
+            job = self.jobs.get(msg.job)
+            assert job, "Done received for unknown job"
+            assert worker.jobid == job.id, "Done message from unassigned worker"
+            worker.set_done()
+            job.set_done()
 
 
     def worker_gone(self, msg : pr.Message):
-        self.log.warn("Worker {} gone", msg.identity)
         worker = self.workers.get(msg.identity)
-        if worker:
+        if not worker:
+            self.log.error("Gone received from unknown worker: {}",
+                           pr.decode(msg.identity))
+        else:
+            self.log.warn("Worker {} gone", msg.identity)
             if worker.jobid:
                 job = self.jobs[worker.jobid]
                 job.set_abandoned()
@@ -260,12 +282,14 @@ class Service(object):
     
 
     def worker_reply(self, msg : pr.Message):
-        self.log.trace("Worker {} job result: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)
-        assert worker, "Reply received from unknown worker"
-
-        job = self.jobs.get(msg.job)
-        assert job, "Reply received for unknown job"
-        assert worker.jobid == job.id, "Reply received from unassigned worker"
-        job.set_result(msg.message)
-        worker.new_hbeat()
+        if not worker:
+            self.log.error("Reply received from unknown worker: {}",
+                           pr.decode(msg.identity))
+        else:
+            self.log.trace("Worker {} job result: {}", msg.identity, msg.job)
+            job = self.jobs.get(msg.job)
+            assert job, "Reply received for unknown job"
+            assert worker.jobid == job.id, "Reply received from unassigned worker"
+            job.set_result(msg.message)
+            worker.new_hbeat()
