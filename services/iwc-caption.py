@@ -253,6 +253,7 @@ class IWCBrowser(SeleniumBrowser):
         ]
 
         referer = self.url
+        old = None
 
         for url in innerpages:
             if url in self.visited:
@@ -275,7 +276,9 @@ class IWCBrowser(SeleniumBrowser):
             
             if len(desc):
                 text = desc[0].get_attribute('innerText')
-                self.addCaption(text, accname, title, referer)
+                if text != old:
+                    self.addCaption(text, accname, title, referer)
+                    old = text
 
         savepath = os.path.join(self.outpath, accname + ".txt")
         self.saveCaptions(savepath)
@@ -322,8 +325,6 @@ if __name__ == '__main__':
 
                 try:
                     browser.gotoPage(page)
-                    if worker.abort():
-                        break
                 except Exception as err:
                     browser.log.Q("Exception raised: {}", err)
                 finally:
