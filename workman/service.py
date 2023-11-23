@@ -106,10 +106,10 @@ class ServiceWorker(object):
         self.idle = False
 
     def set_done(self):
-        # Do not set idle even if done. Wait for the ready event.
         self._last_received = time.time()
         self.jobtask = None
         self.jobid = None
+        self.idle = True
 
 
 class Service(object):
