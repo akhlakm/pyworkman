@@ -8,7 +8,7 @@ import random
 import urllib.request
 from datetime import datetime
 
-from util import conf
+from util import conf, db
 from workman.worker import Worker
 
 try:
@@ -20,6 +20,15 @@ try:
 except ImportError:
 	print("http://selenium-python.readthedocs.io/installation.html")
 	print("Selenium and Selenium Chrome webdriver must be installed on your system to run this program.")
+
+
+tbl = db.Table('Captions',
+    caption = "text NOT NULL",
+    title = "text",
+    username = "varchar(50)",
+    url = "varchar(500)",
+    referer = "varchar(500)"
+)
 
 
 class Logger:
@@ -88,10 +97,11 @@ class SeleniumBrowser:
 
         if page:
             self.navigate(page)
+        self.loadStuff()
 
     def _saveCookies(self):
         pickle.dump(self.driver.get_cookies(), open(self.cookie_file, 'wb'))
-        print("Cookies saved: {}", self.cookie_file)
+        print("Cookies saved:", self.cookie_file)
 
     def _loadCookies(self):
         if not os.path.exists(self.cookie_file):
@@ -109,6 +119,7 @@ class SeleniumBrowser:
     def loadStuff(self):
         try:
             self.visited = pickle.load(open(self.visited_file, 'rb'))
+            print("Load OK:", len(self.visited), "past visited links.")
         except Exception as e:
             print(e)
         self._loadCookies()
@@ -147,18 +158,42 @@ class SeleniumBrowser:
         self.log.i("Download OK: {}", savepath)
         self.wait('download')
 
-    def addCaption(self, text : str, by : str):
-        current_time = datetime.now()
+    def _clean_text(self, text : str) -> str:
+        valid = []
+        for sent in text.split(". "):
+            sent = sent.strip()
+            lowercased = sent.lower()
+            words = lowercased.split()
+            criteria = [
+                len(words) < 4,
+                len(sent) < 4,
+                '%' in lowercased,
+                'markup' in lowercased,
+            ]
+            if not any(criteria):
+                valid.append(sent + ".")
+
+        text = " ".join(valid)
+        return text
+
+    def addCaption(self, text : str, by : str, title : str, referer : str):
         self.captions.append(text)
         self.log.i("Caption [{}] => {}", by, text)
+        tbl.insert_row(
+            caption = text,
+            url = self.url,
+            username = by,
+            title = title,
+            referer = referer,
+        )
 
     def navigate(self, url):
         try:
             print("Loading page -", url)
             try:
-                self.driver.get(url)
                 self.url = url
                 self.visited.append(url)
+                self.driver.get(url)
                 print("Load OK: {}", url)
             except:
                 pass
@@ -169,9 +204,11 @@ class SeleniumBrowser:
 
 class IWCBrowser(SeleniumBrowser):
     def __init__(self, baseurl) -> None:
+        super().__init__()
         self.baseurl = baseurl
         self.outpath = "services/data/"
-        super().__init__()
+        self.cookie_file = os.path.join(self.outpath, self.cookie_file)
+        self.visited_file = os.path.join(self.outpath, self.visited_file)
 
     def init(self):
         os.makedirs(self.outpath, exist_ok=True)
@@ -215,19 +252,30 @@ class IWCBrowser(SeleniumBrowser):
                 By.XPATH, "//div[@class='pop-hitarea']//a[@class='click-hit']")
         ]
 
+        referer = self.url
+
         for url in innerpages:
             if url in self.visited:
                 continue
             self.navigate(url)
             self.acceptPopup()
 
+            accname = self.url.split("/")[5]
+
             desc = self.driver.find_elements(
                 By.XPATH,
                 "//div[@id='description-collapse']//div[contains(@class, 'description')]//span")
             
+            titleEl = self.driver.find_elements(
+                By.XPATH, "//div[contains(@class, ' title')]//span")
+            
+            if len(titleEl):
+                title = titleEl[0].get_attribute('innerText')
+            else: title = ""
+            
             if len(desc):
                 text = desc[0].get_attribute('innerText')
-                self.addCaption(text, accname)
+                self.addCaption(text, accname, title, referer)
 
         savepath = os.path.join(self.outpath, accname + ".txt")
         self.saveCaptions(savepath)
@@ -245,21 +293,26 @@ class IWCBrowser(SeleniumBrowser):
             url = page + pagesuffix
         
         self.navigate(url)
-        self.parseMediaLinks(page)
+        # self.parseMediaLinks(page)
         self.parseMediaDesc(page)
         self.saveOnly()
 
 
-
 if __name__ == '__main__':
+    # Run once. -----------------------
+    tbl.index('caption', 'text')
+    tbl.index('username', 'varchar')
+    tbl.create_all()
+
     if len(sys.argv) < 2:
-         raise ValueError("USAGE: %s <worker-id>" %sys.argv[0])
+        workerid = 'iwc-worker'
+    else:
+        workerid = sys.argv[1]
 
     browser = IWCBrowser(conf.Workers.iwc_url)
-    browser.launch_chrome(headless=False)
+    browser.launch_chrome(headless=True)
     browser.init()
 
-    workerid = sys.argv[1]
     with Worker(conf.WorkMan.mgr_url, 'iwc-caption', workerid) as worker:
         try:
             while True:
