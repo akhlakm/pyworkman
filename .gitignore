@@ -1,4 +1,12 @@
 *.pyc
 *.yaml
 *.log
+*.txt
+*.mp4
+*.jpg
+*.png
+*.pkl
+*.json
+
 postgres/pg_data
+services/chromedriver

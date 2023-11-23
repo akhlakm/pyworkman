@@ -130,6 +130,13 @@ class _wm:
 WorkMan = new_config(_wm)
 
 
+@dataclass
+class _workers:
+    iwc_url : str = 'https://localhost.com'
+
+Workers = new_config(_workers)
+
+
 if __name__ == '__main__':
     load_config()
     save_config()

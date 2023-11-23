@@ -2,6 +2,7 @@ import zmq
 import time
 from workman import protocol as pr
 
+
 class Worker(object):
     def __init__(self, manager_url, service, workerid, context=None):
         self.identity = workerid
@@ -128,7 +129,7 @@ class Worker(object):
 
             # Handle messages.
             if msg.action == pr.HBEAT:
-                print("Received hbeat from manager.")
+                print(".", end="", flush=True)
             elif msg.action == pr.ABORT:
                 self._abort = True
             elif msg.action == pr.REQUEST:

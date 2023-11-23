@@ -29,6 +29,7 @@ class ServiceJob(object):
 
     def set_done(self):
         self.running = False
+        self.abandoned = False
         self.complete = True
 
     def set_cancel(self):
@@ -45,6 +46,7 @@ class ServiceJob(object):
 
     def set_abandoned(self):
         # Do not requeue, as we are not sure if the job was complete.
+        self.running = False
         self.abandoned = True
 
     def set_update(self, update):
@@ -182,7 +184,7 @@ class Service(object):
 
     def client_query_job(self, msg : pr.Message) -> str:
         """ Return job status """
-        self.log.info("Client {} query job {}", msg.identity, msg.job)
+        self.log.trace("Client {} query job {}", msg.identity, msg.job)
         if msg.job not in self.jobs:
             r = {'error': 'Job not found'}
             self.log.error("Invalid job query: {}", msg.job)
@@ -192,7 +194,7 @@ class Service(object):
 
 
     def client_cancel_job(self, msg : pr.Message):
-        self.log.info("Client {} cancel job {}", msg.identity, msg.job)
+        self.log.warn("Client {} cancel job {}", msg.identity, msg.job)
         job = self.jobs.get(msg.job)
         if job:
             if job.running:
@@ -235,7 +237,7 @@ class Service(object):
 
 
     def worker_done(self, msg : pr.Message):
-        self.log.info("Worker {} job done: {}", msg.identity, msg.job)
+        self.log.note("Worker {} job done: {}", msg.identity, msg.job)
         worker = self.workers.get(msg.identity)
         assert worker, "Done received from unknown worker"
 
