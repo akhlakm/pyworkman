@@ -203,7 +203,6 @@ class Service(object):
 
     def client_query_job(self, msg : pr.Message) -> str:
         """ Return job status """
-        self.log.trace("Client {} query job {}", msg.identity, msg.job)
         if msg.job not in self.jobs:
             r = {'error': 'Job not found'}
             self.log.error("Invalid job query: {}", msg.job)
