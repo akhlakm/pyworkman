@@ -46,6 +46,7 @@ class Worker(object):
 
         self._poller = zmq.Poller()
         self._poller.register(self._socket, zmq.POLLIN)
+        self._send_ready()
 
     def close(self):
         if not self._is_connected():
@@ -89,9 +90,7 @@ class Worker(object):
         self._send(pr.DONE, self._jobid)
 
     def send_hbeat(self):
-        if not self._is_busy:
-            self._send_ready()
-        elif (time.time() - self._last_sent) > self._hb_interval:
+        if (time.time() - self._last_sent) > self._hb_interval:
             self._send(pr.HBEAT)
 
     def receive(self) -> pr.Message:
