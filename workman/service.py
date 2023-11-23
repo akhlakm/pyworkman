@@ -164,8 +164,8 @@ class Service(object):
             w for w in self.workers.values() if w.idle and w.alive()
         ]
 
-        self.log.trace("Execute Joblist: {}", joblist)
-        self.log.trace("Execute Workers: {}", workerlist)
+        # self.log.trace("Execute Joblist: {}", joblist)
+        # self.log.trace("Execute Workers: {}", workerlist)
 
         job = None
         if joblist:

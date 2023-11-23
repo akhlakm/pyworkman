@@ -76,14 +76,14 @@ class Message(object):
             encode(self.message)
         ]
 
-        print("--  Sending:", body)
+        # print("--  Sending:", body)
         return body
 
     @classmethod
     def parse(cls, frames : list[bytes]):
         """ Parse a payload received via socket. """
 
-        print("-- Received:", frames)
+        # print("-- Received:", frames)
         assert len(frames) >= 5, "Invalid message, not enough frames"
 
         if frames[0] != b'':
