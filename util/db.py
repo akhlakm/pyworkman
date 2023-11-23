@@ -29,8 +29,16 @@ def raw_sql(psycopg_sql_string, **kwargs) -> list:
     
     return rows
 
+
 class Table:
     def __init__(self, _tableName, **cols) -> None:
+        """ Generic table definition for creating and inserting.
+            Example:
+                tabl = Table("test",
+                    name = "varchar NOT NULL UNIQUE",
+                    age  = "int4 NOT NULL"
+                )
+        """
         self.name = _tableName
         self.pkey = 'id'
         self.columns = {
@@ -44,7 +52,7 @@ class Table:
             self.columns[k] = v
 
     def __repr__(self) -> str:
-        r = f"{self.name}({ ', '.join([k for k in self.columns.keys()]) })"
+        r = f"Table {self.name}({', '.join([k for k in self.columns.keys()])})"
         return r
 
     def constraint(self, col : str, value : str):
@@ -56,14 +64,9 @@ class Table:
 
     def _create_sql(self) -> str:
         sql = f"CREATE TABLE IF NOT EXISTS {self.name} (\n\t"
-
-        # Columns
         rows = [f'"{k}" {v}' for k, v in self.columns.items()]
-        # Constraints
         rows += [f'CONSTRAINT {v} ("{k}")' for k, v in self._constraints.items()]
-
-        sql += ",\n\t".join(rows)
-        sql += "\n);"
+        sql += ",\n\t".join(rows) + "\n);"
         return sql
     
     def _index_sql(self) -> list[str]:
@@ -72,25 +75,40 @@ class Table:
             for k, v in self._indices.items()
         ]
     
-    def create(self):
+    def create(self, drop_existing = False):
         if pool.closed: pool.open()
         with pool.connection() as conn:
             try:
+                if drop_existing:
+                    for k in self._indices.keys():
+                        sql = f"DROP INDEX IF EXISTS ix_{self.name}_{k};"
+                        conn.execute(sql)
+
+                    sql = f"DROP TABLE IF EXISTS {self.name};"
+                    conn.execute(sql)
+
                 for sql in [self._create_sql()] + self._index_sql():
                     print(sql)
                     conn.execute(sql)
+
                 conn.commit()
+
             except:
                 conn.rollback()
+                raise
 
     def insert_row(self, **kwargs):
         """ Insert a single table row and commit immediately.
-        Returns the 'id' field of the inserted row.
+            Returns the inserted Row with the id field. Example:
+            tabl.insert_row(name = "John", age = 31)
         """
         if "date_added" not in kwargs:
             kwargs["date_added"] = datetime.now()
 
         columns = [k for k in kwargs.keys()]
+        for col in columns:
+            assert col in self.columns, f"Column '{col}' not in {self}"
+
         column_string = ", ".join(columns)
         values_string = ", ".join([f"%({k})s" for k in columns])
 
@@ -104,16 +122,60 @@ class Table:
             return row[0]
         return None
 
+    def copy(self, rows : list[dict]):
+        """ Insert a batch of rows and commit at the end. Example:
+            tabl.copy([
+                {'name': "Mike", 'age': 23},
+                {'name': "Kate", 'age': 41},
+                {'name': "Terry", 'age': 9},
+            ])
+        """
+        columns = [k for k in rows[0].keys()]
+        if "date_added" not in columns:
+            columns.append('date_added')
+
+        for col in columns:
+            assert col in self.columns, f"Column '{col}' not in {self}"
+
+        column_string = ", ".join(columns)
+        sql = f"COPY {self.name} ({column_string}) FROM STDIN"
+
+        if pool.closed: pool.open()
+        with pool.connection() as conn:
+            cur : psycopg.Cursor = conn.cursor()
+            try:
+                with cur.copy(sql) as copy:
+                    for row in rows:
+                        if 'date_added' not in row:
+                            row['date_added'] = datetime.now()
+                        copy.write_row([row[k] for k in columns])
+
+                conn.commit()
+            except:
+                conn.rollback()
+                raise
+
 
 if __name__ == "__main__":
-    # print(insert("test", name="John", age=32, male=True))
     tabl = Table("test",
         name   = "varchar NOT NULL UNIQUE",
         age    = "int4 NOT NULL"
     )
 
-    # tabl.index('age')
-    # tabl.index('name', 'varchar')
-    # tabl.create()
+    tabl.index('age')
+    tabl.index('name', 'varchar')
+    tabl.create(drop_existing=True)
 
     print(tabl.insert_row(name = "John", age = 31))
+    print(tabl.insert_row(name = "Doe", age = 32))
+
+    tabl.copy([
+        {'name': "Mike", 'age': 23},
+        {'name': "Kate", 'age': 41},
+        {'name': "Terry", 'age': 9},
+    ])
+
+    for row in raw_sql("SELECT * FROM test;"):
+        print(row)
+
+    print("Done")
