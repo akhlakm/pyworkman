@@ -87,6 +87,9 @@ class SeleniumBrowser:
         except:
             raise RuntimeError("Could not load Chrome. Please install Chrome webdriver and add it to the environment PATH.")
         
+    def quit(self):
+        self.driver.quit()
+
     def init(self, page : str = None):
         self.driver.set_window_size(770,640)
         self.driver.set_window_position(-5,0)
@@ -283,6 +286,8 @@ class IWCBrowser(SeleniumBrowser):
                 if text != old:
                     self.addCaption(text, accname, title, referer)
                     old = text
+            else:
+                self.log.w("No desc found in: {}", self.url)
 
         savepath = os.path.join(self.outpath, accname + ".txt")
         self.saveCaptions(savepath)
@@ -317,20 +322,24 @@ if __name__ == '__main__':
     else:
         workerid = sys.argv[1]
 
-    browser = IWCBrowser(conf.Workers.iwc_url)
-    browser.launch_chrome(headless=True)
-    browser.init()
-
     with Worker(conf.WorkMan.mgr_url, 'iwc-caption', workerid) as worker:
         worker.define(
-            "IWC", "Crawl IWC pages",
+            "IWC",
+            "Crawl IWC pages and download videos and parse captions. "
+            "The captions will be stored in the PGDB specified in the config.yaml file.",
             page = dict(type=str, help="Page/URL to crawl."),
-            media = dict(default=False, help="Download media or not."),
+            media = dict(default=False, help="Download media or not, captions will be parsed always."),
+            headless = dict(default=False, help="Launch browser in headless mode."),
         )
 
         while True:
             request = worker.receive()
             media = request.media.lower() not in ["", "no", "false", "0"]
+            headless = request.headless.lower() not in ["", "no", "false", "0"]
+
+            browser = IWCBrowser(conf.Workers.iwc_url)
+            browser.launch_chrome(headless=headless)
+            browser.init()
             browser.log.add_callback(worker.update)
 
             try:
@@ -340,3 +349,5 @@ if __name__ == '__main__':
             finally:
                 worker.done(f"Done: {request.page}")
                 browser.log.callback = None
+                browser.quit()
+                del browser
