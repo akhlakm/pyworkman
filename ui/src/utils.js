@@ -21,6 +21,7 @@ function handle_response(action, response) {
 
     if (response["error"]) {
         store.alert.set(response['error']);
+        return;
     } else {
         store.alert.set("");
     }
