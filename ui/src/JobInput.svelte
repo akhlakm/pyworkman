@@ -1,9 +1,9 @@
 <script>
     import { onMount } from "svelte";
     import { send } from "./utils";
-    import { clear, alert, job_list, job_definition, selected_service, selected_job } from "./store";
+    import { clear, alert, job_list, job_definition, selected_service, selected_job, job_fields } from "./store";
 
-    export let fields = {};
+    let fields = {};
     let defn = JSON.parse($job_definition);
     let props = {};
     let service = {};
@@ -13,18 +13,22 @@
         service.name = defn["name"];
         service.desc = defn["desc"];
 
+        fields = $job_fields;
         let items = defn["fields"];
 
         Object.entries(items).map((list, i) => {
             let field = list[0];
             let defn = list[1];
-            fields[field] = defn["default"] ? defn["default"] : "";
+            if (!fields[field]) {
+                fields[field] = defn["default"] ? defn["default"] : "";
+            }
             props[field] = {
                 type: defn["type"],
                 help: defn["help"],
                 required: defn["required"] ? "Required" : "Optional",
             };
         });
+        job_fields.set(fields);
     });
 
     function handleRequest(event) {
@@ -37,6 +41,7 @@
             }
             service.message = JSON.stringify(fields);
         }
+        job_fields.set(fields);
         send(
             submitButton.name,
             $selected_service,
@@ -62,19 +67,18 @@
     <h2 class="col-span-5 mb-2 mt-4 border-b">Payload</h2>
 
     {#each Object.keys(fields) as field}
-        {@const details = props[field]}
         <div class="col-start-1 my-auto mr-auto">
-            <b>{field}</b> [{details.type}]:
+            <b>{field}</b> [{props[field].type}]:
         </div>
         <input
             class="col-start-2 col-span-3 mt-2"
             type="text"
             name={field}
             bind:value={fields[field]}
-            placeholder={details.required}
-            required={details.required == "Required"}
+            placeholder={props[field].required}
+            required={props[field].required == "Required"}
         />
-        <p class="col-start-2 col-span-3 mb-2 text-sm">{details.help}</p>
+        <p class="col-start-2 col-span-3 mb-2 text-sm">{props[field].help}</p>
     {/each}
 
     <div class="col-start-2 col-span-4">

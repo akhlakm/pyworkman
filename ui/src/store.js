@@ -18,6 +18,8 @@ export const last_response = writable(null);
 
 export const job_definition = writable(null);
 
+export const job_fields = writable({});
+
 export function clear() {
     alert.set("");
     job_status.set(null);
