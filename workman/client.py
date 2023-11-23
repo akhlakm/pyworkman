@@ -48,6 +48,11 @@ class Client(object):
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
+    def definition(self):
+        msg = pr.Message(pr.CLIENT, pr.READY, self.service)
+        self._socket.send_multipart(msg.frames())
+        self._expect_reply = True
+
     def request(self, job, message = None):
         msg = pr.Message(pr.CLIENT, pr.REQUEST, self.service, job, message)
         self._socket.send_multipart(msg.frames())

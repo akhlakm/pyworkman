@@ -120,6 +120,12 @@ class Manager(object):
         elif msg.action == pr.ABORT:
             svc.client_cancel_job(msg)
 
+        # Service definition
+        elif msg.action == pr.READY:
+            reply = svc.job_definition()
+            self.reply_client(msg, reply)
+
+
     def _handle_list_request(self, msg : pr.Message):
         if msg.service in [None, "None", ""]:
             # List all items
@@ -128,16 +134,19 @@ class Manager(object):
                 svclist[name] = {
                     'jobs': svc.list_jobs(),
                     'workers': svc.list_workers(),
+                    'definition': svc.job_definition(),
                 }
         else:
             svclist = {
                 'jobs': [],
                 'workers': [],
+                'definition': {},
             }
             if msg.service in self._services:
                 svc = self._services[msg.service]
                 svclist['jobs'] = svc.list_jobs()
                 svclist['workers'] = svc.list_workers()
+                svclist['definition'] = svc.job_definition()
 
         reply = pr.serialize(svclist)
         self.reply_client(msg, reply)

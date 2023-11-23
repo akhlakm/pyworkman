@@ -64,6 +64,7 @@ class ServiceWorker(object):
         self.service = service
         self.jobid : bytes = None
         self.jobtask : bytes = None
+        self.definition : str = None
         self._socket : zmq.Socket = socket
         self._hb_timeout = pr.HBEAT_TIMEOUT
         self._hb_interval = pr.HBEAT_INTERVAL
@@ -100,10 +101,13 @@ class ServiceWorker(object):
 
     def new_hbeat(self):
         self._last_received = time.time()
+        if self.definition is None:
+            self._send(pr.READY)
 
-    def set_ready(self):
+    def set_ready(self, definition : str):
         self._last_received = time.time()
         self.idle = True
+        self.definition = definition
 
     def set_gone(self):
         self._last_received = time.time()
@@ -218,6 +222,18 @@ class Service(object):
             job.set_cancel()
 
 
+    def job_definition(self) -> str:
+        defn = None
+        keys = [k for k in self.workers.keys()]
+        if keys:
+            # The latest one (all should be the same).
+            defn = self.workers[keys[-1]].definition
+        if defn:
+            return defn
+        else:
+            return "{}"
+
+
     def _get_or_create_worker(self, msg : pr.Message) -> ServiceWorker:
         if msg.identity not in self.workers:
             worker = ServiceWorker(msg.identity, msg.service, self._socket)
@@ -233,7 +249,7 @@ class Service(object):
             job = self.jobs[worker.jobid]
             job.set_abandoned()
 
-        worker.set_ready()
+        worker.set_ready(msg.message)
 
 
     def worker_beat(self, msg : pr.Message):

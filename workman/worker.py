@@ -8,6 +8,7 @@ class Worker(object):
         self.identity = workerid
         self.service = service
         self.manager_url = manager_url
+        self.definition = {}
         self._zmq_context = context if context else zmq.Context.instance()
         self._socket : zmq.Socket = None
         self._poller : zmq.Poller = None
@@ -46,7 +47,6 @@ class Worker(object):
 
         self._poller = zmq.Poller()
         self._poller.register(self._socket, zmq.POLLIN)
-        self._send_ready()
 
     def close(self):
         if not self._is_connected():
@@ -68,7 +68,7 @@ class Worker(object):
     def _send_ready(self):
         self._is_busy = False
         self._jobid = None
-        self._send(pr.READY)
+        self._send(pr.READY, message=pr.serialize(self.definition))
 
     def _send_gone(self):
         self._send(pr.GONE)
@@ -79,6 +79,17 @@ class Worker(object):
         wait = self._hb_interval + self._last_sent - time.time() # sec
         return max(0, int(1000 * wait))
     
+    def define(self, **kwargs):
+        """ Define the payload json. """
+        for key in ["name", "desc", "fields"]:
+            assert key in kwargs, f"{key} required"
+        assert type(kwargs['fields']) == dict
+        for field, obj in kwargs['fields'].items():
+            for key in ["value", "type", "help"]:
+                assert key in obj, f"{key} required in {field} field"
+        self.definition = kwargs
+        self._send_ready()
+
     def reply(self, message : str):
         self._send(pr.REPLY, self._jobid, message)
 
@@ -131,6 +142,8 @@ class Worker(object):
                 print(".", end="", flush=True)
             elif msg.action == pr.ABORT:
                 self._abort = True
+            elif msg.action == pr.READY:
+                self._send(pr.READY, message=pr.serialize(self.definition))
             elif msg.action == pr.REQUEST:
                 self._abort = False
                 self._is_busy = True
@@ -143,6 +156,17 @@ if __name__ == '__main__':
     from util import conf
 
     with Worker(conf.WorkMan.mgr_url, 'echo', 'worker-1') as worker:
+        worker.define(
+            name="Echo Service",
+            desc="Echo the sent message",
+            fields = {
+                'value': dict(
+                    value="hello", type="string", help="Value to send",
+                    required=1
+                )
+            }
+        )
+
         try:
             while True:
                 msg = worker.receive()

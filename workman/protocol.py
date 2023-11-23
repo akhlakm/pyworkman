@@ -25,8 +25,8 @@ WORKER_BUSY_TIMEOUT = 900
 class Message(object):
     allowed_sender = (CLIENT, WORKER, MANAGER)
     allowed_action = {
-        CLIENT: (REQUEST, STATUS, ABORT, LIST),
-        MANAGER: (REPLY, HBEAT, REQUEST, ABORT),
+        CLIENT: (REQUEST, STATUS, ABORT, LIST, READY),
+        MANAGER: (REPLY, HBEAT, REQUEST, ABORT, READY),
         WORKER: (READY, HBEAT, UPDATE, DONE, GONE, REPLY),
     }
 
@@ -81,7 +81,7 @@ class Message(object):
     def parse(cls, frames : list[bytes]):
         """ Parse a payload received via socket. """
 
-        # print("Replied:", frames)
+        print("-- Received:", frames)
         assert len(frames) >= 5, "Invalid message, not enough frames"
 
         if frames[0] != b'':
