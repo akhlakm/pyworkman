@@ -75,7 +75,9 @@ class Table:
             for k, v in self._indices.items()
         ]
     
-    def create(self, drop_existing = False):
+    def create_all(self, drop_existing = False):
+        """ Create the table and all the defined indices.
+        """
         if pool.closed: pool.open()
         with pool.connection() as conn:
             try:
@@ -164,7 +166,7 @@ if __name__ == "__main__":
 
     tabl.index('age')
     tabl.index('name', 'varchar')
-    tabl.create(drop_existing=True)
+    tabl.create_all(drop_existing=True)
 
     print(tabl.insert_row(name = "John", age = 31))
     print(tabl.insert_row(name = "Doe", age = 32))
