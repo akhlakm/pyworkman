@@ -334,16 +334,14 @@ if __name__ == '__main__':
 
         while True:
             request = worker.receive()
-            media = request.media.lower() not in ["", "no", "false", "0"]
-            headless = request.headless.lower() not in ["", "no", "false", "0"]
 
             browser = IWCBrowser(conf.Workers.iwc_url)
-            browser.launch_chrome(headless=headless)
+            browser.launch_chrome(headless=request.headless)
             browser.init()
             browser.log.add_callback(worker.update)
 
             try:
-                browser.gotoPage(request.page, media=media)
+                browser.gotoPage(request.page, media=request.media)
             except Exception as err:
                 browser.log.Q("Exception raised: {}", err)
             finally:
