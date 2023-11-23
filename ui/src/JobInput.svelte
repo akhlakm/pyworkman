@@ -81,7 +81,7 @@
         <p class="col-start-2 col-span-3 mb-2 text-sm">{props[field].help}</p>
     {/each}
 
-    <div class="col-start-2 col-span-4">
+    <div class="col-start-2 col-span-4 mt-2">
         <input class="btn" type="submit" name="submit" value="Submit Job" />
         <input class="btn" type="submit" name="status" value="Check Status" />
         <input class="btn" type="submit" name="cancel" value="Cancel Job" />
