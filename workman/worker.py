@@ -129,6 +129,12 @@ class Worker(object):
                         # assign the default one.
                         payload[name] = field["default"]
 
+                # Convert to python bool
+                if field["type"] == "bool":
+                    payload[name] = str(payload[name]).lower() in [
+                        "true", "1", "yes", "y",
+                    ]
+
             payload["job"] = msg.job
             defn = namedtuple(name, [k for k in payload.keys()])
             return defn(**payload)
