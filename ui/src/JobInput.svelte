@@ -19,8 +19,8 @@
         Object.entries(items).map((list, i) => {
             let field = list[0];
             let defn = list[1];
-            if (!fields[field]) {
-                fields[field] = defn["default"] ? defn["default"] : "";
+            if ((field in fields) == false) {
+                fields[field] = "default" in defn ? String(defn["default"]) : "";
             }
             props[field] = {
                 type: defn["type"],
@@ -58,7 +58,7 @@
         <input
             class="col-start-2 col-span-3 mt-2 text-sm"
             type="text"
-            bind:value={$selected_job}
+            bind:value="{$selected_job}"
             placeholder="Unique job ID"
             required
         />
@@ -73,9 +73,9 @@
         <input
             class="col-start-2 col-span-3 mt-2"
             type="text"
-            name={field}
-            bind:value={fields[field]}
-            placeholder={props[field].required}
+            name="{field}"
+            bind:value="{fields[field]}"
+            placeholder="{props[field].required}"
             required={props[field].required == "Required"}
         />
         <p class="col-start-2 col-span-3 mb-2 text-sm">{props[field].help}</p>

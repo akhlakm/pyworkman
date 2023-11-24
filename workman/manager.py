@@ -41,6 +41,7 @@ class Manager(object):
     
     def shutdown(self):
         self._stop = True
+        self.close()
         log.note("Manager shutdown.")
 
     def close(self):
@@ -91,7 +92,7 @@ class Manager(object):
         elif msg.action == pr.REPLY:
             svc.worker_reply(msg)
 
-    def reply_client(self, msg, response : str):
+    def _reply_client(self, msg, response : str):
         reply = pr.Message(pr.MANAGER, pr.REPLY, msg.service, msg.job, response)
         reply.set_identity(msg.identity)
         self._socket.send_multipart(reply.frames())
@@ -109,12 +110,12 @@ class Manager(object):
         # New job
         if msg.action == pr.REQUEST:
             reply = svc.client_new_job(msg)
-            self.reply_client(msg, reply)
+            self._reply_client(msg, reply)
 
         # Job status
         elif msg.action == pr.STATUS:
             reply = svc.client_query_job(msg)
-            self.reply_client(msg, reply)
+            self._reply_client(msg, reply)
 
         # Cancel job
         elif msg.action == pr.ABORT:
@@ -123,7 +124,7 @@ class Manager(object):
         # Service definition
         elif msg.action == pr.READY:
             reply = svc.job_definition()
-            self.reply_client(msg, reply)
+            self._reply_client(msg, reply)
 
 
     def _handle_list_request(self, msg : pr.Message):
@@ -149,7 +150,7 @@ class Manager(object):
                 svclist['definition'] = svc.job_definition()
 
         reply = pr.serialize(svclist)
-        self.reply_client(msg, reply)
+        self._reply_client(msg, reply)
 
 
 def main():
