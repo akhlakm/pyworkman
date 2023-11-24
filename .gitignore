@@ -6,8 +6,8 @@
 *.jpg
 *.png
 *.pkl
-*.json
 *.sqlite3
+*.egg-info
 
 postgres/pg_data
 services/chromedriver

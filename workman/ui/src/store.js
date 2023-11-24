@@ -23,6 +23,7 @@ export const job_fields = writable({});
 export function clear() {
     alert.set("");
     job_status.set(null);
+    job_list.set(null);
     service_details.set(null);
     service_list.set(null);
     job_definition.set(null);

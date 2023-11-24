@@ -1,10 +1,12 @@
 import zmq
 import signal
 import pylogg as log
+
+from workman import conf
 from workman import protocol as pr
 from workman.service import Service
 
-class Manager(object):
+class ServiceManager(object):
     def __init__(self, bind_url, zmq_context = None) -> None:
         self._bind_url = bind_url
         self._context = zmq_context if zmq_context \
@@ -20,7 +22,7 @@ class Manager(object):
         self._socket = self._context.socket(zmq.ROUTER)
         self._socket.rcvtimeo = int(pr.HBEAT_INTERVAL * 1000)
         self._socket.bind(self._bind_url)
-        log.info("Manager listening on {}", self._bind_url)
+        log.info("ServiceManager listening on {}", self._bind_url)
 
         try:
             while not self._stop:
@@ -42,7 +44,7 @@ class Manager(object):
     def shutdown(self):
         self._stop = True
         self.close()
-        log.note("Manager shutdown.")
+        log.note("ServiceManager shutdown.")
 
     def close(self):
         if not self._socket:
@@ -153,20 +155,19 @@ class Manager(object):
         self._reply_client(msg, reply)
 
 
-def main():
-    from util import conf
-    log.init(log.Level.DEBUG)
-
-    mgr = Manager(bind_url=conf.WorkMan.mgr_url)
-
+def start():
+    log.init(conf.WorkMan.log_level)
+    mgr = ServiceManager(bind_url=conf.WorkMan.mgr_url)
     def _sig_handler(sig, _):
-        print("\nShutting down ...")
         mgr.shutdown()
 
     signal.signal(signal.SIGINT, _sig_handler)
     signal.signal(signal.SIGTERM, _sig_handler)
 
-    mgr.start()
+    try:
+        mgr.start()
+    except Exception as err:
+        print(err)
 
 if __name__ == '__main__':
-    main()
+    start()

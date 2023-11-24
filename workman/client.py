@@ -97,10 +97,10 @@ class Client(object):
 
 
 if __name__ == '__main__':
-    import time
-    with Client('tcp://127.0.0.1:5555', 'echo', clientid='test-client') as client:
+    from workman import conf
+    with Client(conf.WorkMan.mgr_url, 'echo', clientid='client-1') as client:
         defn = client.definition(10)
-        print("Definition:", defn)
+        print("Service Definition:", defn)
         if defn:
             for i in range(1, 6):
                 payload = {"message": f"hello", "name": i}

@@ -35,7 +35,7 @@
         clear();
         const { submitter: submitButton } = event;
         if (submitButton.name == "submit") {
-            if ($job_list.includes($selected_job)) {
+            if ($job_list && $job_list.includes($selected_job)) {
                 alert.set("Please choose a new job ID.")
                 return;
             }
@@ -66,7 +66,7 @@
 
     <h2 class="col-span-5 mb-2 mt-4 border-b">Payload</h2>
 
-    {#each Object.keys(fields) as field}
+    {#each Object.keys(props) as field}
         <div class="col-start-1 my-auto mr-auto">
             <b>{field}</b> [{props[field].type}]:
         </div>

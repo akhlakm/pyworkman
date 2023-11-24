@@ -62,7 +62,7 @@ update() {
 
 build() {
     ## Compile all items and build the docker container.
-    cd $CWD/ui
+    cd $CWD/workman/ui
     npm run build
 }
 
@@ -108,7 +108,28 @@ pgshell() {
 
 config() {
     # Create/Update yaml config file.
-    python $CWD/util/conf.py    
+    python $CWD/workman/conf.py
+    python $CWD/services/conf.py
+}
+
+
+bump() {
+    ## Bump the version number
+    grep version pyproject.toml
+    VERSION=$(sed -n 's/version = "\(.*\)"/\1/p' pyproject.toml)
+    VERSION=$(python -c "v='$VERSION'.split('.');print('%s.%s.%d' %(v[0], v[1], int(v[2])+1))")
+    echo "   >>>"
+    sed -i "s/\(version = \"\)[^\"]*\"/\1$VERSION\"/" pyproject.toml
+    sed -i "s/\(__version__ = \"\)[^\"]*\"/\1$VERSION\"/" workman/__init__.py
+    grep version pyproject.toml
+    git add pyproject.toml workman/__init__.py
+}
+
+tag() {
+    # create a new git tag using the pyproject.toml version
+    # and push the tag to origin
+    version=$(sed -n 's/version = "\(.*\)"/\1/p' pyproject.toml)
+    git tag v$version && git push origin v$version
 }
 
 
@@ -120,6 +141,9 @@ if [[ "$#" -lt 1 ]]; then
 
     echo -e "build              - Run build on server backend and frontend."
     echo -e "run                - Run the server locally."
+
+    echo -e "bump               - Bump the package minor version number."
+    echo -e "tag                - Tag current version and push to origin."
 
     echo -e "postgres           - Run the postgres docker container."
     echo -e "pgshell            - Login to the running postgres server."

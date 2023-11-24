@@ -8,8 +8,9 @@ import random
 import urllib.request
 
 import pylogg
-from util import conf, db
+import conf
 from workman.worker import Worker
+from workman.util import db
 
 try:
 	from selenium import webdriver
@@ -312,19 +313,19 @@ class IWCBrowser(SeleniumBrowser):
 
 
 if __name__ == '__main__':
-    # Run once. -----------------------
-    tbl.index('caption', 'text')
-    tbl.index('username', 'varchar')
-
-    db.connect(conf.PostGres.db_textgen)
-    tbl.create_all()
+    outpath = "services/data"
 
     if len(sys.argv) < 2:
         workerid = 'iwc-worker'
     else:
         workerid = sys.argv[1]
 
-    outpath = "services/data"
+    db.connect(conf.PostGres)
+
+    # Run once. -----------------------
+    # tbl.index('caption', 'text')
+    # tbl.index('username', 'varchar')
+    # tbl.create_all()
 
     with Worker(conf.WorkMan.mgr_url, 'iwc-caption', workerid) as worker:
         worker.define(

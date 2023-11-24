@@ -1,22 +1,22 @@
 """ Raw SQL-based Postgres DB I/O utils """
 
 import psycopg
-from util import conf
 from datetime import datetime
+from collections import namedtuple
 from psycopg_pool import ConnectionPool
 from psycopg.rows import namedtuple_row
 
 _pool : ConnectionPool = None
 
-def connect(dbname : str) -> ConnectionPool:
+def connect(conf : namedtuple) -> ConnectionPool:
     """ Connect to a specific database. """
     global _pool
 
-    conninfo =  f'host={conf.PostGres.db_host} '\
-                f'port={conf.PostGres.db_port} '\
-                f'dbname={dbname} '\
-                f'user={conf.PostGres.db_user} '\
-                f'password={conf.PostGres.db_pswd}'
+    conninfo =  f'host={conf.db_host} '\
+                f'port={conf.db_port} '\
+                f'dbname={conf.db_name} '\
+                f'user={conf.db_user} '\
+                f'password={conf.db_pswd}'
 
     _pool = ConnectionPool(conninfo=conninfo, min_size=2, open=True)
     return _pool
@@ -165,6 +165,7 @@ class Table:
 
 
 if __name__ == "__main__":
+
     tabl = Table("test",
         name   = "varchar NOT NULL UNIQUE",
         age    = "int4 NOT NULL"
@@ -172,6 +173,8 @@ if __name__ == "__main__":
 
     tabl.index('age')
     tabl.index('name', 'varchar')
+
+    connect('postgres')
     tabl.create_all(drop_existing=True)
 
     print(tabl.insert_row(name = "John", age = 31))

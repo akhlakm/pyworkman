@@ -15,7 +15,6 @@
 </script>
 
 <TopBar />
-<ServiceList />
 {#if $alert}
     <h3 class="mx-auto text-red-500 w-full text-left px-10">{$alert}</h3>
 {/if}
@@ -27,4 +26,6 @@
         <JobInput />
     {/if}
     <ServiceDetails />
+{:else}
+    <ServiceList />
 {/if}

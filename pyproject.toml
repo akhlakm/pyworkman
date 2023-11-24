@@ -1,0 +1,43 @@
+[project]
+name = "pyworkman"
+version = "0.1.1"
+authors = [
+    { name="Akhlak Mahmood", email="akhlakm@gatech.edu" },
+]
+description = "ZeroMQ based work management with WebUI."
+readme = "README.md"
+requires-python = ">=3.0"
+
+keywords = ["zeromq", "development"]
+
+classifiers = [
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+
+dependencies = [
+    "pyzmq",
+    "django",
+    "whitenoise",
+    "psycopg[pool]",
+    "psycopg[binary]",
+    "pylogg @ git+https://github.com/akhlakm/python-logg.git",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/akhlakm/workman-service"
+"Bug Tracker" = "https://github.com/akhlakm/workman-service/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["workman"]
+
+[project.scripts]
+workman = "workman.__main__:main"
+
+[tool.setuptools.package-data]
+'workman' = ['backend/*', 'ui/build/*', 'ui/public/*', 'ui/templates/*']
