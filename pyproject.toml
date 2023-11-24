@@ -1,12 +1,12 @@
 [project]
 name = "pyworkman"
-version = "0.1.2"
+version = "0.1.5"
 authors = [
     { name="Akhlak Mahmood", email="akhlakm@gatech.edu" },
 ]
 description = "ZeroMQ based work management with WebUI."
 readme = "README.md"
-requires-python = ">=3.0"
+requires-python = ">=3.9"
 
 keywords = ["zeromq", "development"]
 
@@ -18,11 +18,16 @@ classifiers = [
 
 dependencies = [
     "pyzmq",
-    "django",
-    "whitenoise",
     "psycopg[pool]",
     "psycopg[binary]",
     "pylogg @ git+https://github.com/akhlakm/python-logg.git",
+]
+
+[project.optional-dependencies]
+# Install using `pip install .[server]`
+server = [
+    "django",
+    "whitenoise",
 ]
 
 [project.urls]
@@ -40,4 +45,7 @@ packages = ["workman"]
 workman = "workman.__main__:main"
 
 [tool.setuptools.package-data]
-'workman' = ['backend/*', 'ui/build/*', 'ui/public/*', 'ui/templates/*']
+'workman' = [
+    '*.py', 'util/**.py', 'backend/**.py',
+    'ui/build/*', 'ui/public/*', 'ui/templates/*'
+]
