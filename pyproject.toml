@@ -21,7 +21,6 @@ dependencies = [
     "whitenoise",
     "psycopg[binary]",
     "psycopg[pool]",
-    "gunicorn",
     "pyzmq",
     "pylogg @ git+https://github.com/akhlakm/python-logg.git",
 ]
@@ -39,3 +38,6 @@ packages = ["workman"]
 
 [project.scripts]
 workman = "workman.__main__:main"
+
+[tool.setuptools.package-data]
+'workman' = ['backend/*', 'ui/build/*', 'ui/public/*', 'ui/templates/*']
