@@ -1,34 +1,39 @@
-""" Run a simple echo service. """
+""" Run a simple echo service for workman. """
 import time
 import conf
 from workman.worker import Worker
 
-
 def start(name = None):
+    """ Start the worker listening for job requests.
+    """
     name = name if name else 'echo-worker'
     with Worker(conf.WorkMan.mgr_url, 'echo', name) as service:
+        # define the input fields for a job.
         service.define("Echo Test",
             "Echo the sent message",
             message = dict(help="Required message to send", type=str),
             name = dict(default="world", help="Optional name"),
         )
+        # listen forever
         while True: execute(service)
 
 
 def execute(worker : Worker):
+    """ Wait and execute a single job request.
+    """
     payload = worker.receive()
     print("Executing:", payload.job, "Input:", payload.message)
 
     worker.update(f"Hello {payload.name}! Generating response.")
-    print("Update 1")
+    print("Update 1 sent")
     time.sleep(2)
 
     worker.update("60% complete.")
-    print("Update 2")
+    print("Update 2 sent")
     time.sleep(4)
 
     worker.update("Almost done.")
-    print("Update 3")
+    print("Update 3 sent")
     time.sleep(4)
 
     worker.reply(payload.message)
