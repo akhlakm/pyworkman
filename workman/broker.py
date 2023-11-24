@@ -74,12 +74,12 @@ class ServiceManager(object):
 
     def _init_encryption(self, key_file = "mgr.key"):
         try:
-            keys = open(key_file, "rb").read().split(b"\n")
+            keys = open(key_file).read().encode("utf-8").split(b"\n")
             random.shuffle(keys)
             log.note("Encryption keys loaded")
         except:
             keys = [pr.encryption_key() for i in range(10)]
-            open(key_file, "wb").write(b"\n".join(keys))
+            open(key_file, "w").write(b"\n".join(keys).decode("utf-8"))
             os.chmod(key_file, 0o600)
             log.note("New encryption keys saved")
 

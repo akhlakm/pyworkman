@@ -22,7 +22,7 @@ class Client(object):
         self.close()
 
     def _init_encryption(self, key_file = "mgr.key"):
-        keys = open(key_file, "rb").read().split(b"\n")
+        keys = open(key_file).read().encode("utf-8").split(b"\n")
         random.shuffle(keys)
         pr.Encryptor = pr.encryptor(*keys)
 
