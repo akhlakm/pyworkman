@@ -1,6 +1,6 @@
 [project]
 name = "pyworkman"
-version = "0.1.5"
+version = "0.1.6"
 authors = [
     { name="Akhlak Mahmood", email="akhlakm@gatech.edu" },
 ]
@@ -18,17 +18,23 @@ classifiers = [
 
 dependencies = [
     "pyzmq",
-    "psycopg[pool]",
-    "psycopg[binary]",
     "pylogg @ git+https://github.com/akhlakm/python-logg.git",
 ]
 
 [project.optional-dependencies]
+# Enable running server.
 # Install using `pip install .[server]`
 server = [
     "django",
     "whitenoise",
 ]
+# Enable Postgres database.
+# Install using `pip install .[db]`
+db = [
+    "psycopg[binary]",
+    "psycopg[pool]",
+]
+
 
 [project.urls]
 "Homepage" = "https://github.com/akhlakm/workman-service"
