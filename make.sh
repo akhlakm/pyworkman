@@ -7,7 +7,7 @@ CWD=$(echo $(command cd $(dirname '$0'); pwd))
 ## GLOBAL VARIABLES
 ## -----------------------------------------------------------------------------
 PGWD=$CWD/postgres
-CONDAENV=tweetcaption
+CONDAENV=pyworkman
 
 if [[ $(basename "${0}") != "make.sh" ]]; then
     # Script sourced, load or create condaenv
@@ -67,7 +67,6 @@ postgres() {
 
     # Run this to fix the permissions of a persistent volume.
     # sudo chown 1024:1024 ./pgserv_data
-
 
     # Remove previous if any.
     docker stop pgserv && docker container rm pgserv
