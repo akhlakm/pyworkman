@@ -108,7 +108,7 @@ pgshell() {
 
 config() {
     # Create/Update yaml config file.
-    python $CWD/util/conf.py    
+    python $CWD/workman/conf.py    
 }
 
 
