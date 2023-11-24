@@ -49,6 +49,7 @@ class Config:
         d = { k : v.__dict__ for k, v in self._sections.items() }
         with open(self._yaml_file, 'w') as fp:
             yaml.safe_dump(d, fp, sort_keys=False, indent=4)
+            os.chmod(self._yaml_file, 0o600)
             print("Save OK:", self._yaml_file)
 
     def _get_cfg(self, section : str, key: str, dtype : callable, val):
