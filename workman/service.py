@@ -44,6 +44,7 @@ class ServiceJob(object):
 
     def requeue(self):
         self.queued = True
+        self.abandoned = False
 
     def set_abandoned(self):
         # Do not requeue, as we are not sure if the job was complete.
@@ -196,8 +197,13 @@ class Service(object):
         else:
             job = self.jobs[msg.job]
             r = job.status()
-            r['error'] = 'Job exists'
-            self.log.warn("Client {} duplicate job {}", msg.identity, job.id)
+            if job.abandoned:
+                job.requeue()
+                self.log.info("Client {} requeue job {}", msg.identity, job.id)
+            else:
+                r['error'] = 'Job exists'
+                self.log.warn("Client {} duplicate job {}", msg.identity, job.id)
+    
         return pr.serialize(r)
 
 
