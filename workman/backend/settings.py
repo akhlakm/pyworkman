@@ -158,7 +158,7 @@ LOGGING = {
         "file": {
             "level": "INFO",
             "class": "logging.FileHandler",
-            "filename": "django.log",
+            "filename": "ui.log",
             "formatter": "app",
         },
     },

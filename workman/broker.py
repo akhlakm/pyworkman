@@ -159,7 +159,7 @@ def start():
     # Create/update the config file.
     conf._c.save_yaml()
 
-    log.init(conf.WorkMan.log_level, append_to_logfile=True)
+    log.init(conf.WorkMan.log_level, logfile_name="mgr", append_to_logfile=True)
     mgr = ServiceManager(bind_url=conf.WorkMan.mgr_url)
     def _sig_handler(sig, _):
         mgr.shutdown()
