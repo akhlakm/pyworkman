@@ -35,7 +35,7 @@
         clear();
         const { submitter: submitButton } = event;
         if (submitButton.name == "submit") {
-            if ($job_list.includes($selected_job)) {
+            if ($job_list && $job_list.includes($selected_job)) {
                 alert.set("Please choose a new job ID.")
                 return;
             }
