@@ -47,27 +47,15 @@ update_nodejs() {
 }
 
 install() {
-    conda install -c conda-forge cxx-compiler==1.5.2 # gcc11
-    conda install -c conda-forge cudatoolkit cudatoolkit-dev
-    conda install -c conda-forge postgresql=16
-
-    pip -v install -r $CWD/requirements.txt
-    # npm install
-}
-
-update() {
-    pip -v install -r $CWD/requirements.txt
-    python $CWD/server/conf.py
+    pip -v install -e .
+    cd $CWD/workman/ui
+    npm install
 }
 
 build() {
-    ## Compile all items and build the docker container.
+    ## Compile all items necessary.
     cd $CWD/workman/ui
     npm run build
-}
-
-run() {
-    python manage.py runserver
 }
 
 postgres() {
@@ -106,13 +94,6 @@ pgshell() {
     docker exec -it pgserv bash
 }
 
-config() {
-    # Create/Update yaml config file.
-    python $CWD/workman/conf.py
-    python $CWD/services/conf.py
-}
-
-
 bump() {
     ## Bump the version number
     grep version pyproject.toml
@@ -140,8 +121,6 @@ if [[ "$#" -lt 1 ]]; then
     echo -e "Available commands:\n"
 
     echo -e "build              - Run build on server backend and frontend."
-    echo -e "run                - Run the server locally."
-
     echo -e "bump               - Bump the package minor version number."
     echo -e "tag                - Tag current version and push to origin."
 
@@ -149,8 +128,6 @@ if [[ "$#" -lt 1 ]]; then
     echo -e "pgshell            - Login to the running postgres server."
 
     echo -e "install            - Run conda and npm installation."
-    echo -e "config             - Create or update config file."
-    echo -e "update             - Run update."
     echo -e "install_nodejs     - Install nvm, node, npm in HOME."
     echo -e "update_nodejs      - Update node and npm using nvm."
     echo
