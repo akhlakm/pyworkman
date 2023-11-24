@@ -1,6 +1,7 @@
 import os
 import zmq
 import signal
+import random
 import pylogg as log
 
 from workman import conf
@@ -70,18 +71,19 @@ class ServiceManager(object):
             except Exception as err:
                 if self._socket is None or self._stop:
                     return
-                
+
     def _init_encryption(self, key_file = "mgr.key"):
         try:
-            key = open(key_file, "rb").read()
-            log.note("Encryption key loaded")
+            keys = open(key_file, "rb").read().split(b"\n")
+            random.shuffle(keys)
+            log.note("Encryption keys loaded")
         except:
-            key = pr.encryption_key()
-            open(key_file, "wb").write(key)
+            keys = [pr.encryption_key() for i in range(10)]
+            open(key_file, "wb").write(b"\n".join(keys))
             os.chmod(key_file, 0o600)
-            log.note("New encryption key saved")
+            log.note("New encryption keys saved")
 
-        pr.Encryptor = pr.encryptor(key)
+        pr.Encryptor = pr.encryptor(*keys)
 
     def _handle_worker_message(self, msg : pr.Message):
         # log.trace("Received from worker: {}", msg.identity)

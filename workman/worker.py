@@ -1,5 +1,6 @@
 import zmq
 import time
+import random
 from collections import namedtuple
 from workman import protocol as pr
 
@@ -32,8 +33,9 @@ class Worker(object):
         self.close()
 
     def _init_encryption(self, key_file = "mgr.key"):
-        key = open(key_file, "rb").read()
-        pr.Encryptor = pr.encryptor(key)
+        keys = open(key_file, "rb").read().split(b"\n")
+        random.shuffle(keys)
+        pr.Encryptor = pr.encryptor(*keys)
 
     def abort(self) -> bool:
         return self._abort

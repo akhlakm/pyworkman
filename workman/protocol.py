@@ -1,5 +1,5 @@
 import json
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, MultiFernet
 
 # Header bit
 CLIENT    = b'C'
@@ -29,8 +29,8 @@ Encryptor = None
 def encryption_key():
     return Fernet.generate_key()
 
-def encryptor(key : bytes):
-    return Fernet(key)
+def encryptor(*keys : bytes):
+    return MultiFernet([Fernet(key) for key in keys])
 
 class Message(object):
     allowed_sender = (CLIENT, WORKER, MANAGER)

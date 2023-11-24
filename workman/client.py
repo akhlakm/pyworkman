@@ -1,4 +1,5 @@
 import zmq
+import random
 from workman import protocol as pr
 
 class Client(object):
@@ -21,8 +22,9 @@ class Client(object):
         self.close()
 
     def _init_encryption(self, key_file = "mgr.key"):
-        key = open(key_file, "rb").read()
-        pr.Encryptor = pr.encryptor(key)
+        keys = open(key_file, "rb").read().split(b"\n")
+        random.shuffle(keys)
+        pr.Encryptor = pr.encryptor(*keys)
 
     def connect(self, reconnect=False):
         if reconnect:
