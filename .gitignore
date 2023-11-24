@@ -6,7 +6,6 @@
 *.jpg
 *.png
 *.pkl
-*.json
 *.sqlite3
 
 postgres/pg_data
