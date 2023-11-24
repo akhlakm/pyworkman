@@ -21,7 +21,7 @@ class _backend:
 class _workman:
     """ WorkMan configurations """
     mgr_url : str = 'tcp://127.0.0.1:5555'
-
+    log_level : int = 8
 
 
 _c = Config("config.yaml").load_yaml()

@@ -1,7 +1,7 @@
 import json
-from django.http import HttpResponse, HttpRequest
-from util import conf
+from workman import conf
 from workman.client import Client
+from django.http import HttpResponse, HttpRequest
 
 def index(request : HttpRequest):
     timeout = 10 # secs
@@ -11,8 +11,6 @@ def index(request : HttpRequest):
     jobid = post.get('job', 'job1')
     message = post.get('message', 'hello')
     identity = post.get('identity', 'django')
-
-    print("Message:", message)
 
     msg = None
 

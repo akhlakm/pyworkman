@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from util import conf
 from pathlib import Path
+from workman import conf
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,11 +27,8 @@ SECRET_KEY = 'django-insecure-n4qdv+_=g58_k+2s0$3-h&x+xvvpl!+0r2$duxyi791%u3fi8_
 DEBUG = not conf.WebServer.production
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'shindook.net',
+    conf.WebServer.host,
 ]
-
 
 # Application definition
 
@@ -57,7 +54,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = 'workman.backend.urls'
 
 TEMPLATES = [
     {
@@ -75,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+WSGI_APPLICATION = 'workman.backend.wsgi.application'
 
 
 # Database

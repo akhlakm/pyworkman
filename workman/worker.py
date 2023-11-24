@@ -215,7 +215,7 @@ class Worker(object):
 
 if __name__ == '__main__':
     # Run a simple echo service.
-    from util import conf
+    from workman import conf
 
     with Worker(conf.WorkMan.mgr_url, 'echo', 'worker-1') as worker:
         worker.define(

@@ -1,7 +1,7 @@
 """ Raw SQL-based Postgres DB I/O utils """
 
 import psycopg
-from util import conf
+from workman import conf
 from datetime import datetime
 from psycopg_pool import ConnectionPool
 from psycopg.rows import namedtuple_row
@@ -165,6 +165,7 @@ class Table:
 
 
 if __name__ == "__main__":
+
     tabl = Table("test",
         name   = "varchar NOT NULL UNIQUE",
         age    = "int4 NOT NULL"
@@ -172,6 +173,8 @@ if __name__ == "__main__":
 
     tabl.index('age')
     tabl.index('name', 'varchar')
+
+    connect('postgres')
     tabl.create_all(drop_existing=True)
 
     print(tabl.insert_row(name = "John", age = 31))
