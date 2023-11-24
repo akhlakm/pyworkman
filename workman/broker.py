@@ -154,8 +154,8 @@ class Manager(object):
 
 
 def main():
-    from util import conf
-    log.init(log.Level.DEBUG)
+    from workman import conf
+    log.init(conf.WorkMan.log_level)
 
     mgr = Manager(bind_url=conf.WorkMan.mgr_url)
 
