@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-n4qdv+_=g58_k+2s0$3-h&x+xvvpl!+0r2$duxyi791%u3fi8_
 DEBUG = not conf.WebServer.production
 
 ALLOWED_HOSTS = [
-    conf.WebServer.host,
+    s.strip() for s in conf.WebServer.hosts.split(";")
 ]
 
 # Application definition

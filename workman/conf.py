@@ -14,7 +14,7 @@ class _postgres:
 class _backend:
     production : Bool = False
     postgres_db : Bool = False
-    host : str = "localhost"
+    hosts : str = "127.0.0.1; localhost;"
 
 
 @dataclass
