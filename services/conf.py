@@ -18,9 +18,14 @@ class _postgres:
     db_name : str = 'postgres'
 
 
+@dataclass
+class _workers:
+    iwc_url : str = "https://localhost.com"
+
 _c = Config("svc-config.yaml").load_yaml()
 WorkMan     = _c.section(_workman)
 PostGres    = _c.section(_postgres)
+Workers     = _c.section(_workers)
 
 if __name__ == '__main__':
     _c.save_yaml()
