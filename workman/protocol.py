@@ -30,6 +30,7 @@ def encryption_key():
     return Fernet.generate_key()
 
 def encryptor(*keys : bytes):
+    # Return None to disable encryption.
     return MultiFernet([Fernet(key) for key in keys])
 
 class Message(object):
