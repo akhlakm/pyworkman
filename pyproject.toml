@@ -22,8 +22,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Enable WebUI server. Install using `pip install .[server]`
-server = [
+# Enable WebUI server. Install using `pip install .[ui]`
+ui = [
     "django",
     "whitenoise",
 ]
