@@ -156,7 +156,7 @@ class ServiceManager(object):
 
 
 def start():
-    log.init(conf.WorkMan.log_level)
+    log.init(conf.WorkMan.log_level, append_to_logfile=True)
     mgr = ServiceManager(bind_url=conf.WorkMan.mgr_url)
     def _sig_handler(sig, _):
         mgr.shutdown()
