@@ -119,6 +119,7 @@ PostGres = new_config(_pg)
 @dataclass
 class _ws:
     production : _bool = False
+    postgres_db : _bool = False
 
 WebServer = new_config(_ws)
 

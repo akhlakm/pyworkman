@@ -81,17 +81,25 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': conf.PostGres.db_host,
-        'PORT': conf.PostGres.db_port,
-        'NAME': conf.PostGres.db_name,
-        'USER': conf.PostGres.db_user,
-        'PASSWORD': conf.PostGres.db_pswd,
+if conf.WebServer.postgres_db:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'HOST': conf.PostGres.db_host,
+            'PORT': conf.PostGres.db_port,
+            'NAME': conf.PostGres.db_name,
+            'USER': conf.PostGres.db_user,
+            'PASSWORD': conf.PostGres.db_pswd,
+        }
     }
-}
-
+else:
+    # Use sqlite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'django.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
