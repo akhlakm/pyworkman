@@ -1,3 +1,4 @@
+import os
 import zmq
 import signal
 import pylogg as log
@@ -19,6 +20,7 @@ class ServiceManager(object):
         if self._socket:
             raise RuntimeError("Socket already bound")
         
+        self._init_encryption()
         self._socket = self._context.socket(zmq.ROUTER)
         self._socket.rcvtimeo = int(pr.HBEAT_INTERVAL * 1000)
         self._socket.bind(self._bind_url)
@@ -68,6 +70,18 @@ class ServiceManager(object):
             except Exception as err:
                 if self._socket is None or self._stop:
                     return
+                
+    def _init_encryption(self, key_file = "mgr.key"):
+        try:
+            key = open(key_file, "rb").read()
+            log.note("Encryption key loaded")
+        except:
+            key = pr.encryption_key()
+            open(key_file, "wb").write(key)
+            os.chmod(key_file, 0o600)
+            log.note("New encryption key saved")
+
+        pr.Encryptor = pr.encryptor(key)
 
     def _handle_worker_message(self, msg : pr.Message):
         # log.trace("Received from worker: {}", msg.identity)
@@ -157,6 +171,7 @@ class ServiceManager(object):
 
 def start():
     log.init(conf.WorkMan.log_level, logfile_name="mgr.log", append_to_logfile=True)
+
     mgr = ServiceManager(bind_url=conf.WorkMan.mgr_url)
     def _sig_handler(sig, _):
         mgr.shutdown()

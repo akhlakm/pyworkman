@@ -1,6 +1,6 @@
 [project]
 name = "pyworkman"
-version = "0.1.11"
+version = "0.1.12"
 authors = [
     { name="Akhlak Mahmood", email="akhlakm@gatech.edu" },
 ]
@@ -19,6 +19,7 @@ classifiers = [
 dependencies = [
     "pyzmq",
     "pyyaml",
+    "cryptography",
     "pylogg @ git+https://github.com/akhlakm/python-logg.git",
 ]
 

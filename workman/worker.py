@@ -31,6 +31,10 @@ class Worker(object):
     def __exit__(self, *args):
         self.close()
 
+    def _init_encryption(self, key_file = "mgr.key"):
+        key = open(key_file, "rb").read()
+        pr.Encryptor = pr.encryptor(key)
+
     def abort(self) -> bool:
         return self._abort
 
@@ -39,7 +43,8 @@ class Worker(object):
             self.close()
         if self._is_connected():
             return
-        
+
+        self._init_encryption()
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
         self._socket.setsockopt(zmq.IDENTITY, pr.encode(self.identity))

@@ -1,4 +1,5 @@
 import json
+from cryptography.fernet import Fernet
 
 # Header bit
 CLIENT    = b'C'
@@ -23,6 +24,13 @@ HBEAT_TIMEOUT       = 300   # sec
 HBEAT_INTERVAL      = 60    # sec
 WORKER_BUSY_TIMEOUT = 900
 
+Encryptor = None
+
+def encryption_key():
+    return Fernet.generate_key()
+
+def encryptor(key : bytes):
+    return Fernet(key)
 
 class Message(object):
     allowed_sender = (CLIENT, WORKER, MANAGER)
@@ -71,19 +79,19 @@ class Message(object):
             b'',
             self.sender,
             self.action,
-            encode(self.service),
-            encode(self.job),
-            encode(self.message)
+            encrypt(self.service),
+            encrypt(self.job),
+            encrypt(self.message)
         ]
 
-        # print("--  Sending:", body)
+        print("--  Sending:", body)
         return body
 
     @classmethod
     def parse(cls, frames : list[bytes]):
         """ Parse a payload received via socket. """
 
-        # print("-- Received:", frames)
+        print("-- Received:", frames)
         assert len(frames) >= 5, "Invalid message, not enough frames"
 
         if frames[0] != b'':
@@ -94,9 +102,9 @@ class Message(object):
         assert frames.pop(0) == b'', "Invalid message, non-empty first frame"
         sender      = frames[0]
         action      = frames[1]
-        service     = decode(frames[2])
-        job         = decode(frames[3])
-        message     = decode(frames[4])
+        service     = decrypt(frames[2])
+        job         = decrypt(frames[3])
+        message     = decrypt(frames[4])
 
         msg = cls(sender, action, service, job, message)
         msg.set_identity(identity)
@@ -135,7 +143,6 @@ class Message(object):
         return f"Message({str(self.items())})"
 
 
-
 def encode(s : str) -> bytes:
     if type(s) == bytes:
         return s
@@ -145,6 +152,16 @@ def decode(b : bytes) -> str:
     if type(b) == str:
         return b
     return b.decode('utf-8', errors='ignore')
+
+def encrypt(s : str) -> bytes:
+    b = encode(s)
+    if Encryptor: b = Encryptor.encrypt(b)
+    return b
+
+def decrypt(b : bytes) -> str:
+    assert type(b) == bytes
+    if Encryptor: b = Encryptor.decrypt(b)
+    return decode(b)
 
 def serialize(items : dict) -> str:
     class JSONSerializer(json.JSONEncoder):

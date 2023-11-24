@@ -6,6 +6,7 @@
 *.jpg
 *.png
 *.pkl
+*.key
 *.sqlite3
 *.egg-info
 
