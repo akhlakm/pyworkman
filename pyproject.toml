@@ -18,6 +18,7 @@ classifiers = [
 
 dependencies = [
     "pyzmq",
+    "pyyaml",
     "pylogg @ git+https://github.com/akhlakm/python-logg.git",
 ]
 
