@@ -3,7 +3,8 @@ from workman import conf
 
 def usage():
     print("USAGE:")
-    print("\tworkman mgr|ui|update|tunnel")
+    print("\tworkman mgr|ui|update")
+    print("\tworkman tunnel [<localport=5455> <remoteport=5455>]")
     sys.exit(1)
 
 
@@ -31,16 +32,17 @@ def main():
     elif cmd == "tunnel":
         # Create ssh tunnel defined by the config.
         from workman.util import shell
-        if len(sys.argv) < 4:
-            print("USAGE:")
-            print("\tworkman tunnel <localport> <remoteport>")
-            sys.exit(1)
+        if len(sys.argv) == 4:
+            # Usage: workman tunnel <localport> <remoteport>
+            lp = sys.argv[2]
+            rp = sys.argv[3]
+        else:
+            lp = 5455
+            rp = 5455
 
-        lp = sys.argv[2]
-        rp = sys.argv[3]
         tunnel = f"-N -f -L 127.0.0.1:{lp}:127.0.0.1:{rp}"
-
-        shell.execute_command(
-            f"ssh {tunnel} {conf.WorkMan.ssh_conn_string}", capture=False)
+        sshcmd = f"ssh {tunnel} {conf.WorkMan.ssh_conn_string}"
+        input(sshcmd)
+        shell.execute_command(sshcmd, capture=False)
     else:
         usage()
