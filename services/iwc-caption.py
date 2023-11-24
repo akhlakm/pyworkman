@@ -6,8 +6,8 @@ import pickle
 import time
 import random
 import urllib.request
-from datetime import datetime
 
+import pylogg
 from util import conf, db
 from workman.worker import Worker
 
@@ -63,7 +63,7 @@ class SeleniumBrowser:
         self.driver = None
         self.cookie_file = 'cookies.pkl'
         self.visited_file = 'visited.pkl'
-        self.log : Logger = Logger()
+        self.log = pylogg.New(self.__class__.__name__)
 
     def set_logger(self, logger : Logger):
         self.log = logger
@@ -115,8 +115,8 @@ class SeleniumBrowser:
             for cookie in cookies:
                 self.driver.add_cookie(cookie)
         except Exception as err:
-            self.log.E("failed to load cookies from {}", self.cookie_file)
-            self.log.E("Error: {}", err)
+            self.log.error("failed to load cookies from {}", self.cookie_file)
+            self.log.error("Error: {}", err)
             pass
 
     def loadStuff(self):
@@ -130,7 +130,7 @@ class SeleniumBrowser:
     def saveCaptions(self, savepath):
         with open(savepath, 'w') as fp:
             fp.writelines([l + "\n" for l in self.captions])
-        self.log.i("Save OK: {}", savepath)
+        self.log.info("Save OK: {}", savepath)
 
     def saveOnly(self):
         pickle.dump(self.visited, open(self.visited_file, 'wb+'))
@@ -158,7 +158,7 @@ class SeleniumBrowser:
         urllib.request.install_opener(opener)
         urllib.request.urlretrieve(url, savepath)
         self.visited.append(url)
-        self.log.i("Download OK: {}", savepath)
+        self.log.info("Download OK: {}", savepath)
         self.wait('download')
 
     def _clean_text(self, text : str) -> str:
@@ -181,7 +181,7 @@ class SeleniumBrowser:
 
     def addCaption(self, text : str, by : str, title : str, referer : str):
         self.captions.append(text)
-        self.log.i("Caption [{}] => {}", by, text)
+        self.log.info("Caption [{}] => {}", by, text)
         tbl.insert_row(
             caption = text,
             url = self.url,
@@ -202,14 +202,14 @@ class SeleniumBrowser:
                 pass
             self.wait('page load')
         except Exception as err:
-            self.log.E("Page navigation error: {}", err)
+            self.log.error("Page navigation error: {}", err)
 
 
 class IWCBrowser(SeleniumBrowser):
-    def __init__(self, baseurl) -> None:
+    def __init__(self, baseurl, outpath = "services/data") -> None:
         super().__init__()
         self.baseurl = baseurl
-        self.outpath = "services/data/"
+        self.outpath = outpath
         self.cookie_file = os.path.join(self.outpath, self.cookie_file)
         self.visited_file = os.path.join(self.outpath, self.visited_file)
 
@@ -235,7 +235,7 @@ class IWCBrowser(SeleniumBrowser):
             if not src:
                 src = vid.get_attribute('src')
             if not src:
-                self.log.E("Failed to identify video src")
+                self.log.error("Failed to identify video src")
                 continue
 
             if src not in self.visited:
@@ -243,7 +243,7 @@ class IWCBrowser(SeleniumBrowser):
                     savepath = os.path.join(folder, src.split("/")[-1])
                     self.download(src, savepath)
                 except Exception as err:
-                    self.log.E("Download failed: {}", err)
+                    self.log.error("Download failed: {}", err)
 
 
     def parseMediaDesc(self, page):
@@ -256,7 +256,7 @@ class IWCBrowser(SeleniumBrowser):
         ]
 
         if not innerpages:
-            self.log.E("No innerpages found: {}", self.url)
+            self.log.error("No innerpages found: {}", self.url)
             return
 
         referer = self.url
@@ -287,7 +287,7 @@ class IWCBrowser(SeleniumBrowser):
                     self.addCaption(text, accname, title, referer)
                     old = text
             else:
-                self.log.w("No desc found in: {}", self.url)
+                self.log.warn("No desc found in: {}", self.url)
 
         savepath = os.path.join(self.outpath, accname + ".txt")
         self.saveCaptions(savepath)
@@ -315,12 +315,16 @@ if __name__ == '__main__':
     # Run once. -----------------------
     tbl.index('caption', 'text')
     tbl.index('username', 'varchar')
+
+    db.connect(conf.PostGres.db_textgen)
     tbl.create_all()
 
     if len(sys.argv) < 2:
         workerid = 'iwc-worker'
     else:
         workerid = sys.argv[1]
+
+    outpath = "services/data"
 
     with Worker(conf.WorkMan.mgr_url, 'iwc-caption', workerid) as worker:
         worker.define(
@@ -335,15 +339,18 @@ if __name__ == '__main__':
         while True:
             request = worker.receive()
 
-            browser = IWCBrowser(conf.Workers.iwc_url)
+            pylogg.init(
+                output_directory=outpath, logfile_name="iwc-caption.log")
+            pylogg.setCallback(worker.update)
+
+            browser = IWCBrowser(conf.Workers.iwc_url, outpath)
             browser.launch_chrome(headless=request.headless)
             browser.init()
-            browser.log.add_callback(worker.update)
 
             try:
                 browser.gotoPage(request.page, media=request.media)
             except Exception as err:
-                browser.log.Q("Exception raised: {}", err)
+                browser.log.fatal("Exception raised: {}", err)
             finally:
                 worker.done(f"Done: {request.page}")
                 browser.log.callback = None
