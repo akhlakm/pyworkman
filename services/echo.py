@@ -1,6 +1,6 @@
 """ Run a simple echo service. """
 import time
-from . import conf
+import conf
 from workman.worker import Worker
 
 
