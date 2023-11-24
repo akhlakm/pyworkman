@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from workman.util.makeconf import Config, Bool
 
 @dataclass
@@ -28,6 +28,3 @@ _c = Config("config-wm.yaml").load_yaml()
 PostGres    = _c.section(_postgres)
 WebServer   = _c.section(_backend)
 WorkMan     = _c.section(_workman)
-
-if __name__ == '__main__':
-    _c.save_yaml()

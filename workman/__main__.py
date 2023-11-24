@@ -1,5 +1,5 @@
 import sys
-from workman import broker, backend
+from workman import conf, broker, backend
 
 def usage():
     print("USAGE:")
@@ -8,6 +8,8 @@ def usage():
 
 
 def main():
+    conf._c.save_yaml()
+
     if len(sys.argv) <= 1:
         usage()
 
