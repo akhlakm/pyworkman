@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from workman.util.makeconf import Config, Bool
 
 
@@ -22,10 +22,8 @@ class _postgres:
 class _workers:
     iwc_url : str = "https://localhost.com"
 
+
 _c = Config("config-svc.yaml").load_yaml()
 WorkMan     = _c.section(_workman)
 PostGres    = _c.section(_postgres)
 Workers     = _c.section(_workers)
-
-if __name__ == '__main__':
-    _c.save_yaml()

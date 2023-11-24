@@ -1,4 +1,4 @@
-VERSION = 23.1121
+VERSION = 23.1124
 
 import sys
 import os
@@ -7,8 +7,8 @@ import time
 import random
 import urllib.request
 
-import pylogg
 import conf
+import pylogg
 from workman.worker import Worker
 from workman.util import db
 
@@ -32,30 +32,6 @@ tbl = db.Table('Captions',
 )
 
 
-class Logger:
-    def __init__(self, cb : callable = None) -> None:
-        self.callback = cb
-
-    def _notify(self, msg):
-        print("\n", msg, flush=True)
-        if self.callback: self.callback(msg)
-
-    def add_callback(self, cb : callable):
-        self.callback = cb
-
-    def i(self, msg, *arg):
-        self._notify("I :: " + str(msg).format(*arg))
-
-    def w(self, msg, *arg):
-        self._notify("W :: " + str(msg).format(*arg))
-
-    def E(self, msg, *arg):
-        self._notify("E :: " + str(msg).format(*arg))
-
-    def Q(self, msg, *arg):
-        self._notify("QUIT :: " + str(msg).format(*arg))
-
-
 class SeleniumBrowser:
     def __init__(self) -> None:
         self.url = None
@@ -66,7 +42,7 @@ class SeleniumBrowser:
         self.visited_file = 'visited.pkl'
         self.log = pylogg.New(self.__class__.__name__)
 
-    def set_logger(self, logger : Logger):
+    def set_logger(self, logger):
         self.log = logger
 
     def launch_chrome(self, headless = False):
@@ -312,13 +288,50 @@ class IWCBrowser(SeleniumBrowser):
         self.saveOnly()
 
 
-if __name__ == '__main__':
+def start(name = None):
+    name = name if name else 'iwc-worker'
+    with Worker(conf.WorkMan.mgr_url, 'iwc', name) as service:
+        service.define(
+            "IWC",
+            "Crawl IWC pages and download videos and parse captions. "
+            "The captions will be stored in the PGDB specified by the config.yaml file.",
+            page = dict(type=str, help="Page/URL to crawl."),
+            media = dict(default=False, help="Download media or not, captions will be parsed always."),
+            headless = dict(default=False, help="Launch browser in headless mode."),
+        )
+        while True: execute(service)
+
+
+def execute(worker : Worker):
     outpath = "services/data"
 
+    request = worker.receive()
+    pylogg.init(logfile_name=f"{request.job}.log")
+    pylogg.setCallback(worker.update)
+
+    browser = IWCBrowser(conf.Workers.iwc_url, outpath)
+    browser.launch_chrome(headless=request.headless)
+    browser.init()
+
+    try:
+        browser.gotoPage(request.page, media=request.media)
+
+    except Exception as err:
+        pylogg.fatal("Exception raised: {}", err)
+
+    finally:
+        worker.done(f"Done: {request.page}")
+        browser.quit()
+        del browser
+
+
+if __name__ == '__main__':
+    conf._c.save_yaml()
+
     if len(sys.argv) < 2:
-        workerid = 'iwc-worker'
+        name = 'iwc-worker'
     else:
-        workerid = sys.argv[1]
+        name = sys.argv[1]
 
     db.connect(conf.PostGres)
 
@@ -327,33 +340,4 @@ if __name__ == '__main__':
     # tbl.index('username', 'varchar')
     # tbl.create_all()
 
-    with Worker(conf.WorkMan.mgr_url, 'iwc-caption', workerid) as worker:
-        worker.define(
-            "IWC",
-            "Crawl IWC pages and download videos and parse captions. "
-            "The captions will be stored in the PGDB specified in the config.yaml file.",
-            page = dict(type=str, help="Page/URL to crawl."),
-            media = dict(default=False, help="Download media or not, captions will be parsed always."),
-            headless = dict(default=False, help="Launch browser in headless mode."),
-        )
-
-        while True:
-            request = worker.receive()
-
-            pylogg.init(
-                output_directory=outpath, logfile_name="iwc-caption.log")
-            pylogg.setCallback(worker.update)
-
-            browser = IWCBrowser(conf.Workers.iwc_url, outpath)
-            browser.launch_chrome(headless=request.headless)
-            browser.init()
-
-            try:
-                browser.gotoPage(request.page, media=request.media)
-            except Exception as err:
-                browser.log.fatal("Exception raised: {}", err)
-            finally:
-                worker.done(f"Done: {request.page}")
-                browser.log.callback = None
-                browser.quit()
-                del browser
+    start(name)
