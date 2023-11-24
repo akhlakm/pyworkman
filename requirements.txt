@@ -1,6 +1,6 @@
 django
 whitenoise
-bokeh==3.3.1
+bokeh == 3.3.1
 django-ninja
 psycopg[binary]
 psycopg[pool]
@@ -10,4 +10,4 @@ scipy
 gunicorn
 numpy
 pyzmq
-git+https://github.com/akhlakm/python-logg.git
+pylogg @ git+https://github.com/akhlakm/python-logg.git
