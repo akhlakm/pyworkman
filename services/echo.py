@@ -1,6 +1,6 @@
 # Run a simple echo service.
 import time
-from util import conf
+import conf
 from workman.worker import Worker
 
 with Worker(conf.WorkMan.mgr_url, 'echo', 'echo-worker') as worker:
