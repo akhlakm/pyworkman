@@ -22,7 +22,7 @@ class _postgres:
 class _workers:
     iwc_url : str = "https://localhost.com"
 
-_c = Config("svc-config.yaml").load_yaml()
+_c = Config("config-svc.yaml").load_yaml()
 WorkMan     = _c.section(_workman)
 PostGres    = _c.section(_postgres)
 Workers     = _c.section(_workers)

@@ -24,7 +24,7 @@ class _workman:
     log_level : int = 8
 
 
-_c = Config("config.yaml").load_yaml()
+_c = Config("config-wm.yaml").load_yaml()
 PostGres    = _c.section(_postgres)
 WebServer   = _c.section(_backend)
 WorkMan     = _c.section(_workman)
