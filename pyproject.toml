@@ -22,23 +22,20 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Enable running server.
-# Install using `pip install .[server]`
+# Enable WebUI server. Install using `pip install .[server]`
 server = [
     "django",
     "whitenoise",
 ]
-# Enable Postgres database.
-# Install using `pip install .[db]`
+# Enable Postgres database. Install using `pip install .[db]`
 db = [
     "psycopg[binary]",
     "psycopg[pool]",
 ]
 
-
 [project.urls]
-"Homepage" = "https://github.com/akhlakm/workman-service"
-"Bug Tracker" = "https://github.com/akhlakm/workman-service/issues"
+"Homepage" = "https://github.com/akhlakm/pyworkman"
+"Bug Tracker" = "https://github.com/akhlakm/pyworkman/issues"
 
 [build-system]
 requires = ["setuptools>=61.0"]
