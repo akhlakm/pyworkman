@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from workman.util.makeconf import Config, Bool
 
+
 @dataclass
 class _postgres:
     db_host : str = 'localhost'
@@ -20,8 +21,9 @@ class _backend:
 @dataclass
 class _workman:
     """ WorkMan configurations """
-    mgr_url : str = 'tcp://127.0.0.1:5555'
     log_level : int = 8
+    mgr_url : str = 'tcp://127.0.0.1:5455'
+    ssh_conn_string : str = "user@host.com:22"
 
 
 _c = Config("config-wm.yaml").load_yaml()
