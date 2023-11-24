@@ -9,9 +9,8 @@ def usage():
 
 
 def main():
-    conf._c.save_yaml()
-
     if len(sys.argv) <= 1:
+        conf._c.save_yaml()
         usage()
 
     cmd = sys.argv[1]
