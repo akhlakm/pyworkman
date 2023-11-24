@@ -326,8 +326,6 @@ def execute(worker : Worker):
 
 
 if __name__ == '__main__':
-    conf._c.save_yaml()
-
     if len(sys.argv) < 2:
         name = 'iwc-worker'
     else:

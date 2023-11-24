@@ -156,9 +156,6 @@ class ServiceManager(object):
 
 
 def start():
-    # Create/update the config file.
-    conf._c.save_yaml()
-
     log.init(conf.WorkMan.log_level, logfile_name="mgr.log", append_to_logfile=True)
     mgr = ServiceManager(bind_url=conf.WorkMan.mgr_url)
     def _sig_handler(sig, _):
