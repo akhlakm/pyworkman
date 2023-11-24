@@ -62,7 +62,7 @@ update() {
 
 build() {
     ## Compile all items and build the docker container.
-    cd $CWD/ui
+    cd $CWD/workman/ui
     npm run build
 }
 
