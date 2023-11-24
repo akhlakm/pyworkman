@@ -1,6 +1,6 @@
 [project]
 name = "pyworkman"
-version = "0.1.14"
+version = "0.1.1"
 authors = [
     { name="Akhlak Mahmood", email="akhlakm@gatech.edu" },
 ]
@@ -17,11 +17,11 @@ classifiers = [
 ]
 
 dependencies = [
+    "pyzmq",
     "django",
     "whitenoise",
-    "psycopg[binary]",
     "psycopg[pool]",
-    "pyzmq",
+    "psycopg[binary]",
     "pylogg @ git+https://github.com/akhlakm/python-logg.git",
 ]
 
