@@ -166,7 +166,9 @@ class Worker(object):
         self.done()
 
     def send_hbeat(self):
-        if (time.time() - self._last_sent) > self._hb_interval:
+        ds = time.time() - self._last_sent
+        dr = time.time() - self._last_received
+        if ds > self._hb_interval:
             self._send(pr.HBEAT)
 
     def receive(self) -> namedtuple:
@@ -199,6 +201,7 @@ class Worker(object):
                 if (time.time() - self._last_received) > self._hb_timeout:
                     print("Mgr might be disconnected. Reconnecting.")
                     self.connect(reconnect=True)
+                    self._send_ready()
 
                 continue
 

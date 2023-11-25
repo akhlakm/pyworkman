@@ -91,7 +91,9 @@ class ServiceWorker(object):
         return (time.time() - self._last_received) < self._hb_timeout
 
     def send_hbeat(self):
-        if (time.time() - self._last_sent) > self._hb_interval:
+        ds = time.time() - self._last_sent
+        dr = time.time() - self._last_received
+        if ds > self._hb_interval:
             self._send(pr.HBEAT)
 
     def send_abort(self, jobid : bytes):
@@ -263,8 +265,8 @@ class Service(object):
     def worker_update(self, msg : pr.Message):
         worker = self.workers.get(msg.identity)
         if not worker:
-            self.log.error("Update received from unknown worker: {}",
-                           pr.decode(msg.identity))
+            self.log.error(
+                "Update received from unknown worker: {}", msg.identity)
         else:
             job = self.jobs.get(msg.job)
             assert job, "Update received for unknown job"
@@ -276,8 +278,8 @@ class Service(object):
     def worker_done(self, msg : pr.Message):
         worker = self.workers.get(msg.identity)
         if not worker:
-            self.log.error("Done received from unknown worker: {}",
-                           pr.decode(msg.identity))
+            self.log.error(
+                "Done received from unknown worker: {}", msg.identity)
         else:
             self.log.note("Worker {} job done: {}", msg.identity, msg.job)
             job = self.jobs.get(msg.job)
@@ -290,8 +292,8 @@ class Service(object):
     def worker_gone(self, msg : pr.Message):
         worker = self.workers.get(msg.identity)
         if not worker:
-            self.log.error("Gone received from unknown worker: {}",
-                           pr.decode(msg.identity))
+            self.log.error(
+                "Gone received from unknown worker: {}", msg.identity)
         else:
             self.log.warn("Worker {} gone", msg.identity)
             if worker.jobid:
@@ -304,8 +306,8 @@ class Service(object):
     def worker_reply(self, msg : pr.Message):
         worker = self.workers.get(msg.identity)
         if not worker:
-            self.log.error("Reply received from unknown worker: {}",
-                           pr.decode(msg.identity))
+            self.log.error(
+                "Reply received from unknown worker: {}", msg.identity)
         else:
             self.log.trace("Worker {} job result: {}", msg.identity, msg.job)
             job = self.jobs.get(msg.job)

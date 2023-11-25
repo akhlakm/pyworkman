@@ -31,6 +31,7 @@ class ServiceManager(object):
 
         try:
             while not self._stop:
+                msg = None
                 try:
                     msg = self.receive()
                     if msg:
@@ -41,7 +42,7 @@ class ServiceManager(object):
                         else:
                             log.warn("Unknown identity: {}", msg.identity)
                 except Exception as err:
-                    log.error("Message handling failed: {}", err)
+                    log.error("Handling failed: {}, (Message: {})", err, msg)
 
         finally:
             self.close()
@@ -73,7 +74,9 @@ class ServiceManager(object):
             except zmq.error.Again:
                 pass
             except Exception as err:
-                log.warn("Message: {} {}", err.__class__, err)
+                if self._stop or self._socket is None:
+                    return
+                log.warn("{} {} from {}", err.__class__, err, frames[0])
 
             if self._socket is None or self._stop:
                 return
@@ -105,7 +108,7 @@ class ServiceManager(object):
             svc.worker_ready(msg)
 
         elif msg.action == pr.HBEAT:
-            print(".", end="")
+            print(".", end="", flush=True)
             svc.worker_beat(msg)
 
         elif msg.action == pr.UPDATE:
