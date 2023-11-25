@@ -59,18 +59,18 @@ class Message(object):
 
     def frames(self) -> list[bytes]:
         """ Create a payload for sending via socket. """
-        body = []
         if self.identity:
-            # identity needed for the router 
-            body += [self.identity]
+            # identity needed for the router
+            body = [self.identity, b'', self.action, encrypt(self.service)]
+        else:
+            body = [b'', self.action, encrypt(self.service)]
 
-        body += [
-            b'',
-            self.action,
-            encrypt(self.service),
-            encrypt(self.job),
-            encrypt(self.message)
-        ]
+        if self.action != HBEAT:
+            if self.message:
+                body.append(encrypt(self.job))
+                body.append(encrypt(self.message))
+            elif self.job:
+                body.append(encrypt(self.job))
 
         if conf.WorkMan.trace_packets:
             print("--  Sending:", body)
@@ -83,7 +83,7 @@ class Message(object):
         if conf.WorkMan.trace_packets:
             print("-- Received:", frames)
 
-        assert len(frames) >= 5, "Invalid message, not enough frames"
+        assert len(frames) >= 2, "Invalid message, not enough frames"
 
         if frames[0] != b'':
             identity = frames.pop(0)
@@ -92,9 +92,9 @@ class Message(object):
 
         assert frames.pop(0) == b'', "Invalid message, non-empty first frame"
         action      = frames[0]
-        service     = decrypt(frames[1])
-        job         = decrypt(frames[2])
-        message     = decrypt(frames[3])
+        service     = decrypt(frames[1]) if len(frames) > 1 else ""
+        job         = decrypt(frames[2]) if len(frames) > 2 else ""
+        message     = decrypt(frames[3]) if len(frames) > 3 else ""
 
         msg = cls(action, service, job, message)
         msg.set_identity(identity)
