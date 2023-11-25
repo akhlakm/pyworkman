@@ -21,6 +21,7 @@ with Worker(conf.mgr_url, conf.svc_name, conf.key_file) as worker:
 
     while True:
         payload = worker.receive()
+        print("Running job:", payload.job)
         try:
             for output in watch_stdout(payload.command):
                 worker.update(output)
