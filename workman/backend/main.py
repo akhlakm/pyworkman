@@ -8,13 +8,12 @@ def index(request : HttpRequest):
     post = json.loads(request.body)
     action = post.get('action', 'submit')
     service = post.get('service', 'echo')
-    jobid = post.get('job', 'job1')
+    jobid = post.get('job', 'job-1')
     message = post.get('message', 'hello')
-    identity = post.get('identity', 'django')
 
     msg = None
 
-    with Client(conf.WorkMan.mgr_url, service, identity) as client:
+    with Client(conf.WorkMan.mgr_url, service) as client:
         if action == 'submit':
             client.request(jobid, message)
             msg = client.reply(timeout)
@@ -30,10 +29,11 @@ def index(request : HttpRequest):
         elif action == 'cancel':
             client.abort(jobid)
         else:
-            return HttpResponse("action must be one of submit, status, cancel")
+            response = json.dumps({"error": "Invalid action."})
+            return HttpResponse(response)
 
     if msg:
         response = msg.message
     else:
-        response = "Failed to fetch response."
+        response = json.dumps({"error": "Failed to fetch response."})
     return HttpResponse(response)
