@@ -41,7 +41,8 @@ def main():
 
         tunnel = f"-N -f -L 127.0.0.1:{lp}:127.0.0.1:{rp}"
         sshcmd = f"ssh {tunnel} {conf.WorkMan.ssh_conn_string}"
-        input(sshcmd)
+        print("Running SSH tunnel command:\n", sshcmd)
+        input("Press enter to continue ...")
         shell.execute_command(sshcmd, capture=False)
     else:
         usage()
