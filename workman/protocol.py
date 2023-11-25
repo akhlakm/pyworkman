@@ -61,16 +61,19 @@ class Message(object):
         """ Create a payload for sending via socket. """
         if self.identity:
             # identity needed for the router
-            body = [self.identity, b'', self.action, encrypt(self.service)]
+            body = [self.identity, b'', encrypt(self.service)]
         else:
-            body = [b'', self.action, encrypt(self.service)]
+            body = [b'', encrypt(self.service)]
 
-        if self.action != HBEAT:
-            if self.message:
-                body.append(encrypt(self.job))
-                body.append(encrypt(self.message))
-            elif self.job:
-                body.append(encrypt(self.job))
+        if self.message:
+            body.append(self.action)
+            body.append(encrypt(self.job))
+            body.append(encrypt(self.message))
+        elif self.job:
+            body.append(self.action)
+            body.append(encrypt(self.job))
+        elif self.action != HBEAT:
+            body.append(self.action)
 
         if conf.WorkMan.trace_packets:
             print("--  Sending:", body)
@@ -91,8 +94,8 @@ class Message(object):
             identity = None
 
         assert frames.pop(0) == b'', "Invalid message, non-empty first frame"
-        action      = frames[0]
-        service     = decrypt(frames[1]) if len(frames) > 1 else ""
+        service     = decrypt(frames[0])
+        action      = frames[1] if len(frames) > 1 else HBEAT
         job         = decrypt(frames[2]) if len(frames) > 2 else ""
         message     = decrypt(frames[3]) if len(frames) > 3 else ""
 
