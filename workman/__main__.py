@@ -24,9 +24,10 @@ def main():
         backend.start()
 
     elif cmd == "update":
-        # Update the python packages.
+        # Reinstall pyworkman.
         from workman.util import shell
-        shell.execute_command("pip install -U pyworkman", capture=False)
+        repo = "git+ssh://git@github.com/akhlakm/pyworkman.git"
+        shell.execute_command(f"pip install -U {repo}", capture=False)
 
     elif cmd == "copy":
         # Copy an example to current directory.
