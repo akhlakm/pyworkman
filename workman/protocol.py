@@ -65,12 +65,12 @@ class Message(object):
 
         self.sender : bytes = sender
         self.action : bytes = action
-        self.identity : str = None
+        self.identity : bytes = None
         self.service : str = service
         self.job : str = job
         self.message : str = message
 
-    def set_identity(self, iden : str):
+    def set_identity(self, iden : bytes):
         self.identity = iden
 
     def frames(self) -> list[bytes]:
@@ -78,7 +78,7 @@ class Message(object):
         body = []
         if self.identity:
             # identity needed for the router 
-            body += [encrypt(self.identity)]
+            body += [self.identity]
 
         body += [
             b'',
@@ -103,7 +103,7 @@ class Message(object):
         assert len(frames) >= 5, "Invalid message, not enough frames"
 
         if frames[0] != b'':
-            identity = decrypt(frames.pop(0))
+            identity = frames.pop(0)
         else:
             identity = None
 

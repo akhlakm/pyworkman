@@ -8,7 +8,7 @@ from workman import protocol as pr
 class Worker(object):
     def __init__(self, manager_url, service, workerid, context=None):
         self.service = service
-        self.identity = f"{service}-{workerid}"
+        self.identity = workerid
         self.manager_url = manager_url
         self.definition = None
         self._zmq_context = context if context else zmq.Context.instance()
@@ -50,7 +50,7 @@ class Worker(object):
         self._init_encryption()
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
-        self._socket.setsockopt(zmq.IDENTITY, pr.encrypt(self.identity))
+        self._socket.setsockopt(zmq.IDENTITY, pr.encode(self.identity))
         self._socket.connect(self.manager_url)
         self._stop = False
 
