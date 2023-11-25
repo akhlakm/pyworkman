@@ -2,7 +2,7 @@ import json
 from workman import conf
 from cryptography.fernet import Fernet, MultiFernet
 
-# Header bit
+# Sender bit
 CLIENT    = b'C'
 WORKER    = b'W'
 MANAGER   = b'M'

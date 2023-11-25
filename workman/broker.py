@@ -69,6 +69,7 @@ class ServiceManager(object):
                 frames = self._socket.recv_multipart()
                 return pr.Message.parse(frames)
             except Exception as err:
+                print(err)
                 if self._socket is None or self._stop:
                     return
 
