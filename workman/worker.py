@@ -68,7 +68,7 @@ class Worker(object):
         self._socket = None
 
     def _send(self, action, job = None, message = None):
-        msg = pr.Message(pr.WORKER, action, self.service, job, message)
+        msg = pr.Message(action, self.service, job, message)
         self._last_sent = time.time()
         self._socket.send_multipart(msg.frames())
 

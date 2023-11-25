@@ -49,13 +49,13 @@ class Client(object):
         self._expect_reply = False
 
     def list_items(self, service = None):
-        msg = pr.Message(pr.CLIENT, pr.LIST, service)
+        msg = pr.Message(pr.LIST, service)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
     def definition(self, timeout_sec : int = None) -> str:
         """ Ask for definition, and wait for the reply. """
-        msg = pr.Message(pr.CLIENT, pr.READY, self.service)
+        msg = pr.Message(pr.READY, self.service)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
         rep = self.reply(timeout_sec)
@@ -63,17 +63,17 @@ class Client(object):
         return rep
 
     def request(self, job, message = None):
-        msg = pr.Message(pr.CLIENT, pr.REQUEST, self.service, job, message)
+        msg = pr.Message(pr.REQUEST, self.service, job, message)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
     def status(self, job):
-        msg = pr.Message(pr.CLIENT, pr.STATUS, self.service, job)
+        msg = pr.Message(pr.STATUS, self.service, job)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = True
 
     def abort(self, job):
-        msg = pr.Message(pr.CLIENT, pr.ABORT, self.service, job)
+        msg = pr.Message(pr.ABORT, self.service, job)
         self._socket.send_multipart(msg.frames())
         self._expect_reply = False
 
