@@ -1,11 +1,21 @@
 import os
-import conf
+from dataclasses import dataclass
 from workman.worker import Worker
-from workman.util import shell
+from workman.util.shell import watch_stdout
+from workman.util.makeconf import Config
+
+@dataclass
+class _shell:
+    mgr_url : str = "tcp://127.0.0.1:5455"
+    key_file : str = "mgr.key"
+
+c = Config("config-svc.yaml")
+conf = c.section(_shell)
+c.save_yaml()
 
 svc_name = f"{os.uname().nodename}-Shell"
 
-with Worker(conf.WorkMan.mgr_url, svc_name) as worker:
+with Worker(conf.mgr_url, svc_name, conf.key_file) as worker:
     worker.define("Shell executor",
         "Directly execute a terminal command. "
         "WARN! Be careful using this service!",
@@ -14,20 +24,10 @@ with Worker(conf.WorkMan.mgr_url, svc_name) as worker:
 
     while True:
         payload = worker.receive()
-        print("Executing:", payload.job, "Input:", payload.command)
-
         try:
-            buffer = ""
-            for output in shell.watch_stdout(payload.command):
-                outstr = output.decode()
-                buffer += outstr
+            for output in watch_stdout(payload.command):
+                worker.update(output)
 
-                if len(buffer) >= 1000:
-                    worker.update(buffer)
-                    buffer = ""
-
-            if len(buffer):
-                worker.update(buffer)
             worker.done("Command executed")
 
         except Exception as err:
