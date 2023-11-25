@@ -68,10 +68,13 @@ class ServiceManager(object):
             try:
                 frames = self._socket.recv_multipart()
                 return pr.Message.parse(frames)
+            except zmq.error.Again:
+                pass
             except Exception as err:
-                print(err)
-                if self._socket is None or self._stop:
-                    return
+                log.warn("Message: {} {}", err.__class__, err)
+
+            if self._socket is None or self._stop:
+                return
 
     def _init_encryption(self, key_file = "mgr.key"):
         if not conf.WorkMan.enable_encryption:
@@ -100,6 +103,7 @@ class ServiceManager(object):
             svc.worker_ready(msg)
 
         elif msg.action == pr.HBEAT:
+            print(".", end="")
             svc.worker_beat(msg)
 
         elif msg.action == pr.UPDATE:
@@ -113,6 +117,8 @@ class ServiceManager(object):
 
         elif msg.action == pr.REPLY:
             svc.worker_reply(msg)
+        else:
+            log.warn("Unknown action from worker: {}", msg)
 
     def _reply_client(self, msg, response : str):
         reply = pr.Message(pr.MANAGER, pr.REPLY, msg.service, msg.job, response)
