@@ -1,6 +1,6 @@
 [project]
 name = "pyworkman"
-version = "0.1.18"
+version = "0.1.19"
 authors = [
     { name="Akhlak Mahmood", email="akhlakm@gatech.edu" },
 ]
@@ -52,5 +52,6 @@ workman = "workman.__main__:main"
 [tool.setuptools.package-data]
 'workman' = [
     '*.py', 'util/**.py', 'backend/**.py',
-    'ui/build/*', 'ui/public/*', 'ui/templates/*'
+    'ui/build/*', 'ui/public/*', 'ui/templates/*',
+    'examples/**.py',
 ]
