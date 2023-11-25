@@ -6,12 +6,12 @@ from workman import protocol as pr
 
 
 class Worker(object):
-    def __init__(self, manager_url, service, workerid, context=None):
+    def __init__(self, manager_url, service, context=None):
         self.service = service
-        self.identity = workerid
         self.manager_url = manager_url
         self.definition = None
         self._zmq_context = context if context else zmq.Context.instance()
+        self.identity : bytes = pr.createId(pr.WORKER)
         self._socket : zmq.Socket = None
         self._poller : zmq.Poller = None
         self._abort = False
@@ -33,7 +33,7 @@ class Worker(object):
         self.close()
 
     def _init_encryption(self, key_file = "mgr.key"):
-        keys = open(key_file).read().encode("utf-8").split(b"\n")
+        keys = open(key_file).read().strip().encode("utf-8").split(b"\n")
         random.shuffle(keys)
         pr.Encryptor = pr.encryptor(*keys)
 
@@ -50,13 +50,12 @@ class Worker(object):
         self._init_encryption()
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
-        self._socket.setsockopt(zmq.IDENTITY, pr.encode(self.identity))
+        self._socket.setsockopt(zmq.IDENTITY, self.identity)
         self._socket.connect(self.manager_url)
         self._stop = False
 
         self._poller = zmq.Poller()
         self._poller.register(self._socket, zmq.POLLIN)
-        print("Connected:", self._is_connected())
 
     def close(self):
         if not self._is_connected():
@@ -68,10 +67,8 @@ class Worker(object):
         self._socket.close()
         self._socket = None
 
-    def _send(self, action, job = None, message = None, identity = None):
+    def _send(self, action, job = None, message = None):
         msg = pr.Message(pr.WORKER, action, self.service, job, message)
-        if identity:
-            msg.set_identity(identity)
         self._last_sent = time.time()
         self._socket.send_multipart(msg.frames())
 
@@ -118,7 +115,7 @@ class Worker(object):
             "name": svcName, "desc": svcDesc, "fields": fields
         }
         self._send_ready()
-        print(f"Worker '{self.identity}' ready for '{self.service}' jobs.")
+        print(f"{pr.decode(self.identity)} ready for '{self.service}' jobs.")
 
 
     def _parse_payload(self, msg : pr.Message) -> namedtuple:
@@ -228,7 +225,7 @@ if __name__ == '__main__':
     # Run a simple echo service.
     from workman import conf
 
-    with Worker(conf.WorkMan.mgr_url, 'echo', 'worker-1') as worker:
+    with Worker(conf.WorkMan.mgr_url, 'echo') as worker:
         worker.define(
             "Echo Service", "Echo the sent message",
             message = dict(help="Required message to send", type=str),

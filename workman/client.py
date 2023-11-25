@@ -3,11 +3,14 @@ import random
 from workman import protocol as pr
 
 class Client(object):
-    def __init__(self, manager_url, service, clientid = None, zmq_context=None):
+    # Clients will be called often.
+    KEYS = open("mgr.key").read().strip().encode("utf-8").split(b"\n")
+
+    def __init__(self, manager_url, service, zmq_context=None):
         self.manager_url = manager_url
-        self.identity = clientid
         self.service = service
         self._socket : zmq.Socket = None
+        self.identity : bytes = pr.createId(pr.CLIENT)
         self._zmq_context = zmq_context if zmq_context else zmq.Context.instance()
         self._expect_reply = False
 
@@ -21,11 +24,6 @@ class Client(object):
     def __exit__(self, *args):
         self.close()
 
-    def _init_encryption(self, key_file = "mgr.key"):
-        keys = open(key_file).read().encode("utf-8").split(b"\n")
-        random.shuffle(keys)
-        pr.Encryptor = pr.encryptor(*keys)
-
     def connect(self, reconnect=False):
         if reconnect:
             self.close()
@@ -33,11 +31,11 @@ class Client(object):
         if self._is_connected():
             return
 
-        self._init_encryption()
+        random.shuffle(self.KEYS)
+        pr.Encryptor = pr.encryptor(*self.KEYS)
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
-        if self.identity:
-            self._socket.setsockopt(zmq.IDENTITY, pr.encode(self.identity))
+        self._socket.setsockopt(zmq.IDENTITY, self.identity)
         self._socket.connect(self.manager_url)
         self._expect_reply = False
 
@@ -105,7 +103,7 @@ class Client(object):
 
 if __name__ == '__main__':
     from workman import conf
-    with Client(conf.WorkMan.mgr_url, 'echo', clientid='client-1') as client:
+    with Client(conf.WorkMan.mgr_url, 'echo') as client:
         defn = client.definition(10)
         print("Service Definition:", defn)
         if defn:

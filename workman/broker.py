@@ -9,11 +9,13 @@ from workman import protocol as pr
 from workman.service import Service
 
 class ServiceManager(object):
-    def __init__(self, bind_url, zmq_context = None) -> None:
+    def __init__(self, bind_url, encrypt : bool = True,
+                 zmq_context = None) -> None:
         self._bind_url = bind_url
         self._context = zmq_context if zmq_context \
             else zmq.Context.instance()
         self._stop = False
+        self._encrypt = encrypt
         self._socket : zmq.Socket = None
         self._services  : dict[bytes, Service] = {}
 
@@ -32,12 +34,12 @@ class ServiceManager(object):
                 try:
                     msg = self.receive()
                     if msg:
-                        if msg.sender == pr.CLIENT:
+                        if msg.identity[0] == pr.CLIENT:
                             self._handle_client_message(msg)
-                        elif msg.sender == pr.WORKER:
+                        elif msg.identity[0] == pr.WORKER:
                             self._handle_worker_message(msg)
                         else:
-                            log.warn("Unknown sender: {}", msg.sender)
+                            log.warn("Unknown identity: {}", msg.identity)
                 except Exception as err:
                     log.error("Message handling failed: {}", err)
 
@@ -77,7 +79,7 @@ class ServiceManager(object):
                 return
 
     def _init_encryption(self, key_file = "mgr.key"):
-        if not conf.WorkMan.enable_encryption:
+        if not self._encrypt:
             log.warn("Encryption not enabled.")
             return
         try:
@@ -182,9 +184,12 @@ class ServiceManager(object):
 
 
 def start():
-    log.init(conf.WorkMan.log_level, logfile_name="mgr.log", append_to_logfile=True)
+    log.init(conf.WorkMan.log_level, logfile_name="mgr.log",
+             append_to_logfile=True)
 
-    mgr = ServiceManager(bind_url=conf.WorkMan.mgr_url)
+    mgr = ServiceManager(bind_url=conf.WorkMan.mgr_url,
+                         encrypt=conf.WorkMan.enable_encryption)
+
     def _sig_handler(sig, _):
         mgr.shutdown()
 

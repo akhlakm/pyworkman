@@ -1,11 +1,11 @@
 import json
+import time
 from workman import conf
 from cryptography.fernet import Fernet, MultiFernet
 
 # Sender bit
 CLIENT    = b'C'
 WORKER    = b'W'
-MANAGER   = b'M'
 
 # Action bit
 ABORT   = b'A'
@@ -36,16 +36,14 @@ def encryptor(*keys : bytes):
     else:
         # Return None to disable encryption.
         return None
+    
+def createId(sender) -> bytes:
+    assert sender in [CLIENT, WORKER]
+    s = str(time.time()).split(".")[1]
+    return sender + encode(s)
 
 class Message(object):
-    allowed_sender = (CLIENT, WORKER, MANAGER)
-    allowed_action = {
-        CLIENT: (REQUEST, STATUS, ABORT, LIST, READY),
-        MANAGER: (REPLY, HBEAT, REQUEST, ABORT, READY),
-        WORKER: (READY, HBEAT, UPDATE, DONE, GONE, REPLY),
-    }
-
-    def __init__(self, sender, action, service, job : str = None,
+    def __init__(self, action, service, job : str = None,
                  message : str = None):
         if message is None:
             message = ""
@@ -54,18 +52,10 @@ class Message(object):
 
         assert type(message) == str, "Message must be str"
 
-        sender = encode(sender)
         action = encode(action)
 
-        if sender not in self.allowed_sender:
-            raise ValueError("Invalid sender", sender)
-
-        if action not in self.allowed_action[sender]:
-            raise ValueError("Invalid action", action)
-
-        self.sender : bytes = sender
-        self.action : bytes = action
         self.identity : bytes = None
+        self.action : bytes = action
         self.service : str = service
         self.job : str = job
         self.message : str = message
@@ -82,7 +72,6 @@ class Message(object):
 
         body += [
             b'',
-            self.sender,
             self.action,
             encrypt(self.service),
             encrypt(self.job),
@@ -108,13 +97,12 @@ class Message(object):
             identity = None
 
         assert frames.pop(0) == b'', "Invalid message, non-empty first frame"
-        sender      = frames[0]
-        action      = frames[1]
-        service     = decrypt(frames[2])
-        job         = decrypt(frames[3])
-        message     = decrypt(frames[4])
+        action      = frames[0]
+        service     = decrypt(frames[1])
+        job         = decrypt(frames[2])
+        message     = decrypt(frames[3])
 
-        msg = cls(sender, action, service, job, message)
+        msg = cls(action, service, job, message)
         msg.set_identity(identity)
         return msg
 
@@ -139,7 +127,7 @@ class Message(object):
             if v == self.action:
                 action = k
         items = {
-            'sender': decode(self.sender),
+            'identity': decode(self.identity),
             'action': action,
             'service': self.service,
             'job': self.job,

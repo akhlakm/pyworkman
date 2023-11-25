@@ -61,8 +61,8 @@ class ServiceJob(object):
 class ServiceWorker(object):
     def __init__(self, workerid, service, socket) -> None:
         self.idle = True
-        self.id = workerid
         self.service = service
+        self.id : bytes = workerid
         self.jobid : bytes = None
         self.jobtask : bytes = None
         self.definition : str = None
@@ -76,7 +76,7 @@ class ServiceWorker(object):
         return str(self.id)
 
     def _send(self, action, jobid = None, message = None):
-        msg = pr.Message(pr.MANAGER, action, self.service, jobid, message)
+        msg = pr.Message(action, self.service, jobid, message)
         msg.set_identity(self.id)
         self._last_sent = time.time()
         self._socket.send_multipart(msg.frames())
@@ -177,7 +177,7 @@ class Service(object):
             worker = workerlist.pop(0)
 
         if job and worker:
-            self.log.info("Executing job {} on worker {}", job.id, worker.id)
+            self.log.info("Executing job {} on {}", job.id, worker.id)
             job.set_start(worker.id)
             worker.execute(job.id, job.task)
 
@@ -192,17 +192,18 @@ class Service(object):
         if msg.job not in self.jobs:
             job = ServiceJob(msg.job, msg.service, msg.message)
             self.jobs[job.id] = job
-            self.log.info("Client {} new job {}", msg.identity, job.id)
+            self.log.info("{} submitted new job {}", msg.identity, job.id)
             r = job.status()
         else:
             job = self.jobs[msg.job]
             r = job.status()
             if job.abandoned:
                 job.requeue()
-                self.log.info("Client {} requeue job {}", msg.identity, job.id)
+                self.log.info("{} requeued job {}", msg.identity, job.id)
             else:
                 r['error'] = 'Job exists'
-                self.log.warn("Client {} duplicate job {}", msg.identity, job.id)
+                self.log.warn("{} requested duplicate job {}", msg.identity,
+                              job.id)
     
         return pr.serialize(r)
 
@@ -211,14 +212,14 @@ class Service(object):
         """ Return job status """
         if msg.job not in self.jobs:
             r = {'error': 'Job not found'}
-            self.log.error("Invalid job query: {}", msg.job)
+            self.log.error("{} queried unknown job {}", msg.identity, msg.job)
         else:
             r = self.jobs[msg.job].status()
         return pr.serialize(r)
 
 
     def client_cancel_job(self, msg : pr.Message):
-        self.log.warn("Client {} cancel job {}", msg.identity, msg.job)
+        self.log.warn("{} cancelled job {}", msg.identity, msg.job)
         job = self.jobs.get(msg.job)
         if job:
             if job.running:
@@ -239,7 +240,8 @@ class Service(object):
         if msg.identity not in self.workers:
             worker = ServiceWorker(msg.identity, msg.service, self._socket)
             self.workers[worker.id] = worker
-            self.log.info("Worker {} register for: {}", msg.identity, msg.service)
+            self.log.info("{} registered for '{}' jobs", msg.identity,
+                          msg.service)
         return self.workers[msg.identity]
 
 
@@ -266,7 +268,8 @@ class Service(object):
         else:
             job = self.jobs.get(msg.job)
             assert job, "Update received for unknown job"
-            assert worker.jobid == job.id, "Update received from unassigned worker"
+            assert worker.jobid == job.id, \
+                "Update received from unassigned worker"
             job.set_update(msg.message)
 
 
@@ -307,6 +310,7 @@ class Service(object):
             self.log.trace("Worker {} job result: {}", msg.identity, msg.job)
             job = self.jobs.get(msg.job)
             assert job, "Reply received for unknown job"
-            assert worker.jobid == job.id, "Reply received from unassigned worker"
+            assert worker.jobid == job.id, \
+                "Reply received from unassigned worker"
             job.set_result(msg.message)
             worker.new_hbeat()

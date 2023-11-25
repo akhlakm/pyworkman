@@ -3,11 +3,10 @@ import time
 import conf
 from workman.worker import Worker
 
-def start(name = None):
+def start():
     """ Start the worker listening for job requests.
     """
-    name = name if name else 'echo-worker'
-    with Worker(conf.WorkMan.mgr_url, 'echo', name) as service:
+    with Worker(conf.WorkMan.mgr_url, 'echo') as service:
         # define the input fields for a job.
         service.define("Echo Test",
             "Echo the sent message",

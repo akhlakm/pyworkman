@@ -288,9 +288,8 @@ class IWCBrowser(SeleniumBrowser):
         self.saveOnly()
 
 
-def start(name = None):
-    name = name if name else 'iwc-worker'
-    with Worker(conf.WorkMan.mgr_url, 'iwc', name) as service:
+def start():
+    with Worker(conf.WorkMan.mgr_url, 'iwc') as service:
         service.define(
             "IWC",
             "Crawl IWC pages and download videos and parse captions. "
@@ -326,11 +325,6 @@ def execute(worker : Worker):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        name = 'iwc-worker'
-    else:
-        name = sys.argv[1]
-
     db.connect(conf.PostGres)
 
     # Run once. -----------------------
@@ -338,4 +332,4 @@ if __name__ == '__main__':
     # tbl.index('username', 'varchar')
     # tbl.create_all()
 
-    start(name)
+    start()
