@@ -43,16 +43,10 @@ def createId(sender) -> bytes:
     return sender + encode(s)
 
 class Message(object):
-    def __init__(self, action, service, job : str = None,
-                 message : str = None):
-        if message is None:
-            message = ""
-        elif type(message) == list:
-            message = " ".join(message)
+    def __init__(self, action : bytes, service : str = "", job : str = "",
+                 message : str = ""):
 
-        assert type(message) == str, "Message must be str"
-
-        action = encode(action)
+        assert type(action) == bytes, "Action must be bytes"
 
         self.identity : bytes = None
         self.action : bytes = action
@@ -140,11 +134,15 @@ class Message(object):
 
 
 def encode(s : str) -> bytes:
+    if s is None:
+        return b""
     if type(s) == bytes:
         return s
     return str(s).encode('utf-8')
 
 def decode(b : bytes) -> str:
+    if b is None:
+        return ""
     if type(b) == str:
         return b
     return b.decode('utf-8', errors='ignore')
