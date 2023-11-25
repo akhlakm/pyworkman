@@ -8,10 +8,9 @@ class _shell:
     mgr_url : str = "tcp://127.0.0.1:5455"
     key_file : str = "/home/akhlak/mgr.key"
     svc_name : str = f"{os.uname().nodename}-Shell"
-    ssh_conn_str : str = None
+    ssh_conn_str : str = None   # Use format 5455#user@host#5455
 
-with Config('pywm-shell.yaml') as yaml:
-    conf = yaml.section(_shell)
+conf = Config().section(_shell)
 
 def start():
     ssh_tunnel(conf.ssh_conn_str)
