@@ -37,7 +37,7 @@ class Client(object):
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
         if self.identity:
-            self._socket.setsockopt(zmq.IDENTITY, pr.encode(self.identity))
+            self._socket.setsockopt(zmq.IDENTITY, pr.encrypt(self.identity))
         self._socket.connect(self.manager_url)
         self._expect_reply = False
 

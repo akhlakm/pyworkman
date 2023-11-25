@@ -70,7 +70,7 @@ class Message(object):
         self.job : str = job
         self.message : str = message
 
-    def set_identity(self, iden : bytes):
+    def set_identity(self, iden : str):
         self.identity = iden
 
     def frames(self) -> list[bytes]:

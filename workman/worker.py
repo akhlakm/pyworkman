@@ -50,7 +50,7 @@ class Worker(object):
         self._init_encryption()
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
-        self._socket.setsockopt(zmq.IDENTITY, pr.encode(self.identity))
+        self._socket.setsockopt(zmq.IDENTITY, pr.encrypt(self.identity))
         self._socket.connect(self.manager_url)
         self._stop = False
 
