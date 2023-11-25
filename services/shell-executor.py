@@ -20,10 +20,11 @@ with Worker(conf.WorkMan.mgr_url, svc_name, name) as worker:
 
         buffer = ""
         for output in shell.watch_stdout(payload.command):
-            buffer += output.decode()
-            print(buffer)
+            outstr = output.decode()
+            buffer += outstr
+            print(outstr)
 
-            if len(buffer) >= 100:
+            if len(buffer) >= 1000:
                 worker.update(buffer)
                 buffer = ""
 
