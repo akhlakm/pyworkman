@@ -8,16 +8,16 @@ WORKER    = b'W'
 MANAGER   = b'M'
 
 # Action bit
-READY   = b'\x01'
-REQUEST = b'\x02'
-HBEAT   = b'\x03'
-REPLY   = b'\x04'
-UPDATE  = b'\x05'
-ABORT   = b'\x06'
-DONE    = b'\x07'
-STATUS  = b'\x08'
-GONE    = b'\x09'
-LIST    = b'\x10'
+ABORT   = b'A'
+HBEAT   = b'B'
+DONE    = b'D'
+GONE    = b'G'
+LIST    = b'L'
+REPLY   = b'P'
+REQUEST = b'Q'
+READY   = b'R'
+STATUS  = b'S'
+UPDATE  = b'U'
 
 # Timing
 ZMQ_LINGER          = 2000  # msec
@@ -63,9 +63,9 @@ class Message(object):
         if action not in self.allowed_action[sender]:
             raise ValueError("Invalid action", action)
 
-        self.identity : bytes = None
         self.sender : bytes = sender
         self.action : bytes = action
+        self.identity : str = None
         self.service : str = service
         self.job : str = job
         self.message : str = message
