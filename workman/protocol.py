@@ -78,7 +78,7 @@ class Message(object):
         body = []
         if self.identity:
             # identity needed for the router 
-            body += [self.identity]
+            body += [encrypt(self.identity)]
 
         body += [
             b'',
@@ -103,7 +103,7 @@ class Message(object):
         assert len(frames) >= 5, "Invalid message, not enough frames"
 
         if frames[0] != b'':
-            identity = frames.pop(0)
+            identity = decrypt(frames.pop(0))
         else:
             identity = None
 
