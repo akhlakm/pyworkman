@@ -1,4 +1,5 @@
 import json
+from workman import conf
 from cryptography.fernet import Fernet, MultiFernet
 
 # Header bit
@@ -30,8 +31,11 @@ def encryption_key():
     return Fernet.generate_key()
 
 def encryptor(*keys : bytes):
-    # Return None to disable encryption.
-    return MultiFernet([Fernet(key) for key in keys])
+    if conf.WorkMan.enable_encryption:
+        return MultiFernet([Fernet(key) for key in keys])
+    else:
+        # Return None to disable encryption.
+        return None
 
 class Message(object):
     allowed_sender = (CLIENT, WORKER, MANAGER)
@@ -85,14 +89,17 @@ class Message(object):
             encrypt(self.message)
         ]
 
-        # print("--  Sending:", body)
+        if conf.WorkMan.trace_packets:
+            print("--  Sending:", body)
         return body
 
     @classmethod
     def parse(cls, frames : list[bytes]):
         """ Parse a payload received via socket. """
 
-        # print("-- Received:", frames)
+        if conf.WorkMan.trace_packets:
+            print("-- Received:", frames)
+
         assert len(frames) >= 5, "Invalid message, not enough frames"
 
         if frames[0] != b'':

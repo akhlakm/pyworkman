@@ -24,6 +24,8 @@ class _workman:
     log_level : int = 8
     mgr_url : str = 'tcp://127.0.0.1:5455'
     ssh_conn_string : str = "user@host.com:22"
+    trace_packets : Bool = False
+    enable_encryption : Bool = True
 
 
 _c = Config("config-wm.yaml").load_yaml()

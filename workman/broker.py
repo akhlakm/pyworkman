@@ -73,6 +73,9 @@ class ServiceManager(object):
                     return
 
     def _init_encryption(self, key_file = "mgr.key"):
+        if not conf.WorkMan.enable_encryption:
+            log.warn("Encryption not enabled.")
+            return
         try:
             keys = open(key_file).read().encode("utf-8").split(b"\n")
             random.shuffle(keys)
