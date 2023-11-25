@@ -1,15 +1,14 @@
 # PyWorkMan
 ZeroMQ-based workload management via a web interface.
+
 ```sh
-git clone git@github.com:akhlakm/pyworkman.git
+pip install -U git+git@github.com:akhlakm/pyworkman.git
 ```
 
-## Installation
+To update, run
 ```sh
-# Install pyworkman
-pip install -e .
+workman update
 ```
-
 
 ## Broker
 The message broker (`mgr`) should be setup as a long running process in a easily accessible server. Message passed between the broker, ui and workers will be end-to-end encrypted.
