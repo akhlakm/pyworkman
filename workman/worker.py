@@ -116,7 +116,7 @@ class Worker(object):
             "name": svcName, "desc": svcDesc, "fields": fields
         }
         self._send_ready()
-        print(f"Worker '{self.identity}' ready for '{svcName}' jobs.")
+        print(f"Worker '{self.identity}' ready for '{self.service}' jobs.")
 
 
     def _parse_payload(self, msg : pr.Message) -> namedtuple:
