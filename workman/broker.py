@@ -34,9 +34,9 @@ class ServiceManager(object):
                 try:
                     msg = self.receive()
                     if msg:
-                        if msg.identity[0] == pr.CLIENT:
+                        if msg.identity[0:1] == pr.CLIENT:
                             self._handle_client_message(msg)
-                        elif msg.identity[0] == pr.WORKER:
+                        elif msg.identity[0:1] == pr.WORKER:
                             self._handle_worker_message(msg)
                         else:
                             log.warn("Unknown identity: {}", msg.identity)
@@ -122,8 +122,8 @@ class ServiceManager(object):
         else:
             log.warn("Unknown action from worker: {}", msg)
 
-    def _reply_client(self, msg, response : str):
-        reply = pr.Message(pr.MANAGER, pr.REPLY, msg.service, msg.job, response)
+    def _reply_client(self, msg : pr.Message, response : str):
+        reply = pr.Message(pr.REPLY, msg.service, msg.job, response)
         reply.set_identity(msg.identity)
         self._socket.send_multipart(reply.frames())
 
