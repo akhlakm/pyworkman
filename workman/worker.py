@@ -6,17 +6,18 @@ from workman import protocol as pr
 
 
 class Worker(object):
-    def __init__(self, manager_url, service, context=None):
+    def __init__(self, manager_url, service, key_file : str = "mgr.key"):
         self.service = service
         self.manager_url = manager_url
         self.definition = None
-        self._zmq_context = context if context else zmq.Context.instance()
+        self._zmq_context = zmq.Context.instance()
         self.identity : bytes = pr.createId(pr.WORKER)
         self._socket : zmq.Socket = None
         self._poller : zmq.Poller = None
         self._abort = False
         self._jobid = None
         self._is_busy = False
+        self._key_file = key_file
         self._hb_timeout = pr.HBEAT_TIMEOUT
         self._hb_interval = pr.HBEAT_INTERVAL
         self._last_sent = time.time()
@@ -32,8 +33,8 @@ class Worker(object):
     def __exit__(self, *args):
         self.close()
 
-    def _init_encryption(self, key_file = "mgr.key"):
-        keys = open(key_file).read().strip().encode("utf-8").split(b"\n")
+    def _init_encryption(self):
+        keys = open(self._key_file).read().strip().encode("utf-8").split(b"\n")
         random.shuffle(keys)
         pr.Encryptor = pr.encryptor(*keys)
 
