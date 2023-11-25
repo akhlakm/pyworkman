@@ -15,6 +15,13 @@ class Config:
         self._sections = {}
         self._yaml_file = yamlfile
 
+    def __enter__(self):
+        self.load_yaml()
+        return self
+
+    def __exit__(self, *args):
+        self.save_yaml()
+
     def section(self, dclass : dataclass):
         inst = dclass()
         section = inst.__class__.__name__.lstrip("_")
@@ -35,7 +42,7 @@ class Config:
 
         self._sections[section] = inst
         return inst
-
+    
     def load_yaml(self):
         try:
             with open(self._yaml_file) as fp:
@@ -51,6 +58,7 @@ class Config:
             yaml.safe_dump(d, fp, sort_keys=False, indent=4)
             os.chmod(self._yaml_file, 0o600)
             print("Save OK:", self._yaml_file)
+        return self
 
     def _get_cfg(self, section : str, key: str, dtype : callable, val):
         if not self._yaml:
