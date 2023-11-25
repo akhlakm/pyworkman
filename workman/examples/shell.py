@@ -10,7 +10,7 @@ class _shell:
     svc_name : str = f"{os.uname().nodename}-Shell"
     ssh_conn_str : str = None
 
-with Config('config-svc.yaml') as yaml:
+with Config('pywm-shell.yaml') as yaml:
     conf = yaml.section(_shell)
 
 def start():

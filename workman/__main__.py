@@ -35,7 +35,7 @@ def main():
             usage()
         name = sys.argv[2]
         shutil.copyfile(f"{os.path.dirname(__file__)}/examples/{name}.py",
-                        f"./{name}.py")
+                        f"./pywm-{name}.py")
         print("Copy OK:", name)
 
     else:
