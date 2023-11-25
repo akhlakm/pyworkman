@@ -46,6 +46,7 @@ class Worker(object):
         if self._is_connected():
             return
 
+        print(f"Connecting to {self.manager_url}")
         self._init_encryption()
         self._socket = self._zmq_context.socket(zmq.DEALER)
         self._socket.setsockopt(zmq.LINGER, pr.ZMQ_LINGER)
@@ -55,6 +56,7 @@ class Worker(object):
 
         self._poller = zmq.Poller()
         self._poller.register(self._socket, zmq.POLLIN)
+        print("Connected:", self._is_connected())
 
     def close(self):
         if not self._is_connected():
