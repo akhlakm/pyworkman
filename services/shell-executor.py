@@ -16,16 +16,20 @@ with Worker(conf.WorkMan.mgr_url, svc_name) as worker:
         payload = worker.receive()
         print("Executing:", payload.job, "Input:", payload.command)
 
-        buffer = ""
-        for output in shell.watch_stdout(payload.command):
-            outstr = output.decode()
-            buffer += outstr
-            print(outstr)
+        try:
+            buffer = ""
+            for output in shell.watch_stdout(payload.command):
+                outstr = output.decode()
+                buffer += outstr
 
-            if len(buffer) >= 1000:
+                if len(buffer) >= 1000:
+                    worker.update(buffer)
+                    buffer = ""
+
+            if len(buffer):
                 worker.update(buffer)
-                buffer = ""
+            worker.done("Command executed")
 
-        if len(buffer):
-            worker.update(buffer)
-        worker.done("Command executed")
+        except Exception as err:
+            worker.done_with_error(str(err))
+
