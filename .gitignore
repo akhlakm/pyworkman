@@ -1,6 +1,7 @@
 *.pyc
 *.yaml
 *.log
+*.out
 *.txt
 *.mp4
 *.jpg

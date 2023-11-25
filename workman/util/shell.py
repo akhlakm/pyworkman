@@ -20,3 +20,11 @@ def execute_command(command : str, *, stdin : any = None,
     result = subprocess.run(cmdlist, shell=False,
                             capture_output=capture, input=stdin)
     return result
+
+def watch_stdout(command : str):
+    cmdlist = shlex.split(command)
+    process = subprocess.Popen(
+        cmdlist, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    for line in process.stdout:
+        yield line
+
