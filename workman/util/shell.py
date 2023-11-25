@@ -21,10 +21,24 @@ def execute_command(command : str, *, stdin : any = None,
                             capture_output=capture, input=stdin)
     return result
 
-def watch_stdout(command : str):
+def watch_stdout(command : str, char_chunk : int = 1000):
+    """
+    Execute a shell command with arguments and capture stdout and stderr
+    in real time.
+
+    Yields the output in a size of char_chunk.
+    """
+
     cmdlist = shlex.split(command)
     process = subprocess.Popen(
         cmdlist, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    
+    buffer = ""
     for line in process.stdout:
-        yield line
+        buffer += line.decode()
+        if len(buffer) >= char_chunk:
+            yield buffer
+            buffer = ""
 
+    if len(buffer):
+        yield buffer
