@@ -6,7 +6,7 @@ from workman.util.makeconf import Config, dataclass
 @dataclass
 class _shell:
     mgr_url : str = "tcp://127.0.0.1:5455"
-    key_file : str = "mgr.key"
+    key_file : str = "/home/akhlak/mgr.key"
     svc_name : str = f"{os.uname().nodename}-Shell"
     ssh_conn_str : str = None
 

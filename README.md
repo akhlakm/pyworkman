@@ -1,8 +1,9 @@
 # PyWorkMan
 ZeroMQ-based workload management via a web interface.
 
+## Installation
 ```sh
-pip install -U git+git@github.com:akhlakm/pyworkman.git
+pip install git+ssh://git@github.com/akhlakm/pyworkman.git
 ```
 
 To update, run
