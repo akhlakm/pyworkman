@@ -7,7 +7,7 @@ from workman.util.makeconf import Config, dataclass
 class _shell:
     mgr_url : str = "tcp://127.0.0.1:5455"
     key_file : str = "mgr.key"
-    svc_name = f"{os.uname().nodename}-Shell"
+    svc_name : str = f"{os.uname().nodename}-Shell"
 
 with Config('config-svc.yaml') as yaml:
     conf = yaml.section(_shell)
