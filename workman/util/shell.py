@@ -42,19 +42,3 @@ def watch_stdout(command : str, char_chunk : int = 1000):
 
     if len(buffer):
         yield buffer
-
-
-def ssh_tunnel(conn_string : str = None):
-    """
-    Create a SSH tunnel using a connection string formatted as
-    <localport>#user@host.com:22#<remoteport>.
-
-    Returns: On success or None connection string.
-    Raises: ConnectionError on failure.
-    """
-    if conn_string:
-        lp, user, rp = conn_string.split("#")
-        sshcmd = f"ssh -N -f -L {lp}:127.0.0.1:{rp} {user}"
-        result = execute_command(sshcmd)
-        if result.returncode:
-            raise ConnectionError(result.stdout + result.stderr)

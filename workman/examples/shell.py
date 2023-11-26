@@ -1,27 +1,25 @@
+"""
+    Run a shell executor service with optional ssh tunnel setup.
+    As SSH connection may require a password,
+        first set the connection string and run once to create the tunnel.
+    Then set the connection string to None to start the service using nohup.
+"""
+
 import os
 from workman.worker import Worker
-from workman.util.shell import watch_stdout, ssh_tunnel
+from workman.util.shell import watch_stdout
 from workman.util.makeconf import Config, dataclass
 
+
 @dataclass
-class _shell:
+class _conf:
     mgr_url : str = "tcp://127.0.0.1:5455"
-    key_file : str = "/home/akhlak/mgr.key"
+    key_file : str  = "/home/akhlak/mgr.key"
     svc_name : str = f"{os.uname().nodename}-Shell"
-    ssh_conn_str : str = None   # Use format 5455#user@host#5455
 
-conf = Config().section(_shell)
+# Init config. Use with block to save to a yaml file.
+conf = Config().section(_conf)
 
-def start():
-    ssh_tunnel(conf.ssh_conn_str)
-    with Worker(conf.mgr_url, conf.svc_name, conf.key_file) as worker:
-        worker.define("Shell executor",
-            "Directly execute a terminal command. "
-            "WARN! Be careful using this service!",
-            command = dict(help="Required command to execute.", type=str),
-        )
-        while True:
-            execute(worker)
 
 def execute(job : Worker):
     payload = job.receive()
@@ -35,5 +33,15 @@ def execute(job : Worker):
     except Exception as err:
         job.done_with_error(str(err))
 
-if __name__ == "__main__":
-    start()
+
+with Worker(conf.mgr_url, conf.svc_name, conf.key_file) as worker:
+    worker.define("Shell executor",
+        "Directly execute a terminal command. "
+        "WARN! Be careful using this service!",
+        command = dict(help="Required command to execute.", type=str),
+    )
+    print("Please create a ssh tunnel if required.")
+    print("\tworkman tunnel")
+
+    while True:
+        execute(worker)
