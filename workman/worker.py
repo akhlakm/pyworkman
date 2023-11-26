@@ -1,6 +1,7 @@
 import zmq
 import time
 import random
+import signal
 from collections import namedtuple
 from workman import protocol as pr
 
@@ -295,11 +296,22 @@ def StartWorker(service : type, mgr_url, key_file):
     for k, v in fields.items():
         assert type(v) == dict, f"Field {k} must be a dictionary."
 
+    # Handle termination
+    shutdown = False
+    def _sig_handler(sig, _):
+        shutdown = True
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGINT, _sig_handler)
+    signal.signal(signal.SIGTERM, _sig_handler)
+
     # Start the worker.
     with Worker(mgr_url, svcName, key_file) as worker:
         worker.define(svcName, svcDesc, **fields)
 
         while True:
+            if shutdown:
+                break
             payload = worker.receive()
             print("\nRunning job:", payload.job)
 
