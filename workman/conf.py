@@ -13,7 +13,7 @@ class _postgres:
 
 @dataclass
 class _backend:
-    production : Bool = False
+    production : Bool = True        # set this to false for UI dev.
     postgres_db : Bool = False
     hosts : str = "127.0.0.1; localhost;"
 
