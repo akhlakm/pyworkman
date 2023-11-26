@@ -174,13 +174,14 @@ class Worker(object):
     def done(self, reply : str = None):
         assert self._is_busy, "Cannot send done twice"
         if reply: self.reply(reply)
-        self._is_busy = False
         self.update(f"Job Duration: {self._elapsed()}")
         self._send(pr.DONE, self._jobid)
+        self._is_busy = False
+        self._timer = None
 
     def done_with_error(self, error_message : str):
-        self.reply(error_message)
-        self.done()
+        print(error_message)
+        self.done(error_message)
 
     def send_hbeat(self):
         ds = time.time() - self._last_sent
@@ -240,6 +241,46 @@ class Worker(object):
                 if payload:
                     self._start_timer()
                     return payload
+
+
+def StartWorker(service : type, mgr_url, key_file):
+    # Use the class name as service name.
+    svcName = service.__name__
+
+    # The service must define a run function to process a job and payload.
+    assert hasattr(service, "run") and callable(service.run), \
+        f"{svcName} must define a run(Worker, {svcName}) staticmethod"
+
+    # Fallback to docstring if not defined.
+    try: svcDesc = service.__desc__
+    except AttributeError:
+        svcDesc = service.__doc__
+
+    # All arguments not starting with _ are payload fields.
+    fields = {
+        k : v for k, v in service.__dict__.items()
+        if not k.startswith("_") and not callable(v)
+    }
+
+    # Make sure the fields are valid.
+    for k, v in fields.items():
+        assert type(v) == dict, f"Field {k} must be a dictionary."
+
+    # Start the worker.
+    with Worker(mgr_url, svcName, key_file) as worker:
+        worker.define(svcName, svcDesc, **fields)
+
+        while True:
+            payload = worker.receive()
+            print("Running job:", payload.job)
+
+            try:
+                service.run(worker, payload)
+                worker.done()
+
+            except Exception as err:
+                print(err)
+                worker.done_with_error(str(err))
 
 
 if __name__ == '__main__':
