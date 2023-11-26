@@ -98,6 +98,10 @@ class Worker(object):
         wait = self._hb_interval + self._last_sent - time.time() # sec
         return max(0, int(1000 * wait))
     
+    def _make_bool(self, boolean) -> bool:
+        return str(boolean).lower() in [
+            "true", "1", "yes", "y", "yeah", "yep", "t", "of course"]
+    
     def define(self, svcName : str, svcDesc : str, **fields):
         """ Define the payload json.
             >>> worker.define("Echo Service", "Echo the sent message",
@@ -132,9 +136,15 @@ class Worker(object):
                 assert "default" not in obj \
                     or obj["default"] in obj["choices"], \
                     f"Default must be one of the choices in field {field}"
-                
+
             if obj['type'] == 'bool' and 'choices' not in obj:
                 obj['choices'] = ['Yes', 'No']
+                # Convert default to Yes, No
+                if 'default' in obj:
+                    if self._make_bool(obj['default']):
+                        obj['default'] = 'Yes'
+                    else:
+                        obj['default'] = 'No'
 
         self.definition = {
             "name": svcName, "desc": svcDesc, "fields": fields
@@ -168,9 +178,7 @@ class Worker(object):
 
                 # Convert to python bool
                 if field["type"] == "bool":
-                    payload[name] = str(payload[name]).lower() in [
-                        "true", "1", "yes", "y",
-                    ]
+                    payload[name] = self._make_bool(payload[name])
 
                 if "choices" in field and payload[name] not in field["choices"]:
                     self.done_with_error(
