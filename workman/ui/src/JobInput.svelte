@@ -26,6 +26,7 @@
                 type: defn["type"],
                 help: defn["help"],
                 required: defn["required"] ? "Required" : "Optional",
+                choices: defn["choices"] ? defn["choices"] : null,
             };
         });
         job_fields.set(fields);
@@ -72,14 +73,21 @@
         <div class="col-start-1 my-auto mr-auto">
             <b>{field}</b> [{props[field].type}]:
         </div>
-        <input
-            class="col-start-2 col-span-3 mt-2"
-            type="text"
-            name="{field}"
-            bind:value="{fields[field]}"
-            placeholder="{props[field].required}"
-            required={props[field].required == "Required"}
-        />
+        {#if props[field].choices }
+            <select bind:value={fields[field]}>
+                {#each props[field].choices as choice}
+                    <option value={String(choice)}>{String(choice)}</option>
+                {/each}
+            </select>
+        {:else}
+            <input
+                type="text"
+                name="{field}"
+                bind:value="{fields[field]}"
+                placeholder="{props[field].required}"
+                required={props[field].required == "Required"}
+            />
+        {/if}
         <p class="col-start-2 col-span-3 mb-2 text-sm">{props[field].help}</p>
     {/each}
 
@@ -95,10 +103,11 @@
         @apply grid grid-cols-5 mx-auto w-11/12;
     }
 
-    input[type="text"] {
+    input[type="text"], select {
         background-color: #fff;
         padding: 3px;
         @apply border-2 rounded border-black;
+        @apply col-start-2 col-span-3 mt-2;
         width: 100%;
     }
 </style>

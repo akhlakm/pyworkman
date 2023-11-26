@@ -119,9 +119,19 @@ class Worker(object):
                 assert "default" in obj and obj["default"] is not None, \
                     f"Type must be set for field {field}"
                 obj['type'] = type(obj["default"]).__name__
+
             elif type(obj["type"]) != str:
                 # use the name of the callable
                 obj['type'] = obj['type'].__name__
+
+            if "choices" in obj:
+                # must be a list
+                assert type(obj["choices"]) in [list, tuple], \
+                    f"choices must be a list or tuple in field {field}"
+                # default must be one of the choices
+                assert "default" not in obj \
+                    or obj["default"] in obj["choices"], \
+                    f"Default must be one of the choices in field {field}"
 
         self.definition = {
             "name": svcName, "desc": svcDesc, "fields": fields
@@ -142,7 +152,7 @@ class Worker(object):
                 f"Invalid payload type: '{type(payload)}', dict expected.")
             return None
         else:
-            name = self.definition["name"]
+            service = self.definition["name"]
             fields = self.definition["fields"]
             for name, field in fields.items():
                 if name not in payload:
@@ -159,8 +169,14 @@ class Worker(object):
                         "true", "1", "yes", "y",
                     ]
 
+                if "choices" in field and payload[name] not in field["choices"]:
+                    self.done_with_error(
+                        f"Invalid choice for {name}: '{payload[name]}'")
+                    return None
+
+
             payload["job"] = msg.job
-            defn = namedtuple(name, [k for k in payload.keys()])
+            defn = namedtuple(service, [k for k in payload.keys()])
             return defn(**payload)
 
     def reply(self, message : str):
@@ -274,7 +290,7 @@ def StartWorker(service : type, mgr_url, key_file):
 
         while True:
             payload = worker.receive()
-            print("Running job:", payload.job)
+            print("\nRunning job:", payload.job)
 
             try:
                 service.run(worker, payload)
@@ -283,6 +299,8 @@ def StartWorker(service : type, mgr_url, key_file):
             except Exception as err:
                 print(err)
                 worker.done_with_error(str(err))
+
+            print("Job done:", payload.job)
 
 
 if __name__ == '__main__':

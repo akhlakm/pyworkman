@@ -18,11 +18,17 @@ with the Worker handler and job inputs.
 
     message : str = \
         dict(help="Message to send.", default="hello", required=1)
+    
+    reverse : bool = \
+        dict(help="Reverse the message.", default=False, choices=[True, False])
 
     @staticmethod
     def run(worker : Worker, fields : 'EchoService'):
         print(fields.message)
-        worker.reply(fields.message)
+        if fields.reverse:
+            worker.reply(fields.message[::-1])
+        else:
+            worker.reply(fields.message)
 
 
 # -----------------------------------------------
