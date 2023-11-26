@@ -52,7 +52,9 @@
 </script>
 
 <form class="jobform" on:submit|preventDefault={handleRequest}>
-    <div class="col-span-5 py-2 text-center text-sm">{service.desc}</div>
+    <div class="col-span-5 py-2 text-slate-500 text-sm">
+        <pre class="wrap">{service.desc}</pre>
+    </div>
     <h2 class="col-span-5 my-2 border-b">Job ID</h2>
     <div class="col-start-2 col-span-2">
         <input

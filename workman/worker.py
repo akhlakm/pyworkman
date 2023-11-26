@@ -245,7 +245,9 @@ class Worker(object):
 
 def StartWorker(service : type, mgr_url, key_file):
     # Use the class name as service name.
-    svcName = service.__name__
+    try: svcName = service.__name__
+    except AttributeError:
+        svcName = service.__class__.__name__
 
     # The service must define a run function to process a job and payload.
     assert hasattr(service, "run") and callable(service.run), \
