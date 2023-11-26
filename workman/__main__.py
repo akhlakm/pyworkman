@@ -50,7 +50,7 @@ def main():
         else:
             usage()
 
-        sshcmd = f"ssh -N -f -L 127.0.0.1:{lp}:127.0.0.1:{rp} {cs}"
+        sshcmd = f"ssh -4 -N -f -L 127.0.0.1:{lp}:127.0.0.1:{rp} {cs}"
         print("Running SSH tunnel command:\n", sshcmd)
         input("Press enter to continue ...")
         shell.execute_command(sshcmd, capture=False)
