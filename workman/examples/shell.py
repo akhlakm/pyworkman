@@ -1,8 +1,6 @@
-"""
-    Run a shell executor service with optional ssh tunnel setup.
-    As SSH connection may require a password,
-        first set the connection string and run once to create the tunnel.
-    Then set the connection string to None to start the service using nohup.
+""" Run a shell executor service under the current python environment.
+    Create a ssh tunnel first, if required:
+        workman tunnel
 """
 
 import os
@@ -21,17 +19,11 @@ class _conf:
 conf = Config().section(_conf)
 
 
-def execute(job : Worker):
-    payload = job.receive()
-    print("Running job:", payload.job)
-    try:
-        for output in watch_stdout(payload.command):
-            job.update(output)
+def execute(job : Worker, command):
+    for output in watch_stdout(command):
+        job.update(output)
 
-        job.done("Command executed")
-
-    except Exception as err:
-        job.done_with_error(str(err))
+    job.done("Command executed")
 
 
 with Worker(conf.mgr_url, conf.svc_name, conf.key_file) as worker:
@@ -40,8 +32,13 @@ with Worker(conf.mgr_url, conf.svc_name, conf.key_file) as worker:
         "WARN! Be careful using this service!",
         command = dict(help="Required command to execute.", type=str),
     )
-    print("Please create a ssh tunnel if required.")
-    print("\tworkman tunnel")
 
     while True:
-        execute(worker)
+        payload = worker.receive()
+        print("Running job:", payload.job)
+
+        try:
+            execute(worker, payload.command)
+        except Exception as err:
+            worker.done_with_error(str(err))
+
