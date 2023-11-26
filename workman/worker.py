@@ -197,7 +197,7 @@ class Worker(object):
 
     def done_with_error(self, error_message : str):
         print(error_message)
-        self.done(error_message)
+        self.done(f"FATAL: {error_message}")
 
     def send_hbeat(self):
         ds = time.time() - self._last_sent
