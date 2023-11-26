@@ -28,7 +28,7 @@
                 class="hover:underline px-2 cursor-pointer uppercase"
                 type="submit"
                 name="listsvc"
-                value="{$selected_service} Service"
+                value="{$selected_service}"
             />
         {/if}
         <input
