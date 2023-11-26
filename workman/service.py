@@ -273,6 +273,7 @@ class Service(object):
             assert worker.jobid == job.id, \
                 "Update received from unassigned worker"
             job.set_update(msg.message)
+            worker.new_hbeat()
 
 
     def worker_done(self, msg : pr.Message):
