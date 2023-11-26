@@ -22,6 +22,7 @@ class Worker(object):
         self._hb_interval = pr.HBEAT_INTERVAL
         self._last_sent = time.time()
         self._last_received = time.time()
+        self._timer = None
 
     def _is_connected(self):
         return self._socket is not None
@@ -37,6 +38,16 @@ class Worker(object):
         keys = open(self._key_file).read().strip().encode("utf-8").split(b"\n")
         random.shuffle(keys)
         pr.Encryptor = pr.encryptor(*keys)
+
+    def _start_timer(self):
+        self._timer = time.time()
+
+    def _elapsed(self) -> str:
+        """ Return elapsed time string."""
+        if self._timer:
+            return f"{(time.time() - self._timer):.3f} s"
+        else:
+            return "0 s"
 
     def abort(self) -> bool:
         return self._abort
@@ -120,6 +131,10 @@ class Worker(object):
 
 
     def _parse_payload(self, msg : pr.Message) -> namedtuple:
+        """
+        Try to parse the payload according to the definition.
+        Return: A namedtuple of the payload. None on error.
+        """
         assert self.definition, "Payload definition not set, define() first"
         payload = pr.unserialize(msg.message)
         if not type(payload) == dict:
@@ -160,6 +175,7 @@ class Worker(object):
         assert self._is_busy, "Cannot send done twice"
         if reply: self.reply(reply)
         self._is_busy = False
+        self.update(f"Job Duration: {self._elapsed()}")
         self._send(pr.DONE, self._jobid)
 
     def done_with_error(self, error_message : str):
@@ -222,6 +238,7 @@ class Worker(object):
                 # parse with definition or reply with error.
                 payload = self._parse_payload(msg)
                 if payload:
+                    self._start_timer()
                     return payload
 
 
