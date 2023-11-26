@@ -176,14 +176,14 @@ class Worker(object):
                         # assign the default one.
                         payload[name] = field["default"]
 
-                # Convert to python bool
-                if field["type"] == "bool":
-                    payload[name] = self._make_bool(payload[name])
-
                 if "choices" in field and payload[name] not in field["choices"]:
                     self.done_with_error(
                         f"Invalid choice for {name}: '{payload[name]}'")
                     return None
+
+                # Convert to python bool
+                if field["type"] == "bool":
+                    payload[name] = self._make_bool(payload[name])
 
 
             payload["job"] = msg.job
