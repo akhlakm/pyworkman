@@ -132,6 +132,9 @@ class Worker(object):
                 assert "default" not in obj \
                     or obj["default"] in obj["choices"], \
                     f"Default must be one of the choices in field {field}"
+                
+            if obj['type'] == 'bool' and 'choices' not in obj:
+                obj['choices'] = ['Yes', 'No']
 
         self.definition = {
             "name": svcName, "desc": svcDesc, "fields": fields
