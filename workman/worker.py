@@ -271,6 +271,21 @@ class Worker(object):
                     return payload
 
 
+class Send:
+    worker : Worker = None
+    @staticmethod
+    def update(msg : str):
+        print("-- Update:", msg)
+        if Send.worker:
+            Send.worker.update(msg)
+    
+    @staticmethod
+    def reply(msg : str):
+        print("-- Reply:", msg)
+        if Send.worker:
+            Send.worker.reply(msg)
+
+
 def StartWorker(service : type, mgr_url, key_file):
     # Use the class name as service name.
     try: svcName = service.__name__
@@ -279,7 +294,7 @@ def StartWorker(service : type, mgr_url, key_file):
 
     # The service must define a run function to process a job and payload.
     assert hasattr(service, "run") and callable(service.run), \
-        f"{svcName} must define a run(Worker, {svcName}) staticmethod"
+        f"{svcName} must define run(send : Send, job : {svcName}) staticmethod"
 
     # Fallback to docstring if not defined.
     try: svcDesc = service.__desc__
@@ -307,6 +322,7 @@ def StartWorker(service : type, mgr_url, key_file):
 
     # Start the worker.
     with Worker(mgr_url, svcName, key_file) as worker:
+        Send.worker = worker
         worker.define(svcName, svcDesc, **fields)
 
         while True:
@@ -316,7 +332,7 @@ def StartWorker(service : type, mgr_url, key_file):
             print("\nRunning job:", payload.job)
 
             try:
-                service.run(worker, payload)
+                service.run(Send, payload)
                 worker.done()
 
             except Exception as err:

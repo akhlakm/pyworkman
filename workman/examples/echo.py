@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from workman.worker import Worker, StartWorker
+from workman.worker import Send, StartWorker
 
 MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
 KEY = "mgr.key"                 # Download from MGR.
@@ -20,16 +20,21 @@ with the Worker handler and job inputs.
         dict(help="Message to send.", default="hello", required=1)
     
     reverse : bool = \
-        dict(help="Reverse the message.", default=False, choices=[True, False])
+        dict(help="Reverse the message.", default=False)
 
     @staticmethod
-    def run(worker : Worker, fields : 'EchoService'):
-        print(fields.message)
-        if fields.reverse:
-            worker.reply(fields.message[::-1])
+    def run(send : Send, job : 'EchoService'):
+        send.update("Input: " + job.message)
+        if job.reverse:
+            send.reply(job.message[::-1])
         else:
-            worker.reply(fields.message)
-
+            send.reply(job.message)
 
 # -----------------------------------------------
 StartWorker(EchoService, MGR, KEY)
+
+# For testing, we can directly call the run function
+# test = EchoService()
+# test.message = "hello world"
+# test.reverse = True
+# EchoService.run(Send, test)
