@@ -334,9 +334,8 @@ def StartWorker(service : type, mgr_url, key_file):
             print("\nRunning job:", payload.job)
 
             try:
-                service.run(Send, payload)
-                worker.done()
-
+                reply = service.run(Send, payload)
+                worker.done(str(reply))
             except Exception as err:
                 print(err)
                 worker.done_with_error(str(err))
