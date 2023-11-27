@@ -6,7 +6,7 @@ from collections import namedtuple
 from workman import protocol as pr
 
 
-class Worker(object):
+class ServiceWorker(object):
     def __init__(self, manager_url, service, key_file : str = "mgr.key"):
         self.service = service
         self.manager_url = manager_url
@@ -275,7 +275,7 @@ class Send:
     """ An interface to send message over the network.
         Useful for testing purposes.
     """
-    worker : Worker = None
+    worker : ServiceWorker = None
 
     @staticmethod
     def update(*msg : any):
@@ -292,7 +292,11 @@ class Send:
             Send.worker.reply(message)
 
 
-def StartWorker(service : type, mgr_url, key_file):
+def start_worker(service : type, mgr_url, key_file):
+    """ Start a worker for the service.
+        Keeps running indefinitely.
+    """
+
     # Use the class name as service name.
     try: svcName = service.__name__
     except AttributeError:
@@ -325,7 +329,7 @@ def StartWorker(service : type, mgr_url, key_file):
     signal.signal(signal.SIGTERM, _sig_handler)
 
     # Start the worker.
-    with Worker(mgr_url, svcName, key_file) as worker:
+    with ServiceWorker(mgr_url, svcName, key_file) as worker:
         Send.worker = worker
         worker.define(svcName, svcDesc, **fields)
 

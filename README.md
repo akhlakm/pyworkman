@@ -29,6 +29,7 @@ The broker will generate key file, which must be copied to other machines for th
 
 ### WebUI
 The webUI (`ui`) should be run on the local workstation/laptop where you can open up a web browser.
+
 ```sh
 # Install webui dependencies.
 pip install .[ui]
@@ -65,7 +66,7 @@ Overview of the connections and ports. First create the SSH tunnel from local po
 
 ## How to write a service
 ```python
-from workman.worker import Send, StartWorker
+from workman.worker import start_worker
 
 class EchoService:
     """ A simple echo example. """
@@ -79,7 +80,7 @@ class EchoService:
 
 
     @staticmethod
-    def run(send : Send, job : 'EchoService') -> str:
+    def run(send, job : 'EchoService') -> str:
         # process the inputs.
         send.update("Input: " + job.message)
 
@@ -88,7 +89,7 @@ class EchoService:
         else:
             return job.message
 
-StartWorker(EchoService, "http://localhost:5455", "mgr.key")
+start_worker(EchoService, "http://localhost:5455", "mgr.key")
 ```
-Run `workman copy echo` to copy this example script to the current directory.
-See more examples in the `workman/examples` directory. 
+
+Run `workman copy echo` to copy this example script to the current directory. See more examples in `workman/examples`.

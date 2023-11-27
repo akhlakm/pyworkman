@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from workman.worker import Send, StartWorker
+from workman.worker import start_worker, Send
 
 MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
 KEY = "mgr.key"                 # Download from MGR.
@@ -8,7 +8,7 @@ class EchoService:
     """
 A simple echo service for test purposes.
 
-This service can be run with the StartWorker() function.
+This service can be run with the start_worker() function.
 Input fields are defined by non-callable class properties.
 Properties starting with _ are ignored.
 
@@ -31,7 +31,7 @@ with the Worker handler and job inputs.
             send.reply(job.message)
 
 # -----------------------------------------------
-StartWorker(EchoService, MGR, KEY)
+start_worker(EchoService, MGR, KEY)
 
 # For testing, we can directly call the run function
 # -----------------------------------------------
