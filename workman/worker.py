@@ -300,7 +300,7 @@ def StartWorker(service : type, mgr_url, key_file):
     shutdown = False
     def _sig_handler(sig, _):
         shutdown = True
-        raise KeyboardInterrupt
+        raise RuntimeError("Shutdown signal received")
 
     signal.signal(signal.SIGINT, _sig_handler)
     signal.signal(signal.SIGTERM, _sig_handler)
@@ -325,25 +325,3 @@ def StartWorker(service : type, mgr_url, key_file):
 
             print("Job done:", payload.job)
 
-
-if __name__ == '__main__':
-    # Run a simple echo service.
-    from workman import conf
-
-    with Worker(conf.WorkMan.mgr_url, 'echo') as worker:
-        worker.define(
-            "Echo Service", "Echo the sent message",
-            message = dict(help="Required message to send", type=str),
-            name = dict(default="world", help="Optional name"),
-        )
-
-        print(worker.definition)
-
-        try:
-            while True:
-                payload = worker.receive()
-                print("Payload:", payload)
-                worker.update("Preparing response.")
-                worker.done(payload.message + " " + str(payload.name))
-        except KeyboardInterrupt:
-            print("\nShutting down worker.")
