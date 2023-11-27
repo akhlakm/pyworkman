@@ -19,6 +19,9 @@ if [[ $(basename "${0}") != "make.sh" ]]; then
         conda create -n $CONDAENV python=3.10 -c conda-forge
         conda activate $CONDAENV
     fi
+
+    alias make="$CWD/make.sh"
+    echo "Environment set up. You can now use 'make' to execute this script."
     return 0
 fi
 
