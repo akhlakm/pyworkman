@@ -34,6 +34,7 @@ with the Worker handler and job inputs.
 StartWorker(EchoService, MGR, KEY)
 
 # For testing, we can directly call the run function
+# -----------------------------------------------
 # test = EchoService()
 # test.message = "hello world"
 # test.reverse = True

@@ -272,18 +272,24 @@ class Worker(object):
 
 
 class Send:
+    """ An interface to send message over the network.
+        Useful for testing purposes.
+    """
     worker : Worker = None
+
     @staticmethod
-    def update(msg : str):
-        print("-- Update:", msg)
+    def update(*msg : any):
+        message = " ".join([str(m) for m in msg])
+        print("-- Update:", message)
         if Send.worker:
-            Send.worker.update(msg)
+            Send.worker.update(message)
     
     @staticmethod
-    def reply(msg : str):
-        print("-- Reply:", msg)
+    def reply(*msg : any):
+        message = " ".join([str(m) for m in msg])
+        print("--- Reply:", message)
         if Send.worker:
-            Send.worker.reply(msg)
+            Send.worker.reply(message)
 
 
 def StartWorker(service : type, mgr_url, key_file):
@@ -312,10 +318,8 @@ def StartWorker(service : type, mgr_url, key_file):
         assert type(v) == dict, f"Field {k} must be a dictionary."
 
     # Handle termination
-    shutdown = False
     def _sig_handler(sig, _):
-        shutdown = True
-        raise RuntimeError("Shutdown signal received")
+        raise RuntimeError("Shutdown signal received.")
 
     signal.signal(signal.SIGINT, _sig_handler)
     signal.signal(signal.SIGTERM, _sig_handler)
@@ -326,8 +330,6 @@ def StartWorker(service : type, mgr_url, key_file):
         worker.define(svcName, svcDesc, **fields)
 
         while True:
-            if shutdown:
-                break
             payload = worker.receive()
             print("\nRunning job:", payload.job)
 
