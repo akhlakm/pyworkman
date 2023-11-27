@@ -3,7 +3,7 @@ Distributed job scheduling and workload management via a web interface.
 
 ## Installation
 ```sh
-pip install git+ssh://git@github.com/akhlakm/pyworkman.git
+pip install git+https://github.com/akhlakm/pyworkman.git
 ```
 
 To update, run
