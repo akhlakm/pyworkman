@@ -1,5 +1,5 @@
 # PyWorkMan
-ZeroMQ-based workload management via a web interface.
+Distributed job scheduling and workload management via a web interface.
 
 ## Installation
 ```sh
@@ -11,7 +11,7 @@ To update, run
 workman update
 ```
 
-## Broker
+### Broker
 The message broker (`mgr`) should be setup as a long running process in a easily accessible server. Message passed between the broker, ui and workers will be end-to-end encrypted.
 
 ```sh
@@ -27,7 +27,7 @@ cat mgr.key
 
 The broker will generate key file, which must be copied to other machines for the UI and service workers. Improperly encrypted messages will be silently ignored.
 
-## WebUI
+### WebUI
 The webUI (`ui`) should be run on the local workstation/laptop where you can open up a web browser.
 ```sh
 # Install webui dependencies.
@@ -46,7 +46,7 @@ rsync user@remote:/path/to/mgr.key mgr.key
 workman ui
 ```
 
-## Services
+### Services
 Service workers can be run on any machine. Each service can have many workers.
 ```sh
 # Create a SSH tunnel to the broker port (default 5455 -> 5455).
@@ -62,3 +62,33 @@ rsync user@remote:/path/to/mgr.key mgr.key
 Overview of the connections and ports. First create the SSH tunnel from local ports to the broker then use the local connections.
 
 ![](connection-setup.svg)
+
+## How to write a service
+```python
+from workman.worker import Send, StartWorker
+
+class EchoService:
+    """ A simple echo example. """
+
+    # define the inputs as class properties.
+    message : str = \
+        dict(help="Message to send.", default="hello", required=1)
+    
+    reverse : bool = \
+        dict(help="Reverse the message.", default=False)
+
+
+    @staticmethod
+    def run(send : Send, job : 'EchoService') -> str:
+        # process the inputs.
+        send.update("Input: " + job.message)
+
+        if job.reverse:
+            return job.message[::-1]
+        else:
+            return job.message
+
+StartWorker(EchoService, "http://localhost:5455", "mgr.key")
+```
+Run `workman copy echo` to copy this example script to the current directory.
+See more examples in the `workman/examples` directory. 
