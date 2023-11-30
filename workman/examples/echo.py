@@ -31,11 +31,12 @@ with the Worker handler and job inputs.
             send.reply(job.message)
 
 # -----------------------------------------------
-start_worker(EchoService, MGR, KEY)
+start_worker(EchoService, MGR, KEY) # No Return
 
-# For testing, we can directly call the run function
-# -----------------------------------------------
-# test = EchoService()
-# test.message = "hello world"
-# test.reverse = True
-# EchoService.run(Send, test)
+# For testing, we can directly call the run function.
+# Comment the start_worker call to run the tests below.
+# -----------------------------------------------------
+test = EchoService()
+test.message = "hello world"
+test.reverse = True
+EchoService.run(Send, test)

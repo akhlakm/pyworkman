@@ -20,7 +20,7 @@ class ShellService:
             send.update(output)
 
 # -----------------------------------------------
-start_worker(ShellService, MGR, KEY)
+start_worker(ShellService, MGR, KEY) # No Return
 
 # For testing, we can directly call the run function.
 # Comment the start_worker call to run the tests below.
