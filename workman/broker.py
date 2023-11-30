@@ -165,11 +165,17 @@ class ServiceManager(object):
             # List all items
             svclist = {}
             for name, svc in self._services.items():
-                svclist[name] = {
-                    'jobs': svc.list_jobs(),
-                    'workers': svc.list_workers(),
-                    'definition': svc.job_definition(),
-                }
+                jobs = svc.list_jobs()
+                workers = svc.list_workers()
+
+                # Ignore empty services.
+                if len(jobs) + len(workers):
+                    svclist[name] = {
+                        'jobs': jobs,
+                        'workers': workers,
+                        'definition': svc.job_definition(),
+                    }
+
         else:
             svclist = {
                 'jobs': [],
