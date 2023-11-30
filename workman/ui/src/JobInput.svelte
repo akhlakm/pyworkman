@@ -1,7 +1,15 @@
 <script>
     import { onMount } from "svelte";
     import { send } from "./utils";
-    import { clear, alert, job_list, job_definition, selected_service, selected_job, job_fields } from "./store";
+    import {
+        clear,
+        alert,
+        job_list,
+        job_definition,
+        selected_service,
+        selected_job,
+        job_fields,
+    } from "./store";
 
     let fields = {};
     let defn = JSON.parse($job_definition);
@@ -19,8 +27,9 @@
         Object.entries(items).map((list, i) => {
             let field = list[0];
             let defn = list[1];
-            if ((field in fields) == false) {
-                fields[field] = "default" in defn ? String(defn["default"]) : "";
+            if (field in fields == false) {
+                fields[field] =
+                    "default" in defn ? String(defn["default"]) : "";
             }
             props[field] = {
                 type: defn["type"],
@@ -37,10 +46,14 @@
         const { submitter: submitButton } = event;
         if (submitButton.name == "submit") {
             if ($job_list && $job_list.includes($selected_job)) {
-                alert.set("Please choose a new job ID.")
+                alert.set("Please choose a new job ID.");
                 return;
             }
-            service.message = JSON.stringify(fields);
+            let payload = {};
+            Object.keys(props).forEach((field) => {
+                payload[field] = fields[field];
+            });
+            service.message = JSON.stringify(payload);
         }
         job_fields.set(fields);
         send(
@@ -61,7 +74,7 @@
         <input
             class="col-start-2 col-span-3 mt-2 text-sm"
             type="text"
-            bind:value="{$selected_job}"
+            bind:value={$selected_job}
             placeholder="Unique job ID"
             required
         />
@@ -73,7 +86,7 @@
         <div class="col-start-1 my-auto mr-auto">
             <b>{field}</b> [{props[field].type}]:
         </div>
-        {#if props[field].choices }
+        {#if props[field].choices}
             <select bind:value={fields[field]}>
                 {#each props[field].choices as choice}
                     <option value={String(choice)}>{String(choice)}</option>
@@ -82,9 +95,9 @@
         {:else}
             <input
                 type="text"
-                name="{field}"
-                bind:value="{fields[field]}"
-                placeholder="{props[field].required}"
+                name={field}
+                bind:value={fields[field]}
+                placeholder={props[field].required}
                 required={props[field].required == "Required"}
             />
         {/if}
@@ -103,7 +116,8 @@
         @apply grid grid-cols-5 mx-auto w-11/12;
     }
 
-    input[type="text"], select {
+    input[type="text"],
+    select {
         background-color: #fff;
         padding: 3px;
         @apply border-2 rounded border-black;
