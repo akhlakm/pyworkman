@@ -8,7 +8,7 @@ export default defineConfig({
     base: './',
     publicDir: false,
     build: {
-        minify: false,
+        minify: 'esbuild',
         outDir: 'build',
         // build the js in library mode, the html files are served by django
         lib: {
@@ -17,7 +17,7 @@ export default defineConfig({
             name: 'App',
             fileName: (fmt, ent) => basename(ent) + '.js',
         },
-        watch: true,
+        watch: false,
         sourcemap: true,
     },
     optimizeDeps: {
