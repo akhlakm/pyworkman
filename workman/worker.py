@@ -294,7 +294,7 @@ class Send:
 
 def start_worker(service : type, mgr_url, key_file):
     """ Start a worker for the service.
-        Keeps running indefinitely.
+        Keeps running indefinitely, exits when shutdown requested.
     """
 
     # Use the class name as service name.
@@ -322,7 +322,10 @@ def start_worker(service : type, mgr_url, key_file):
         assert type(v) == dict, f"Field {k} must be a dictionary."
 
     # Handle termination
+    shutdown = False
     def _sig_handler(sig, _):
+        global shutdown
+        shutdown = True
         raise RuntimeError("Shutdown signal received.")
 
     signal.signal(signal.SIGINT, _sig_handler)
@@ -333,7 +336,7 @@ def start_worker(service : type, mgr_url, key_file):
         Send.worker = worker
         worker.define(svcName, svcDesc, **fields)
 
-        while True:
+        while not shutdown:
             payload = worker.receive()
             print("\nRunning job:", payload.job)
 
@@ -346,3 +349,4 @@ def start_worker(service : type, mgr_url, key_file):
 
             print("Job done:", payload.job)
 
+    exit(0)
