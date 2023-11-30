@@ -1,44 +1,32 @@
-""" Run a shell executor service under the current python environment.
-    Create a ssh tunnel first, if required:
-        workman tunnel
-"""
-
+#!/usr/bin/env python
 import os
-from workman.worker import Worker
-from workman.util.shell import watch_stdout
-from workman.util.makeconf import Config, dataclass
+from workman.worker import start_worker, Send
+from workman.util import shell
 
+MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
+KEY = "mgr.key"                 # Download from MGR.
 
-@dataclass
-class _conf:
-    mgr_url : str = "tcp://127.0.0.1:5455"
-    key_file : str  = "/home/akhlak/mgr.key"
-    svc_name : str = f"{os.uname().nodename}-Shell"
+class ShellService:
+    """
+    Directly execute a terminal command.
+    WARN! Be careful using this service!
+    """
+    __name__ = f"{os.uname().nodename}-Shell"
 
-# Init config. Use with block to save to a yaml file.
-conf = Config().section(_conf)
+    command : str = \
+        dict(help="Command to execute.", default="conda info", required=1)
+    
+    @staticmethod
+    def run(send : Send, job : 'ShellService'):
+        for output in shell.watch_stdout(job.command):
+            send.update(output)
 
+# -----------------------------------------------
+start_worker(ShellService, MGR, KEY)
 
-def execute(job : Worker, command):
-    for output in watch_stdout(command):
-        job.update(output)
-
-    job.done("Command executed")
-
-
-with Worker(conf.mgr_url, conf.svc_name, conf.key_file) as worker:
-    worker.define("Shell executor",
-        "Directly execute a terminal command. "
-        "WARN! Be careful using this service!",
-        command = dict(help="Required command to execute.", type=str),
-    )
-
-    while True:
-        payload = worker.receive()
-        print("Running job:", payload.job)
-
-        try:
-            execute(worker, payload.command)
-        except Exception as err:
-            worker.done_with_error(str(err))
-
+# For testing, we can directly call the run function.
+# Comment the start_worker call to run the tests below.
+# -----------------------------------------------------
+test = ShellService()
+test.command = "bash -i -c 'echo $PWD'"
+ShellService.run(Send, test)
