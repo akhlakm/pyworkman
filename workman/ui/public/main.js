@@ -1,335 +1,244 @@
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => {
-  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-  return value;
-};
-function noop() {
+var jt = Object.defineProperty;
+var wt = (t, e, n) => e in t ? jt(t, e, { enumerable: !0, configurable: !0, writable: !0, value: n }) : t[e] = n;
+var Ce = (t, e, n) => (wt(t, typeof e != "symbol" ? e + "" : e, n), n);
+function E() {
 }
-function run(fn) {
-  return fn();
+function mt(t) {
+  return t();
 }
-function blank_object() {
+function Ue() {
   return /* @__PURE__ */ Object.create(null);
 }
-function run_all(fns) {
-  fns.forEach(run);
+function te(t) {
+  t.forEach(mt);
 }
-function is_function(thing) {
-  return typeof thing === "function";
+function ht(t) {
+  return typeof t == "function";
 }
-function safe_not_equal(a, b) {
-  return a != a ? b == b : a !== b || a && typeof a === "object" || typeof a === "function";
+function H(t, e) {
+  return t != t ? e == e : t !== e || t && typeof t == "object" || typeof t == "function";
 }
-function is_empty(obj) {
-  return Object.keys(obj).length === 0;
+function yt(t) {
+  return Object.keys(t).length === 0;
 }
-function subscribe(store, ...callbacks) {
-  if (store == null) {
-    for (const callback of callbacks) {
-      callback(void 0);
-    }
-    return noop;
+function St(t, ...e) {
+  if (t == null) {
+    for (const l of e)
+      l(void 0);
+    return E;
   }
-  const unsub = store.subscribe(...callbacks);
-  return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+  const n = t.subscribe(...e);
+  return n.unsubscribe ? () => n.unsubscribe() : n;
 }
-function component_subscribe(component, store, callback) {
-  component.$$.on_destroy.push(subscribe(store, callback));
+function J(t, e, n) {
+  t.$$.on_destroy.push(St(e, n));
 }
-function append(target, node) {
-  target.appendChild(node);
+function a(t, e) {
+  t.appendChild(e);
 }
-function insert(target, node, anchor) {
-  target.insertBefore(node, anchor || null);
+function g(t, e, n) {
+  t.insertBefore(e, n || null);
 }
-function detach(node) {
-  if (node.parentNode) {
-    node.parentNode.removeChild(node);
-  }
+function b(t) {
+  t.parentNode && t.parentNode.removeChild(t);
 }
-function destroy_each(iterations, detaching) {
-  for (let i = 0; i < iterations.length; i += 1) {
-    if (iterations[i])
-      iterations[i].d(detaching);
-  }
+function V(t, e) {
+  for (let n = 0; n < t.length; n += 1)
+    t[n] && t[n].d(e);
 }
-function element(name) {
-  return document.createElement(name);
+function d(t) {
+  return document.createElement(t);
 }
-function text(data) {
-  return document.createTextNode(data);
+function q(t) {
+  return document.createTextNode(t);
 }
-function space() {
-  return text(" ");
+function k() {
+  return q(" ");
 }
-function empty() {
-  return text("");
+function W() {
+  return q("");
 }
-function listen(node, event, handler, options) {
-  node.addEventListener(event, handler, options);
-  return () => node.removeEventListener(event, handler, options);
+function U(t, e, n, l) {
+  return t.addEventListener(e, n, l), () => t.removeEventListener(e, n, l);
 }
-function prevent_default(fn) {
-  return function(event) {
-    event.preventDefault();
-    return fn.call(this, event);
+function bt(t) {
+  return function(e) {
+    return e.preventDefault(), t.call(this, e);
   };
 }
-function attr(node, attribute, value) {
-  if (value == null)
-    node.removeAttribute(attribute);
-  else if (node.getAttribute(attribute) !== value)
-    node.setAttribute(attribute, value);
+function p(t, e, n) {
+  n == null ? t.removeAttribute(e) : t.getAttribute(e) !== n && t.setAttribute(e, n);
 }
-function children(element2) {
-  return Array.from(element2.childNodes);
+function qt(t) {
+  return Array.from(t.childNodes);
 }
-function set_data(text2, data) {
-  data = "" + data;
-  if (text2.data === data)
-    return;
-  text2.data = /** @type {string} */
-  data;
+function N(t, e) {
+  e = "" + e, t.data !== e && (t.data = /** @type {string} */
+  e);
 }
-function set_input_value(input, value) {
-  input.value = value == null ? "" : value;
+function x(t, e) {
+  t.value = e ?? "";
 }
-function select_option(select, value, mounting) {
-  for (let i = 0; i < select.options.length; i += 1) {
-    const option = select.options[i];
-    if (option.__value === value) {
-      option.selected = true;
+function He(t, e, n) {
+  for (let l = 0; l < t.options.length; l += 1) {
+    const s = t.options[l];
+    if (s.__value === e) {
+      s.selected = !0;
       return;
     }
   }
-  if (!mounting || value !== void 0) {
-    select.selectedIndex = -1;
-  }
+  (!n || e !== void 0) && (t.selectedIndex = -1);
 }
-function select_value(select) {
-  const selected_option = select.querySelector(":checked");
-  return selected_option && selected_option.__value;
+function Ot(t) {
+  const e = t.querySelector(":checked");
+  return e && e.__value;
 }
-let current_component;
-function set_current_component(component) {
-  current_component = component;
+let ue;
+function re(t) {
+  ue = t;
 }
-function get_current_component() {
-  if (!current_component)
+function Ct() {
+  if (!ue)
     throw new Error("Function called outside component initialization");
-  return current_component;
+  return ue;
 }
-function onMount(fn) {
-  get_current_component().$$.on_mount.push(fn);
+function gt(t) {
+  Ct().$$.on_mount.push(t);
 }
-const dirty_components = [];
-const binding_callbacks = [];
-let render_callbacks = [];
-const flush_callbacks = [];
-const resolved_promise = /* @__PURE__ */ Promise.resolve();
-let update_scheduled = false;
-function schedule_update() {
-  if (!update_scheduled) {
-    update_scheduled = true;
-    resolved_promise.then(flush);
-  }
+const Y = [], Ve = [];
+let Z = [];
+const We = [], Nt = /* @__PURE__ */ Promise.resolve();
+let Ie = !1;
+function Et() {
+  Ie || (Ie = !0, Nt.then(vt));
 }
-function add_render_callback(fn) {
-  render_callbacks.push(fn);
+function $e(t) {
+  Z.push(t);
 }
-const seen_callbacks = /* @__PURE__ */ new Set();
-let flushidx = 0;
-function flush() {
-  if (flushidx !== 0) {
+const Ne = /* @__PURE__ */ new Set();
+let K = 0;
+function vt() {
+  if (K !== 0)
     return;
-  }
-  const saved_component = current_component;
+  const t = ue;
   do {
     try {
-      while (flushidx < dirty_components.length) {
-        const component = dirty_components[flushidx];
-        flushidx++;
-        set_current_component(component);
-        update(component.$$);
+      for (; K < Y.length; ) {
+        const e = Y[K];
+        K++, re(e), It(e.$$);
       }
     } catch (e) {
-      dirty_components.length = 0;
-      flushidx = 0;
-      throw e;
+      throw Y.length = 0, K = 0, e;
     }
-    set_current_component(null);
-    dirty_components.length = 0;
-    flushidx = 0;
-    while (binding_callbacks.length)
-      binding_callbacks.pop()();
-    for (let i = 0; i < render_callbacks.length; i += 1) {
-      const callback = render_callbacks[i];
-      if (!seen_callbacks.has(callback)) {
-        seen_callbacks.add(callback);
-        callback();
-      }
+    for (re(null), Y.length = 0, K = 0; Ve.length; )
+      Ve.pop()();
+    for (let e = 0; e < Z.length; e += 1) {
+      const n = Z[e];
+      Ne.has(n) || (Ne.add(n), n());
     }
-    render_callbacks.length = 0;
-  } while (dirty_components.length);
-  while (flush_callbacks.length) {
-    flush_callbacks.pop()();
-  }
-  update_scheduled = false;
-  seen_callbacks.clear();
-  set_current_component(saved_component);
+    Z.length = 0;
+  } while (Y.length);
+  for (; We.length; )
+    We.pop()();
+  Ie = !1, Ne.clear(), re(t);
 }
-function update($$) {
-  if ($$.fragment !== null) {
-    $$.update();
-    run_all($$.before_update);
-    const dirty = $$.dirty;
-    $$.dirty = [-1];
-    $$.fragment && $$.fragment.p($$.ctx, dirty);
-    $$.after_update.forEach(add_render_callback);
+function It(t) {
+  if (t.fragment !== null) {
+    t.update(), te(t.before_update);
+    const e = t.dirty;
+    t.dirty = [-1], t.fragment && t.fragment.p(t.ctx, e), t.after_update.forEach($e);
   }
 }
-function flush_render_callbacks(fns) {
-  const filtered = [];
-  const targets = [];
-  render_callbacks.forEach((c) => fns.indexOf(c) === -1 ? filtered.push(c) : targets.push(c));
-  targets.forEach((c) => c());
-  render_callbacks = filtered;
+function Rt(t) {
+  const e = [], n = [];
+  Z.forEach((l) => t.indexOf(l) === -1 ? e.push(l) : n.push(l)), n.forEach((l) => l()), Z = e;
 }
-const outroing = /* @__PURE__ */ new Set();
-let outros;
-function group_outros() {
-  outros = {
+const ke = /* @__PURE__ */ new Set();
+let F;
+function kt() {
+  F = {
     r: 0,
     c: [],
-    p: outros
+    p: F
     // parent group
   };
 }
-function check_outros() {
-  if (!outros.r) {
-    run_all(outros.c);
-  }
-  outros = outros.p;
+function $t() {
+  F.r || te(F.c), F = F.p;
 }
-function transition_in(block, local) {
-  if (block && block.i) {
-    outroing.delete(block);
-    block.i(local);
-  }
+function P(t, e) {
+  t && t.i && (ke.delete(t), t.i(e));
 }
-function transition_out(block, local, detach2, callback) {
-  if (block && block.o) {
-    if (outroing.has(block))
+function z(t, e, n, l) {
+  if (t && t.o) {
+    if (ke.has(t))
       return;
-    outroing.add(block);
-    outros.c.push(() => {
-      outroing.delete(block);
-      if (callback) {
-        if (detach2)
-          block.d(1);
-        callback();
-      }
-    });
-    block.o(local);
-  } else if (callback) {
-    callback();
-  }
+    ke.add(t), F.c.push(() => {
+      ke.delete(t), l && (n && t.d(1), l());
+    }), t.o(e);
+  } else
+    l && l();
 }
-function ensure_array_like(array_like_or_iterator) {
-  return (array_like_or_iterator == null ? void 0 : array_like_or_iterator.length) !== void 0 ? array_like_or_iterator : Array.from(array_like_or_iterator);
+function D(t) {
+  return (t == null ? void 0 : t.length) !== void 0 ? t : Array.from(t);
 }
-function create_component(block) {
-  block && block.c();
+function fe(t) {
+  t && t.c();
 }
-function mount_component(component, target, anchor) {
-  const { fragment, after_update } = component.$$;
-  fragment && fragment.m(target, anchor);
-  add_render_callback(() => {
-    const new_on_destroy = component.$$.on_mount.map(run).filter(is_function);
-    if (component.$$.on_destroy) {
-      component.$$.on_destroy.push(...new_on_destroy);
-    } else {
-      run_all(new_on_destroy);
-    }
-    component.$$.on_mount = [];
-  });
-  after_update.forEach(add_render_callback);
+function ne(t, e, n) {
+  const { fragment: l, after_update: s } = t.$$;
+  l && l.m(e, n), $e(() => {
+    const i = t.$$.on_mount.map(mt).filter(ht);
+    t.$$.on_destroy ? t.$$.on_destroy.push(...i) : te(i), t.$$.on_mount = [];
+  }), s.forEach($e);
 }
-function destroy_component(component, detaching) {
-  const $$ = component.$$;
-  if ($$.fragment !== null) {
-    flush_render_callbacks($$.after_update);
-    run_all($$.on_destroy);
-    $$.fragment && $$.fragment.d(detaching);
-    $$.on_destroy = $$.fragment = null;
-    $$.ctx = [];
-  }
+function le(t, e) {
+  const n = t.$$;
+  n.fragment !== null && (Rt(n.after_update), te(n.on_destroy), n.fragment && n.fragment.d(e), n.on_destroy = n.fragment = null, n.ctx = []);
 }
-function make_dirty(component, i) {
-  if (component.$$.dirty[0] === -1) {
-    dirty_components.push(component);
-    schedule_update();
-    component.$$.dirty.fill(0);
-  }
-  component.$$.dirty[i / 31 | 0] |= 1 << i % 31;
+function Jt(t, e) {
+  t.$$.dirty[0] === -1 && (Y.push(t), Et(), t.$$.dirty.fill(0)), t.$$.dirty[e / 31 | 0] |= 1 << e % 31;
 }
-function init(component, options, instance2, create_fragment2, not_equal, props, append_styles = null, dirty = [-1]) {
-  const parent_component = current_component;
-  set_current_component(component);
-  const $$ = component.$$ = {
+function se(t, e, n, l, s, i, o = null, r = [-1]) {
+  const u = ue;
+  re(t);
+  const c = t.$$ = {
     fragment: null,
     ctx: [],
     // state
-    props,
-    update: noop,
-    not_equal,
-    bound: blank_object(),
+    props: i,
+    update: E,
+    not_equal: s,
+    bound: Ue(),
     // lifecycle
     on_mount: [],
     on_destroy: [],
     on_disconnect: [],
     before_update: [],
     after_update: [],
-    context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
+    context: new Map(e.context || (u ? u.$$.context : [])),
     // everything else
-    callbacks: blank_object(),
-    dirty,
-    skip_bound: false,
-    root: options.target || parent_component.$$.root
+    callbacks: Ue(),
+    dirty: r,
+    skip_bound: !1,
+    root: e.target || u.$$.root
   };
-  append_styles && append_styles($$.root);
-  let ready = false;
-  $$.ctx = instance2 ? instance2(component, options.props || {}, (i, ret, ...rest) => {
-    const value = rest.length ? rest[0] : ret;
-    if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
-      if (!$$.skip_bound && $$.bound[i])
-        $$.bound[i](value);
-      if (ready)
-        make_dirty(component, i);
-    }
-    return ret;
-  }) : [];
-  $$.update();
-  ready = true;
-  run_all($$.before_update);
-  $$.fragment = create_fragment2 ? create_fragment2($$.ctx) : false;
-  if (options.target) {
-    if (options.hydrate) {
-      const nodes = children(options.target);
-      $$.fragment && $$.fragment.l(nodes);
-      nodes.forEach(detach);
-    } else {
-      $$.fragment && $$.fragment.c();
-    }
-    if (options.intro)
-      transition_in(component.$$.fragment);
-    mount_component(component, options.target, options.anchor);
-    flush();
+  o && o(c.root);
+  let f = !1;
+  if (c.ctx = n ? n(t, e.props || {}, (_, m, ...w) => {
+    const C = w.length ? w[0] : m;
+    return c.ctx && s(c.ctx[_], c.ctx[_] = C) && (!c.skip_bound && c.bound[_] && c.bound[_](C), f && Jt(t, _)), m;
+  }) : [], c.update(), f = !0, te(c.before_update), c.fragment = l ? l(c.ctx) : !1, e.target) {
+    if (e.hydrate) {
+      const _ = qt(e.target);
+      c.fragment && c.fragment.l(_), _.forEach(b);
+    } else
+      c.fragment && c.fragment.c();
+    e.intro && P(t.$$.fragment), ne(t, e.target, e.anchor), vt();
   }
-  set_current_component(parent_component);
+  re(u);
 }
-class SvelteComponent {
+class ie {
   constructor() {
     /**
      * ### PRIVATE API
@@ -338,7 +247,7 @@ class SvelteComponent {
      *
      * @type {any}
      */
-    __publicField(this, "$$");
+    Ce(this, "$$");
     /**
      * ### PRIVATE API
      *
@@ -346,12 +255,11 @@ class SvelteComponent {
      *
      * @type {any}
      */
-    __publicField(this, "$$set");
+    Ce(this, "$$set");
   }
   /** @returns {void} */
   $destroy() {
-    destroy_component(this, 1);
-    this.$destroy = noop;
+    le(this, 1), this.$destroy = E;
   }
   /**
    * @template {Extract<keyof Events, string>} K
@@ -359,2267 +267,1279 @@ class SvelteComponent {
    * @param {((e: Events[K]) => void) | null | undefined} callback
    * @returns {() => void}
    */
-  $on(type, callback) {
-    if (!is_function(callback)) {
-      return noop;
-    }
-    const callbacks = this.$$.callbacks[type] || (this.$$.callbacks[type] = []);
-    callbacks.push(callback);
-    return () => {
-      const index = callbacks.indexOf(callback);
-      if (index !== -1)
-        callbacks.splice(index, 1);
+  $on(e, n) {
+    if (!ht(n))
+      return E;
+    const l = this.$$.callbacks[e] || (this.$$.callbacks[e] = []);
+    return l.push(n), () => {
+      const s = l.indexOf(n);
+      s !== -1 && l.splice(s, 1);
     };
   }
   /**
    * @param {Partial<Props>} props
    * @returns {void}
    */
-  $set(props) {
-    if (this.$$set && !is_empty(props)) {
-      this.$$.skip_bound = true;
-      this.$$set(props);
-      this.$$.skip_bound = false;
-    }
+  $set(e) {
+    this.$$set && !yt(e) && (this.$$.skip_bound = !0, this.$$set(e), this.$$.skip_bound = !1);
   }
 }
-const PUBLIC_VERSION = "4";
-if (typeof window !== "undefined")
-  (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
-const subscriber_queue = [];
-function writable(value, start = noop) {
-  let stop;
-  const subscribers = /* @__PURE__ */ new Set();
-  function set(new_value) {
-    if (safe_not_equal(value, new_value)) {
-      value = new_value;
-      if (stop) {
-        const run_queue = !subscriber_queue.length;
-        for (const subscriber of subscribers) {
-          subscriber[1]();
-          subscriber_queue.push(subscriber, value);
-        }
-        if (run_queue) {
-          for (let i = 0; i < subscriber_queue.length; i += 2) {
-            subscriber_queue[i][0](subscriber_queue[i + 1]);
-          }
-          subscriber_queue.length = 0;
-        }
+const Tt = "4";
+typeof window < "u" && (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(Tt);
+const Q = [];
+function M(t, e = E) {
+  let n;
+  const l = /* @__PURE__ */ new Set();
+  function s(r) {
+    if (H(t, r) && (t = r, n)) {
+      const u = !Q.length;
+      for (const c of l)
+        c[1](), Q.push(c, t);
+      if (u) {
+        for (let c = 0; c < Q.length; c += 2)
+          Q[c][0](Q[c + 1]);
+        Q.length = 0;
       }
     }
   }
-  function update2(fn) {
-    set(fn(value));
+  function i(r) {
+    s(r(t));
   }
-  function subscribe2(run2, invalidate = noop) {
-    const subscriber = [run2, invalidate];
-    subscribers.add(subscriber);
-    if (subscribers.size === 1) {
-      stop = start(set, update2) || noop;
-    }
-    run2(value);
-    return () => {
-      subscribers.delete(subscriber);
-      if (subscribers.size === 0 && stop) {
-        stop();
-        stop = null;
-      }
+  function o(r, u = E) {
+    const c = [r, u];
+    return l.add(c), l.size === 1 && (n = e(s, i) || E), r(t), () => {
+      l.delete(c), l.size === 0 && n && (n(), n = null);
     };
   }
-  return { set, update: update2, subscribe: subscribe2 };
+  return { set: s, update: i, subscribe: o };
 }
-const alert = writable("");
-const selected_service = writable("");
-const selected_job = writable("");
-const service_list = writable(null);
-const job_status = writable(null);
-const job_list = writable(null);
-const service_details = writable(null);
-const last_response = writable(null);
-const job_definition = writable(null);
-const job_fields = writable({});
-function clear() {
-  alert.set("");
-  job_status.set(null);
-  job_list.set(null);
-  service_details.set(null);
-  service_list.set(null);
-  job_definition.set(null);
+const ee = M(""), we = M(""), ce = M(""), Re = M(null), je = M(null), ye = M(null), Je = M(null), At = M(null), Se = M(null), Ee = M({});
+function Te() {
+  ee.set(""), je.set(null), ye.set(null), Je.set(null), Re.set(null), Se.set(null);
 }
-async function postData(url = "", data = {}) {
-  const csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-  const response = await fetch(url, {
+async function Dt(t = "", e = {}) {
+  const n = document.querySelector("[name=csrfmiddlewaretoken]").value;
+  return (await fetch(t, {
     method: "POST",
     cache: "no-cache",
-    body: JSON.stringify(data),
+    body: JSON.stringify(e),
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": csrftoken
+      "X-CSRFToken": n
     },
     mode: "same-origin"
-  });
-  return response.json();
+  })).json();
 }
-function handle_response(action, response) {
-  last_response.set(response);
-  if (response["error"]) {
-    alert.set(response["error"]);
+function Lt(t, e) {
+  if (At.set(e), e.error) {
+    ee.set(e.error);
     return;
-  } else {
-    alert.set("");
-  }
-  if (action == "submit") {
-    job_status.set(response);
-  } else if (action == "status") {
-    job_status.set(response);
-  } else if (action == "listall") {
-    service_list.set(Object.keys(response));
-  } else if (action == "listsvc") {
-    service_details.set(response);
-    let jobitems = [];
-    for (var type in response["jobs"]) {
-      jobitems = jobitems.concat(response["jobs"][type]);
-    }
-    job_list.set(jobitems);
-    if (response["definition"]) {
-      job_definition.set(response["definition"]);
-    }
-  } else {
-    console.log("Response for unknown action:", action);
-  }
+  } else
+    ee.set("");
+  if (t == "submit")
+    je.set(e);
+  else if (t == "status")
+    je.set(e);
+  else if (t == "listall")
+    Re.set(Object.keys(e));
+  else if (t == "listsvc") {
+    Je.set(e);
+    let l = [];
+    for (var n in e.jobs)
+      l = l.concat(e.jobs[n]);
+    ye.set(l), e.definition && Se.set(e.definition);
+  } else
+    console.log("Response for unknown action:", t);
 }
-function send(action, service, job, message) {
-  let payload = {
-    service,
-    job,
-    message,
-    action
+function ae(t, e, n, l) {
+  let s = {
+    service: e,
+    job: n,
+    message: l,
+    action: t
   };
-  selected_service.set(service);
-  postData("/main/", payload).then((data) => {
-    handle_response(action, data);
+  we.set(e), Dt("/main/", s).then((i) => {
+    Lt(t, i);
   });
 }
-function create_if_block_1$2(ctx) {
-  let input;
-  let input_value_value;
+function Xe(t) {
+  let e, n;
   return {
     c() {
-      input = element("input");
-      attr(input, "class", "hover:underline px-2 cursor-pointer uppercase");
-      attr(input, "type", "submit");
-      attr(input, "name", "status");
-      input.value = input_value_value = "Refresh " + /*$selected_job*/
-      ctx[0];
+      e = d("input"), p(e, "class", "hover:underline px-2 cursor-pointer uppercase"), p(e, "type", "submit"), p(e, "name", "status"), e.value = n = "Refresh " + /*$selected_job*/
+      t[0];
     },
-    m(target, anchor) {
-      insert(target, input, anchor);
+    m(l, s) {
+      g(l, e, s);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*$selected_job*/
-      1 && input_value_value !== (input_value_value = "Refresh " + /*$selected_job*/
-      ctx2[0])) {
-        input.value = input_value_value;
-      }
+    p(l, s) {
+      s & /*$selected_job*/
+      1 && n !== (n = "Refresh " + /*$selected_job*/
+      l[0]) && (e.value = n);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(input);
-      }
+    d(l) {
+      l && b(e);
     }
   };
 }
-function create_if_block$5(ctx) {
-  let input;
+function Ge(t) {
+  let e;
   return {
     c() {
-      input = element("input");
-      attr(input, "class", "hover:underline px-2 cursor-pointer uppercase");
-      attr(input, "type", "submit");
-      attr(input, "name", "listsvc");
-      input.value = /*$selected_service*/
-      ctx[1];
+      e = d("input"), p(e, "class", "hover:underline px-2 cursor-pointer uppercase"), p(e, "type", "submit"), p(e, "name", "listsvc"), e.value = /*$selected_service*/
+      t[1];
     },
-    m(target, anchor) {
-      insert(target, input, anchor);
+    m(n, l) {
+      g(n, e, l);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*$selected_service*/
-      2) {
-        input.value = /*$selected_service*/
-        ctx2[1];
-      }
+    p(n, l) {
+      l & /*$selected_service*/
+      2 && (e.value = /*$selected_service*/
+      n[1]);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(input);
-      }
+    d(n) {
+      n && b(e);
     }
   };
 }
-function create_fragment$5(ctx) {
-  let form;
-  let div;
-  let t0;
-  let t1;
-  let input;
-  let mounted;
-  let dispose;
-  let if_block0 = (
+function Bt(t) {
+  let e, n, l, s, i, o, r, u = (
     /*$selected_job*/
-    ctx[0] && create_if_block_1$2(ctx)
-  );
-  let if_block1 = (
+    t[0] && Xe(t)
+  ), c = (
     /*$selected_service*/
-    ctx[1] && create_if_block$5(ctx)
+    t[1] && Ge(t)
   );
   return {
     c() {
-      form = element("form");
-      div = element("div");
-      if (if_block0)
-        if_block0.c();
-      t0 = space();
-      if (if_block1)
-        if_block1.c();
-      t1 = space();
-      input = element("input");
-      attr(input, "class", "hover:underline px-2 cursor-pointer uppercase");
-      attr(input, "type", "submit");
-      attr(input, "name", "listall");
-      input.value = "List All";
-      attr(div, "class", "col-span-5 mx-auto");
-      attr(form, "class", "topbar svelte-1usbfhw");
+      e = d("form"), n = d("div"), u && u.c(), l = k(), c && c.c(), s = k(), i = d("input"), p(i, "class", "hover:underline px-2 cursor-pointer uppercase"), p(i, "type", "submit"), p(i, "name", "listall"), i.value = "List All", p(n, "class", "col-span-5 mx-auto"), p(e, "class", "topbar svelte-1usbfhw");
     },
-    m(target, anchor) {
-      insert(target, form, anchor);
-      append(form, div);
-      if (if_block0)
-        if_block0.m(div, null);
-      append(div, t0);
-      if (if_block1)
-        if_block1.m(div, null);
-      append(div, t1);
-      append(div, input);
-      if (!mounted) {
-        dispose = listen(form, "submit", prevent_default(
-          /*handleRequest*/
-          ctx[2]
-        ));
-        mounted = true;
-      }
+    m(f, _) {
+      g(f, e, _), a(e, n), u && u.m(n, null), a(n, l), c && c.m(n, null), a(n, s), a(n, i), o || (r = U(e, "submit", bt(
+        /*handleRequest*/
+        t[2]
+      )), o = !0);
     },
-    p(ctx2, [dirty]) {
-      if (
-        /*$selected_job*/
-        ctx2[0]
-      ) {
-        if (if_block0) {
-          if_block0.p(ctx2, dirty);
-        } else {
-          if_block0 = create_if_block_1$2(ctx2);
-          if_block0.c();
-          if_block0.m(div, t0);
-        }
-      } else if (if_block0) {
-        if_block0.d(1);
-        if_block0 = null;
-      }
-      if (
-        /*$selected_service*/
-        ctx2[1]
-      ) {
-        if (if_block1) {
-          if_block1.p(ctx2, dirty);
-        } else {
-          if_block1 = create_if_block$5(ctx2);
-          if_block1.c();
-          if_block1.m(div, t1);
-        }
-      } else if (if_block1) {
-        if_block1.d(1);
-        if_block1 = null;
-      }
+    p(f, [_]) {
+      /*$selected_job*/
+      f[0] ? u ? u.p(f, _) : (u = Xe(f), u.c(), u.m(n, l)) : u && (u.d(1), u = null), /*$selected_service*/
+      f[1] ? c ? c.p(f, _) : (c = Ge(f), c.c(), c.m(n, s)) : c && (c.d(1), c = null);
     },
-    i: noop,
-    o: noop,
-    d(detaching) {
-      if (detaching) {
-        detach(form);
-      }
-      if (if_block0)
-        if_block0.d();
-      if (if_block1)
-        if_block1.d();
-      mounted = false;
-      dispose();
+    i: E,
+    o: E,
+    d(f) {
+      f && b(e), u && u.d(), c && c.d(), o = !1, r();
     }
   };
 }
-function instance$5($$self, $$props, $$invalidate) {
-  let $selected_job;
-  let $selected_service;
-  component_subscribe($$self, selected_job, ($$value) => $$invalidate(0, $selected_job = $$value));
-  component_subscribe($$self, selected_service, ($$value) => $$invalidate(1, $selected_service = $$value));
-  function handleRequest(event) {
-    clear();
-    const { submitter: submitButton } = event;
-    if (submitButton.name == "listsvc" && $selected_service == "") {
-      alert.set("Select a service from the list");
+function Pt(t, e, n) {
+  let l, s;
+  J(t, ce, (o) => n(0, l = o)), J(t, we, (o) => n(1, s = o));
+  function i(o) {
+    Te();
+    const { submitter: r } = o;
+    if (r.name == "listsvc" && s == "") {
+      ee.set("Select a service from the list");
       return;
     }
-    send(submitButton.name, $selected_service, $selected_job, "");
+    ae(r.name, s, l, "");
   }
-  return [$selected_job, $selected_service, handleRequest];
+  return [l, s, i];
 }
-class TopBar extends SvelteComponent {
-  constructor(options) {
-    super();
-    init(this, options, instance$5, create_fragment$5, safe_not_equal, {});
+class Mt extends ie {
+  constructor(e) {
+    super(), se(this, e, Pt, Bt, H, {});
   }
 }
-function get_each_context$3(ctx, list, i) {
-  const child_ctx = ctx.slice();
-  child_ctx[4] = list[i][0];
-  child_ctx[5] = list[i][1];
-  return child_ctx;
+function Ke(t, e, n) {
+  const l = t.slice();
+  return l[4] = e[n][0], l[5] = e[n][1], l;
 }
-function get_each_context_1$1(ctx, list, i) {
-  const child_ctx = ctx.slice();
-  child_ctx[8] = list[i][0];
-  child_ctx[9] = list[i][1];
-  return child_ctx;
+function Qe(t, e, n) {
+  const l = t.slice();
+  return l[8] = e[n][0], l[9] = e[n][1], l;
 }
-function get_each_context_2(ctx, list, i) {
-  const child_ctx = ctx.slice();
-  child_ctx[12] = list[i];
-  return child_ctx;
+function Ye(t, e, n) {
+  const l = t.slice();
+  return l[12] = e[n], l;
 }
-function create_if_block$4(ctx) {
-  let div;
-  let each_value = ensure_array_like(Object.entries(
+function Ze(t) {
+  let e, n = D(Object.entries(
     /*$service_details*/
-    ctx[0]
-  ));
-  let each_blocks = [];
-  for (let i = 0; i < each_value.length; i += 1) {
-    each_blocks[i] = create_each_block$3(get_each_context$3(ctx, each_value, i));
-  }
+    t[0]
+  )), l = [];
+  for (let s = 0; s < n.length; s += 1)
+    l[s] = nt(Ke(t, n, s));
   return {
     c() {
-      div = element("div");
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        each_blocks[i].c();
-      }
-      attr(div, "class", "grid grid-cols-10 mx-auto w-11/12 my-3");
+      e = d("div");
+      for (let s = 0; s < l.length; s += 1)
+        l[s].c();
+      p(e, "class", "grid grid-cols-10 mx-auto w-11/12 my-3");
     },
-    m(target, anchor) {
-      insert(target, div, anchor);
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        if (each_blocks[i]) {
-          each_blocks[i].m(div, null);
-        }
-      }
+    m(s, i) {
+      g(s, e, i);
+      for (let o = 0; o < l.length; o += 1)
+        l[o] && l[o].m(e, null);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*Object, $service_details, onclick*/
+    p(s, i) {
+      if (i & /*Object, $service_details, onclick*/
       3) {
-        each_value = ensure_array_like(Object.entries(
+        n = D(Object.entries(
           /*$service_details*/
-          ctx2[0]
+          s[0]
         ));
-        let i;
-        for (i = 0; i < each_value.length; i += 1) {
-          const child_ctx = get_each_context$3(ctx2, each_value, i);
-          if (each_blocks[i]) {
-            each_blocks[i].p(child_ctx, dirty);
-          } else {
-            each_blocks[i] = create_each_block$3(child_ctx);
-            each_blocks[i].c();
-            each_blocks[i].m(div, null);
-          }
+        let o;
+        for (o = 0; o < n.length; o += 1) {
+          const r = Ke(s, n, o);
+          l[o] ? l[o].p(r, i) : (l[o] = nt(r), l[o].c(), l[o].m(e, null));
         }
-        for (; i < each_blocks.length; i += 1) {
-          each_blocks[i].d(1);
-        }
-        each_blocks.length = each_value.length;
+        for (; o < l.length; o += 1)
+          l[o].d(1);
+        l.length = n.length;
       }
     },
-    d(detaching) {
-      if (detaching) {
-        detach(div);
-      }
-      destroy_each(each_blocks, detaching);
+    d(s) {
+      s && b(e), V(l, s);
     }
   };
 }
-function create_if_block_1$1(ctx) {
-  let p;
-  let t0_value = (
+function xe(t) {
+  let e, n = (
     /*key*/
-    ctx[4] + ""
-  );
-  let t0;
-  let t1;
-  let each_1_anchor;
-  let each_value_1 = ensure_array_like(Object.entries(
+    t[4] + ""
+  ), l, s, i, o = D(Object.entries(
     /*value*/
-    ctx[5]
-  ));
-  let each_blocks = [];
-  for (let i = 0; i < each_value_1.length; i += 1) {
-    each_blocks[i] = create_each_block_1$1(get_each_context_1$1(ctx, each_value_1, i));
-  }
+    t[5]
+  )), r = [];
+  for (let u = 0; u < o.length; u += 1)
+    r[u] = tt(Qe(t, o, u));
   return {
     c() {
-      p = element("p");
-      t0 = text(t0_value);
-      t1 = space();
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        each_blocks[i].c();
-      }
-      each_1_anchor = empty();
-      attr(p, "class", "col-start-1 col-span-9 font-bold border-b pt-2 pb-1 mt-1");
+      e = d("p"), l = q(n), s = k();
+      for (let u = 0; u < r.length; u += 1)
+        r[u].c();
+      i = W(), p(e, "class", "col-start-1 col-span-9 font-bold border-b pt-2 pb-1 mt-1");
     },
-    m(target, anchor) {
-      insert(target, p, anchor);
-      append(p, t0);
-      insert(target, t1, anchor);
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        if (each_blocks[i]) {
-          each_blocks[i].m(target, anchor);
-        }
-      }
-      insert(target, each_1_anchor, anchor);
+    m(u, c) {
+      g(u, e, c), a(e, l), g(u, s, c);
+      for (let f = 0; f < r.length; f += 1)
+        r[f] && r[f].m(u, c);
+      g(u, i, c);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*$service_details*/
-      1 && t0_value !== (t0_value = /*key*/
-      ctx2[4] + ""))
-        set_data(t0, t0_value);
-      if (dirty & /*Object, $service_details, onclick*/
+    p(u, c) {
+      if (c & /*$service_details*/
+      1 && n !== (n = /*key*/
+      u[4] + "") && N(l, n), c & /*Object, $service_details, onclick*/
       3) {
-        each_value_1 = ensure_array_like(Object.entries(
+        o = D(Object.entries(
           /*value*/
-          ctx2[5]
+          u[5]
         ));
-        let i;
-        for (i = 0; i < each_value_1.length; i += 1) {
-          const child_ctx = get_each_context_1$1(ctx2, each_value_1, i);
-          if (each_blocks[i]) {
-            each_blocks[i].p(child_ctx, dirty);
-          } else {
-            each_blocks[i] = create_each_block_1$1(child_ctx);
-            each_blocks[i].c();
-            each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
-          }
+        let f;
+        for (f = 0; f < o.length; f += 1) {
+          const _ = Qe(u, o, f);
+          r[f] ? r[f].p(_, c) : (r[f] = tt(_), r[f].c(), r[f].m(i.parentNode, i));
         }
-        for (; i < each_blocks.length; i += 1) {
-          each_blocks[i].d(1);
-        }
-        each_blocks.length = each_value_1.length;
+        for (; f < r.length; f += 1)
+          r[f].d(1);
+        r.length = o.length;
       }
     },
-    d(detaching) {
-      if (detaching) {
-        detach(p);
-        detach(t1);
-        detach(each_1_anchor);
-      }
-      destroy_each(each_blocks, detaching);
+    d(u) {
+      u && (b(e), b(s), b(i)), V(r, u);
     }
   };
 }
-function create_else_block$2(ctx) {
-  let p;
-  let t0_value = (
+function zt(t) {
+  let e, n = (
     /*jobname*/
-    ctx[12] + ""
-  );
-  let t0;
-  let t1;
+    t[12] + ""
+  ), l, s;
   return {
     c() {
-      p = element("p");
-      t0 = text(t0_value);
-      t1 = space();
-      attr(p, "class", "col-start-4 col-span-5 pb-1");
+      e = d("p"), l = q(n), s = k(), p(e, "class", "col-start-4 col-span-5 pb-1");
     },
-    m(target, anchor) {
-      insert(target, p, anchor);
-      append(p, t0);
-      append(p, t1);
+    m(i, o) {
+      g(i, e, o), a(e, l), a(e, s);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*$service_details*/
-      1 && t0_value !== (t0_value = /*jobname*/
-      ctx2[12] + ""))
-        set_data(t0, t0_value);
+    p(i, o) {
+      o & /*$service_details*/
+      1 && n !== (n = /*jobname*/
+      i[12] + "") && N(l, n);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(p);
-      }
+    d(i) {
+      i && b(e);
     }
   };
 }
-function create_if_block_2$1(ctx) {
-  let p;
-  let t0_value = (
+function Ft(t) {
+  let e, n = (
     /*jobname*/
-    ctx[12] + ""
-  );
-  let t0;
-  let t1;
-  let mounted;
-  let dispose;
+    t[12] + ""
+  ), l, s, i, o;
   return {
     c() {
-      p = element("p");
-      t0 = text(t0_value);
-      t1 = space();
-      attr(p, "class", "col-start-4 col-span-5 pb-1 cursor-pointer hover:underline");
+      e = d("p"), l = q(n), s = k(), p(e, "class", "col-start-4 col-span-5 pb-1 cursor-pointer hover:underline");
     },
-    m(target, anchor) {
-      insert(target, p, anchor);
-      append(p, t0);
-      append(p, t1);
-      if (!mounted) {
-        dispose = listen(
-          p,
-          "click",
-          /*onclick*/
-          ctx[1]
-        );
-        mounted = true;
-      }
+    m(r, u) {
+      g(r, e, u), a(e, l), a(e, s), i || (o = U(
+        e,
+        "click",
+        /*onclick*/
+        t[1]
+      ), i = !0);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*$service_details*/
-      1 && t0_value !== (t0_value = /*jobname*/
-      ctx2[12] + ""))
-        set_data(t0, t0_value);
+    p(r, u) {
+      u & /*$service_details*/
+      1 && n !== (n = /*jobname*/
+      r[12] + "") && N(l, n);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(p);
-      }
-      mounted = false;
-      dispose();
+    d(r) {
+      r && b(e), i = !1, o();
     }
   };
 }
-function create_each_block_2(ctx) {
-  let if_block_anchor;
-  function select_block_type(ctx2, dirty) {
-    if (
+function et(t) {
+  let e;
+  function n(i, o) {
+    return (
       /*key*/
-      ctx2[4] == "jobs"
-    )
-      return create_if_block_2$1;
-    return create_else_block$2;
+      i[4] == "jobs" ? Ft : zt
+    );
   }
-  let current_block_type = select_block_type(ctx);
-  let if_block = current_block_type(ctx);
+  let l = n(t), s = l(t);
   return {
     c() {
-      if_block.c();
-      if_block_anchor = empty();
+      s.c(), e = W();
     },
-    m(target, anchor) {
-      if_block.m(target, anchor);
-      insert(target, if_block_anchor, anchor);
+    m(i, o) {
+      s.m(i, o), g(i, e, o);
     },
-    p(ctx2, dirty) {
-      if (current_block_type === (current_block_type = select_block_type(ctx2)) && if_block) {
-        if_block.p(ctx2, dirty);
-      } else {
-        if_block.d(1);
-        if_block = current_block_type(ctx2);
-        if (if_block) {
-          if_block.c();
-          if_block.m(if_block_anchor.parentNode, if_block_anchor);
-        }
-      }
+    p(i, o) {
+      l === (l = n(i)) && s ? s.p(i, o) : (s.d(1), s = l(i), s && (s.c(), s.m(e.parentNode, e)));
     },
-    d(detaching) {
-      if (detaching) {
-        detach(if_block_anchor);
-      }
-      if_block.d(detaching);
+    d(i) {
+      i && b(e), s.d(i);
     }
   };
 }
-function create_each_block_1$1(ctx) {
-  let p;
-  let t0_value = (
+function tt(t) {
+  let e, n = (
     /*type*/
-    ctx[8] + ""
-  );
-  let t0;
-  let t1;
-  let each_1_anchor;
-  let each_value_2 = ensure_array_like(
+    t[8] + ""
+  ), l, s, i, o = D(
     /*job*/
-    ctx[9]
-  );
-  let each_blocks = [];
-  for (let i = 0; i < each_value_2.length; i += 1) {
-    each_blocks[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
-  }
+    t[9]
+  ), r = [];
+  for (let u = 0; u < o.length; u += 1)
+    r[u] = et(Ye(t, o, u));
   return {
     c() {
-      p = element("p");
-      t0 = text(t0_value);
-      t1 = space();
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        each_blocks[i].c();
-      }
-      each_1_anchor = empty();
-      attr(p, "class", "col-start-2 col-span-8 pb-2");
+      e = d("p"), l = q(n), s = k();
+      for (let u = 0; u < r.length; u += 1)
+        r[u].c();
+      i = W(), p(e, "class", "col-start-2 col-span-8 pb-2");
     },
-    m(target, anchor) {
-      insert(target, p, anchor);
-      append(p, t0);
-      insert(target, t1, anchor);
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        if (each_blocks[i]) {
-          each_blocks[i].m(target, anchor);
-        }
-      }
-      insert(target, each_1_anchor, anchor);
+    m(u, c) {
+      g(u, e, c), a(e, l), g(u, s, c);
+      for (let f = 0; f < r.length; f += 1)
+        r[f] && r[f].m(u, c);
+      g(u, i, c);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*$service_details*/
-      1 && t0_value !== (t0_value = /*type*/
-      ctx2[8] + ""))
-        set_data(t0, t0_value);
-      if (dirty & /*onclick, Object, $service_details*/
+    p(u, c) {
+      if (c & /*$service_details*/
+      1 && n !== (n = /*type*/
+      u[8] + "") && N(l, n), c & /*onclick, Object, $service_details*/
       3) {
-        each_value_2 = ensure_array_like(
+        o = D(
           /*job*/
-          ctx2[9]
+          u[9]
         );
-        let i;
-        for (i = 0; i < each_value_2.length; i += 1) {
-          const child_ctx = get_each_context_2(ctx2, each_value_2, i);
-          if (each_blocks[i]) {
-            each_blocks[i].p(child_ctx, dirty);
-          } else {
-            each_blocks[i] = create_each_block_2(child_ctx);
-            each_blocks[i].c();
-            each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
-          }
+        let f;
+        for (f = 0; f < o.length; f += 1) {
+          const _ = Ye(u, o, f);
+          r[f] ? r[f].p(_, c) : (r[f] = et(_), r[f].c(), r[f].m(i.parentNode, i));
         }
-        for (; i < each_blocks.length; i += 1) {
-          each_blocks[i].d(1);
-        }
-        each_blocks.length = each_value_2.length;
+        for (; f < r.length; f += 1)
+          r[f].d(1);
+        r.length = o.length;
       }
     },
-    d(detaching) {
-      if (detaching) {
-        detach(p);
-        detach(t1);
-        detach(each_1_anchor);
-      }
-      destroy_each(each_blocks, detaching);
+    d(u) {
+      u && (b(e), b(s), b(i)), V(r, u);
     }
   };
 }
-function create_each_block$3(ctx) {
-  let if_block_anchor;
-  let if_block = (
+function nt(t) {
+  let e, n = (
     /*key*/
-    ctx[4] != "definition" && create_if_block_1$1(ctx)
+    t[4] != "definition" && xe(t)
   );
   return {
     c() {
-      if (if_block)
-        if_block.c();
-      if_block_anchor = empty();
+      n && n.c(), e = W();
     },
-    m(target, anchor) {
-      if (if_block)
-        if_block.m(target, anchor);
-      insert(target, if_block_anchor, anchor);
+    m(l, s) {
+      n && n.m(l, s), g(l, e, s);
     },
-    p(ctx2, dirty) {
-      if (
-        /*key*/
-        ctx2[4] != "definition"
-      ) {
-        if (if_block) {
-          if_block.p(ctx2, dirty);
-        } else {
-          if_block = create_if_block_1$1(ctx2);
-          if_block.c();
-          if_block.m(if_block_anchor.parentNode, if_block_anchor);
-        }
-      } else if (if_block) {
-        if_block.d(1);
-        if_block = null;
-      }
+    p(l, s) {
+      /*key*/
+      l[4] != "definition" ? n ? n.p(l, s) : (n = xe(l), n.c(), n.m(e.parentNode, e)) : n && (n.d(1), n = null);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(if_block_anchor);
-      }
-      if (if_block)
-        if_block.d(detaching);
+    d(l) {
+      l && b(e), n && n.d(l);
     }
   };
 }
-function create_fragment$4(ctx) {
-  let if_block_anchor;
-  let if_block = (
+function Ut(t) {
+  let e, n = (
     /*$service_details*/
-    ctx[0] && create_if_block$4(ctx)
+    t[0] && Ze(t)
   );
   return {
     c() {
-      if (if_block)
-        if_block.c();
-      if_block_anchor = empty();
+      n && n.c(), e = W();
     },
-    m(target, anchor) {
-      if (if_block)
-        if_block.m(target, anchor);
-      insert(target, if_block_anchor, anchor);
+    m(l, s) {
+      n && n.m(l, s), g(l, e, s);
     },
-    p(ctx2, [dirty]) {
-      if (
-        /*$service_details*/
-        ctx2[0]
-      ) {
-        if (if_block) {
-          if_block.p(ctx2, dirty);
-        } else {
-          if_block = create_if_block$4(ctx2);
-          if_block.c();
-          if_block.m(if_block_anchor.parentNode, if_block_anchor);
-        }
-      } else if (if_block) {
-        if_block.d(1);
-        if_block = null;
-      }
+    p(l, [s]) {
+      /*$service_details*/
+      l[0] ? n ? n.p(l, s) : (n = Ze(l), n.c(), n.m(e.parentNode, e)) : n && (n.d(1), n = null);
     },
-    i: noop,
-    o: noop,
-    d(detaching) {
-      if (detaching) {
-        detach(if_block_anchor);
-      }
-      if (if_block)
-        if_block.d(detaching);
+    i: E,
+    o: E,
+    d(l) {
+      l && b(e), n && n.d(l);
     }
   };
 }
-function instance$4($$self, $$props, $$invalidate) {
-  let $selected_job;
-  let $selected_service;
-  let $service_details;
-  component_subscribe($$self, selected_job, ($$value) => $$invalidate(2, $selected_job = $$value));
-  component_subscribe($$self, selected_service, ($$value) => $$invalidate(3, $selected_service = $$value));
-  component_subscribe($$self, service_details, ($$value) => $$invalidate(0, $service_details = $$value));
-  function onclick(ev) {
-    selected_job.set(ev.target.innerText);
-    clear();
-    send("status", $selected_service, $selected_job, null);
+function Ht(t, e, n) {
+  let l, s, i;
+  J(t, ce, (r) => n(2, l = r)), J(t, we, (r) => n(3, s = r)), J(t, Je, (r) => n(0, i = r));
+  function o(r) {
+    ce.set(r.target.innerText), Te(), ae("status", s, l, null);
   }
-  return [$service_details, onclick];
+  return [i, o];
 }
-class ServiceDetails extends SvelteComponent {
-  constructor(options) {
-    super();
-    init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
+class Vt extends ie {
+  constructor(e) {
+    super(), se(this, e, Ht, Ut, H, {});
   }
 }
-function get_each_context$2(ctx, list, i) {
-  const child_ctx = ctx.slice();
-  child_ctx[2] = list[i];
-  child_ctx[4] = i;
-  return child_ctx;
+function lt(t, e, n) {
+  const l = t.slice();
+  return l[2] = e[n], l[4] = n, l;
 }
-function create_each_block$2(ctx) {
-  let li;
-  let pre;
-  let t_value = (
+function st(t) {
+  let e, n, l = (
     /*item*/
-    ctx[2] + ""
-  );
-  let t;
+    t[2] + ""
+  ), s;
   return {
     c() {
-      li = element("li");
-      pre = element("pre");
-      t = text(t_value);
-      attr(pre, "class", "wrap");
+      e = d("li"), n = d("pre"), s = q(l), p(n, "class", "wrap");
     },
-    m(target, anchor) {
-      insert(target, li, anchor);
-      append(li, pre);
-      append(pre, t);
+    m(i, o) {
+      g(i, e, o), a(e, n), a(n, s);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*status*/
-      1 && t_value !== (t_value = /*item*/
-      ctx2[2] + ""))
-        set_data(t, t_value);
+    p(i, o) {
+      o & /*status*/
+      1 && l !== (l = /*item*/
+      i[2] + "") && N(s, l);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(li);
-      }
+    d(i) {
+      i && b(e);
     }
   };
 }
-function create_if_block$3(ctx) {
-  let span0;
-  let t1;
-  let span1;
-  let t2_value = (
+function it(t) {
+  let e, n, l, s = (
     /*status*/
-    ctx[0]["error"] + ""
-  );
-  let t2;
+    t[0].error + ""
+  ), i;
   return {
     c() {
-      span0 = element("span");
-      span0.textContent = "Error:";
-      t1 = space();
-      span1 = element("span");
-      t2 = text(t2_value);
-      attr(span0, "class", "font-bold");
-      attr(span1, "class", "col-span-4 text-red-500");
+      e = d("span"), e.textContent = "Error:", n = k(), l = d("span"), i = q(s), p(e, "class", "font-bold"), p(l, "class", "col-span-4 text-red-500");
     },
-    m(target, anchor) {
-      insert(target, span0, anchor);
-      insert(target, t1, anchor);
-      insert(target, span1, anchor);
-      append(span1, t2);
+    m(o, r) {
+      g(o, e, r), g(o, n, r), g(o, l, r), a(l, i);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*status*/
-      1 && t2_value !== (t2_value = /*status*/
-      ctx2[0]["error"] + ""))
-        set_data(t2, t2_value);
+    p(o, r) {
+      r & /*status*/
+      1 && s !== (s = /*status*/
+      o[0].error + "") && N(i, s);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(span0);
-        detach(t1);
-        detach(span1);
-      }
+    d(o) {
+      o && (b(e), b(n), b(l));
     }
   };
 }
-function create_fragment$3(ctx) {
-  let div;
-  let span0;
-  let t1;
-  let span1;
-  let t2_value = (
+function Wt(t) {
+  let e, n, l, s, i = (
     /*status*/
-    ctx[0]["id"] + ""
-  );
-  let t2;
-  let t3;
-  let span2;
-  let t5;
-  let span3;
-  let t6_value = (
+    t[0].id + ""
+  ), o, r, u, c, f, _ = (
     /*status*/
-    ctx[0]["service"] + ""
-  );
-  let t6;
-  let t7;
-  let span4;
-  let t9;
-  let span5;
-  let t10;
-  let t11;
-  let span6;
-  let t13;
-  let span7;
-  let t14_value = (
+    t[0].service + ""
+  ), m, w, C, T, h, v, y, j, $, L, O = (
     /*status*/
-    ctx[0]["workerid"] + ""
-  );
-  let t14;
-  let t15;
-  let span8;
-  let t17;
-  let span9;
-  let t18_value = (
+    t[0].workerid + ""
+  ), X, Ae, pe, De, _e, de = (
     /*status*/
-    ctx[0]["task"] + ""
-  );
-  let t18;
-  let t19;
-  let span10;
-  let t21;
-  let span11;
-  let ul;
-  let t22;
-  let span12;
-  let t24;
-  let span13;
-  let t25_value = (
+    t[0].task + ""
+  ), qe, Le, me, Be, he, oe, Pe, be, Me, ge, ve = (
     /*status*/
-    ctx[0]["result"] + ""
-  );
-  let t25;
-  let t26;
-  let each_value = ensure_array_like(
+    t[0].result + ""
+  ), Oe, ze, G = D(
     /*status*/
-    ctx[0]["updates"]
-  );
-  let each_blocks = [];
-  for (let i = 0; i < each_value.length; i += 1) {
-    each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
-  }
-  let if_block = (
+    t[0].updates
+  ), R = [];
+  for (let S = 0; S < G.length; S += 1)
+    R[S] = st(lt(t, G, S));
+  let A = (
     /*status*/
-    ctx[0]["error"] && create_if_block$3(ctx)
+    t[0].error && it(t)
   );
   return {
     c() {
-      div = element("div");
-      span0 = element("span");
-      span0.textContent = "ID:";
-      t1 = space();
-      span1 = element("span");
-      t2 = text(t2_value);
-      t3 = space();
-      span2 = element("span");
-      span2.textContent = "Service:";
-      t5 = space();
-      span3 = element("span");
-      t6 = text(t6_value);
-      t7 = space();
-      span4 = element("span");
-      span4.textContent = "Status:";
-      t9 = space();
-      span5 = element("span");
-      t10 = text(
+      e = d("div"), n = d("span"), n.textContent = "ID:", l = k(), s = d("span"), o = q(i), r = k(), u = d("span"), u.textContent = "Service:", c = k(), f = d("span"), m = q(_), w = k(), C = d("span"), C.textContent = "Status:", T = k(), h = d("span"), v = q(
         /*state*/
-        ctx[1]
-      );
-      t11 = space();
-      span6 = element("span");
-      span6.textContent = "Worker:";
-      t13 = space();
-      span7 = element("span");
-      t14 = text(t14_value);
-      t15 = space();
-      span8 = element("span");
-      span8.textContent = "Input:";
-      t17 = space();
-      span9 = element("span");
-      t18 = text(t18_value);
-      t19 = space();
-      span10 = element("span");
-      span10.textContent = "Logs:";
-      t21 = space();
-      span11 = element("span");
-      ul = element("ul");
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        each_blocks[i].c();
-      }
-      t22 = space();
-      span12 = element("span");
-      span12.textContent = "Output:";
-      t24 = space();
-      span13 = element("span");
-      t25 = text(t25_value);
-      t26 = space();
-      if (if_block)
-        if_block.c();
-      attr(span0, "class", "font-bold");
-      attr(span1, "class", "col-span-4");
-      attr(span2, "class", "font-bold");
-      attr(span3, "class", "col-span-4");
-      attr(span4, "class", "font-bold");
-      attr(span5, "class", "col-span-4");
-      attr(span6, "class", "font-bold");
-      attr(span7, "class", "col-span-4");
-      attr(span8, "class", "font-bold");
-      attr(span9, "class", "col-span-4");
-      attr(span10, "class", "font-bold");
-      attr(ul, "class", "my-8 text-sm flex flex-col justify-start");
-      attr(span11, "class", "col-span-4");
-      attr(span12, "class", "font-bold");
-      attr(span13, "class", "col-span-4");
-      attr(div, "class", "status svelte-1sy2uwb");
+        t[1]
+      ), y = k(), j = d("span"), j.textContent = "Worker:", $ = k(), L = d("span"), X = q(O), Ae = k(), pe = d("span"), pe.textContent = "Input:", De = k(), _e = d("span"), qe = q(de), Le = k(), me = d("span"), me.textContent = "Logs:", Be = k(), he = d("span"), oe = d("ul");
+      for (let S = 0; S < R.length; S += 1)
+        R[S].c();
+      Pe = k(), be = d("span"), be.textContent = "Output:", Me = k(), ge = d("span"), Oe = q(ve), ze = k(), A && A.c(), p(n, "class", "font-bold"), p(s, "class", "col-span-4"), p(u, "class", "font-bold"), p(f, "class", "col-span-4"), p(C, "class", "font-bold"), p(h, "class", "col-span-4"), p(j, "class", "font-bold"), p(L, "class", "col-span-4"), p(pe, "class", "font-bold"), p(_e, "class", "col-span-4"), p(me, "class", "font-bold"), p(oe, "class", "my-8 text-sm flex flex-col justify-start"), p(he, "class", "col-span-4"), p(be, "class", "font-bold"), p(ge, "class", "col-span-4"), p(e, "class", "status svelte-1sy2uwb");
     },
-    m(target, anchor) {
-      insert(target, div, anchor);
-      append(div, span0);
-      append(div, t1);
-      append(div, span1);
-      append(span1, t2);
-      append(div, t3);
-      append(div, span2);
-      append(div, t5);
-      append(div, span3);
-      append(span3, t6);
-      append(div, t7);
-      append(div, span4);
-      append(div, t9);
-      append(div, span5);
-      append(span5, t10);
-      append(div, t11);
-      append(div, span6);
-      append(div, t13);
-      append(div, span7);
-      append(span7, t14);
-      append(div, t15);
-      append(div, span8);
-      append(div, t17);
-      append(div, span9);
-      append(span9, t18);
-      append(div, t19);
-      append(div, span10);
-      append(div, t21);
-      append(div, span11);
-      append(span11, ul);
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        if (each_blocks[i]) {
-          each_blocks[i].m(ul, null);
-        }
-      }
-      append(div, t22);
-      append(div, span12);
-      append(div, t24);
-      append(div, span13);
-      append(span13, t25);
-      append(div, t26);
-      if (if_block)
-        if_block.m(div, null);
+    m(S, B) {
+      g(S, e, B), a(e, n), a(e, l), a(e, s), a(s, o), a(e, r), a(e, u), a(e, c), a(e, f), a(f, m), a(e, w), a(e, C), a(e, T), a(e, h), a(h, v), a(e, y), a(e, j), a(e, $), a(e, L), a(L, X), a(e, Ae), a(e, pe), a(e, De), a(e, _e), a(_e, qe), a(e, Le), a(e, me), a(e, Be), a(e, he), a(he, oe);
+      for (let I = 0; I < R.length; I += 1)
+        R[I] && R[I].m(oe, null);
+      a(e, Pe), a(e, be), a(e, Me), a(e, ge), a(ge, Oe), a(e, ze), A && A.m(e, null);
     },
-    p(ctx2, [dirty]) {
-      if (dirty & /*status*/
-      1 && t2_value !== (t2_value = /*status*/
-      ctx2[0]["id"] + ""))
-        set_data(t2, t2_value);
-      if (dirty & /*status*/
-      1 && t6_value !== (t6_value = /*status*/
-      ctx2[0]["service"] + ""))
-        set_data(t6, t6_value);
-      if (dirty & /*state*/
-      2)
-        set_data(
-          t10,
-          /*state*/
-          ctx2[1]
-        );
-      if (dirty & /*status*/
-      1 && t14_value !== (t14_value = /*status*/
-      ctx2[0]["workerid"] + ""))
-        set_data(t14, t14_value);
-      if (dirty & /*status*/
-      1 && t18_value !== (t18_value = /*status*/
-      ctx2[0]["task"] + ""))
-        set_data(t18, t18_value);
-      if (dirty & /*status*/
+    p(S, [B]) {
+      if (B & /*status*/
+      1 && i !== (i = /*status*/
+      S[0].id + "") && N(o, i), B & /*status*/
+      1 && _ !== (_ = /*status*/
+      S[0].service + "") && N(m, _), B & /*state*/
+      2 && N(
+        v,
+        /*state*/
+        S[1]
+      ), B & /*status*/
+      1 && O !== (O = /*status*/
+      S[0].workerid + "") && N(X, O), B & /*status*/
+      1 && de !== (de = /*status*/
+      S[0].task + "") && N(qe, de), B & /*status*/
       1) {
-        each_value = ensure_array_like(
+        G = D(
           /*status*/
-          ctx2[0]["updates"]
+          S[0].updates
         );
-        let i;
-        for (i = 0; i < each_value.length; i += 1) {
-          const child_ctx = get_each_context$2(ctx2, each_value, i);
-          if (each_blocks[i]) {
-            each_blocks[i].p(child_ctx, dirty);
-          } else {
-            each_blocks[i] = create_each_block$2(child_ctx);
-            each_blocks[i].c();
-            each_blocks[i].m(ul, null);
-          }
+        let I;
+        for (I = 0; I < G.length; I += 1) {
+          const Fe = lt(S, G, I);
+          R[I] ? R[I].p(Fe, B) : (R[I] = st(Fe), R[I].c(), R[I].m(oe, null));
         }
-        for (; i < each_blocks.length; i += 1) {
-          each_blocks[i].d(1);
-        }
-        each_blocks.length = each_value.length;
+        for (; I < R.length; I += 1)
+          R[I].d(1);
+        R.length = G.length;
       }
-      if (dirty & /*status*/
-      1 && t25_value !== (t25_value = /*status*/
-      ctx2[0]["result"] + ""))
-        set_data(t25, t25_value);
-      if (
-        /*status*/
-        ctx2[0]["error"]
-      ) {
-        if (if_block) {
-          if_block.p(ctx2, dirty);
-        } else {
-          if_block = create_if_block$3(ctx2);
-          if_block.c();
-          if_block.m(div, null);
-        }
-      } else if (if_block) {
-        if_block.d(1);
-        if_block = null;
-      }
+      B & /*status*/
+      1 && ve !== (ve = /*status*/
+      S[0].result + "") && N(Oe, ve), /*status*/
+      S[0].error ? A ? A.p(S, B) : (A = it(S), A.c(), A.m(e, null)) : A && (A.d(1), A = null);
     },
-    i: noop,
-    o: noop,
-    d(detaching) {
-      if (detaching) {
-        detach(div);
-      }
-      destroy_each(each_blocks, detaching);
-      if (if_block)
-        if_block.d();
+    i: E,
+    o: E,
+    d(S) {
+      S && b(e), V(R, S), A && A.d();
     }
   };
 }
-function instance$3($$self, $$props, $$invalidate) {
-  let { status = {
+function Xt(t, e, n) {
+  let { status: l = {
     id: "job1",
     service: "echo",
     task: "hello",
-    queued: false,
-    running: false,
-    complete: true,
-    cancelled: false,
-    abandoned: false,
+    queued: !1,
+    running: !1,
+    complete: !0,
+    cancelled: !1,
+    abandoned: !1,
     workerid: "echo-worker",
     updates: ["Preparing response.", "Almost done.", "95% complete."],
     result: "hello"
-  } } = $$props;
-  let state = "queue";
-  if (status["running"]) {
-    state = "running";
-  } else if (status["complete"]) {
-    state = "finished";
-  } else if (status["cancelled"]) {
-    state = "cancelled";
-  } else if (status["abandoned"]) {
-    state = "abandoned";
-  }
-  $$self.$$set = ($$props2) => {
-    if ("status" in $$props2)
-      $$invalidate(0, status = $$props2.status);
-  };
-  return [status, state];
+  } } = e, s = "queue";
+  return l.running ? s = "running" : l.complete ? s = "finished" : l.cancelled ? s = "cancelled" : l.abandoned && (s = "abandoned"), t.$$set = (i) => {
+    "status" in i && n(0, l = i.status);
+  }, [l, s];
 }
-class JobStatus extends SvelteComponent {
-  constructor(options) {
-    super();
-    init(this, options, instance$3, create_fragment$3, safe_not_equal, { status: 0 });
+class Gt extends ie {
+  constructor(e) {
+    super(), se(this, e, Xt, Wt, H, { status: 0 });
   }
 }
-function get_each_context$1(ctx, list, i) {
-  const child_ctx = ctx.slice();
-  child_ctx[2] = list[i];
-  child_ctx[4] = i;
-  return child_ctx;
+function ot(t, e, n) {
+  const l = t.slice();
+  return l[2] = e[n], l[4] = n, l;
 }
-function create_if_block$2(ctx) {
-  let ul;
-  let each_value = ensure_array_like(
+function rt(t) {
+  let e, n = D(
     /*$service_list*/
-    ctx[0]
-  );
-  let each_blocks = [];
-  for (let i = 0; i < each_value.length; i += 1) {
-    each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
-  }
+    t[0]
+  ), l = [];
+  for (let s = 0; s < n.length; s += 1)
+    l[s] = ut(ot(t, n, s));
   return {
     c() {
-      ul = element("ul");
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        each_blocks[i].c();
-      }
-      attr(ul, "class", "svelte-1vfek8v");
+      e = d("ul");
+      for (let s = 0; s < l.length; s += 1)
+        l[s].c();
+      p(e, "class", "svelte-1vfek8v");
     },
-    m(target, anchor) {
-      insert(target, ul, anchor);
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        if (each_blocks[i]) {
-          each_blocks[i].m(ul, null);
-        }
-      }
+    m(s, i) {
+      g(s, e, i);
+      for (let o = 0; o < l.length; o += 1)
+        l[o] && l[o].m(e, null);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*onclick, $service_list*/
+    p(s, i) {
+      if (i & /*onclick, $service_list*/
       3) {
-        each_value = ensure_array_like(
+        n = D(
           /*$service_list*/
-          ctx2[0]
+          s[0]
         );
-        let i;
-        for (i = 0; i < each_value.length; i += 1) {
-          const child_ctx = get_each_context$1(ctx2, each_value, i);
-          if (each_blocks[i]) {
-            each_blocks[i].p(child_ctx, dirty);
-          } else {
-            each_blocks[i] = create_each_block$1(child_ctx);
-            each_blocks[i].c();
-            each_blocks[i].m(ul, null);
-          }
+        let o;
+        for (o = 0; o < n.length; o += 1) {
+          const r = ot(s, n, o);
+          l[o] ? l[o].p(r, i) : (l[o] = ut(r), l[o].c(), l[o].m(e, null));
         }
-        for (; i < each_blocks.length; i += 1) {
-          each_blocks[i].d(1);
-        }
-        each_blocks.length = each_value.length;
+        for (; o < l.length; o += 1)
+          l[o].d(1);
+        l.length = n.length;
       }
     },
-    d(detaching) {
-      if (detaching) {
-        detach(ul);
-      }
-      destroy_each(each_blocks, detaching);
+    d(s) {
+      s && b(e), V(l, s);
     }
   };
 }
-function create_each_block$1(ctx) {
-  let li;
-  let t_value = (
+function ut(t) {
+  let e, n = (
     /*item*/
-    ctx[2] + ""
-  );
-  let t;
-  let mounted;
-  let dispose;
+    t[2] + ""
+  ), l, s, i;
   return {
     c() {
-      li = element("li");
-      t = text(t_value);
-      attr(li, "class", "hover:underline svelte-1vfek8v");
+      e = d("li"), l = q(n), p(e, "class", "hover:underline svelte-1vfek8v");
     },
-    m(target, anchor) {
-      insert(target, li, anchor);
-      append(li, t);
-      if (!mounted) {
-        dispose = listen(
-          li,
-          "click",
-          /*onclick*/
-          ctx[1]
-        );
-        mounted = true;
-      }
+    m(o, r) {
+      g(o, e, r), a(e, l), s || (i = U(
+        e,
+        "click",
+        /*onclick*/
+        t[1]
+      ), s = !0);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*$service_list*/
-      1 && t_value !== (t_value = /*item*/
-      ctx2[2] + ""))
-        set_data(t, t_value);
+    p(o, r) {
+      r & /*$service_list*/
+      1 && n !== (n = /*item*/
+      o[2] + "") && N(l, n);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(li);
-      }
-      mounted = false;
-      dispose();
+    d(o) {
+      o && b(e), s = !1, i();
     }
   };
 }
-function create_fragment$2(ctx) {
-  let if_block_anchor;
-  let if_block = (
+function Kt(t) {
+  let e, n = (
     /*$service_list*/
-    ctx[0] && create_if_block$2(ctx)
+    t[0] && rt(t)
   );
   return {
     c() {
-      if (if_block)
-        if_block.c();
-      if_block_anchor = empty();
+      n && n.c(), e = W();
     },
-    m(target, anchor) {
-      if (if_block)
-        if_block.m(target, anchor);
-      insert(target, if_block_anchor, anchor);
+    m(l, s) {
+      n && n.m(l, s), g(l, e, s);
     },
-    p(ctx2, [dirty]) {
-      if (
-        /*$service_list*/
-        ctx2[0]
-      ) {
-        if (if_block) {
-          if_block.p(ctx2, dirty);
-        } else {
-          if_block = create_if_block$2(ctx2);
-          if_block.c();
-          if_block.m(if_block_anchor.parentNode, if_block_anchor);
-        }
-      } else if (if_block) {
-        if_block.d(1);
-        if_block = null;
-      }
+    p(l, [s]) {
+      /*$service_list*/
+      l[0] ? n ? n.p(l, s) : (n = rt(l), n.c(), n.m(e.parentNode, e)) : n && (n.d(1), n = null);
     },
-    i: noop,
-    o: noop,
-    d(detaching) {
-      if (detaching) {
-        detach(if_block_anchor);
-      }
-      if (if_block)
-        if_block.d(detaching);
+    i: E,
+    o: E,
+    d(l) {
+      l && b(e), n && n.d(l);
     }
   };
 }
-function instance$2($$self, $$props, $$invalidate) {
-  let $service_list;
-  component_subscribe($$self, service_list, ($$value) => $$invalidate(0, $service_list = $$value));
-  function onclick(ev) {
-    let service = ev.target.innerText;
-    send("listsvc", service, null, null);
+function Qt(t, e, n) {
+  let l;
+  J(t, Re, (i) => n(0, l = i));
+  function s(i) {
+    let o = i.target.innerText;
+    ae("listsvc", o, null, null);
   }
-  return [$service_list, onclick];
+  return [l, s];
 }
-class ServiceList extends SvelteComponent {
-  constructor(options) {
-    super();
-    init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
+class Yt extends ie {
+  constructor(e) {
+    super(), se(this, e, Qt, Kt, H, {});
   }
 }
-function get_each_context(ctx, list, i) {
-  const child_ctx = ctx.slice();
-  child_ctx[13] = list[i];
-  child_ctx[14] = list;
-  child_ctx[15] = i;
-  return child_ctx;
+function ct(t, e, n) {
+  const l = t.slice();
+  return l[13] = e[n], l[14] = e, l[15] = n, l;
 }
-function get_each_context_1(ctx, list, i) {
-  const child_ctx = ctx.slice();
-  child_ctx[16] = list[i];
-  return child_ctx;
+function ft(t, e, n) {
+  const l = t.slice();
+  return l[16] = e[n], l;
 }
-function create_else_block$1(ctx) {
-  let input;
-  let input_name_value;
-  let input_placeholder_value;
-  let input_required_value;
-  let mounted;
-  let dispose;
-  function input_input_handler() {
-    ctx[7].call(
-      input,
+function Zt(t) {
+  let e, n, l, s, i, o;
+  function r() {
+    t[7].call(
+      e,
       /*field*/
-      ctx[13]
+      t[13]
     );
   }
   return {
     c() {
-      input = element("input");
-      attr(input, "type", "text");
-      attr(input, "name", input_name_value = /*field*/
-      ctx[13]);
-      attr(input, "placeholder", input_placeholder_value = /*props*/
-      ctx[1][
+      e = d("input"), p(e, "type", "text"), p(e, "name", n = /*field*/
+      t[13]), p(e, "placeholder", l = /*props*/
+      t[1][
         /*field*/
-        ctx[13]
-      ].required);
-      input.required = input_required_value = /*props*/
-      ctx[1][
+        t[13]
+      ].required), e.required = s = /*props*/
+      t[1][
         /*field*/
-        ctx[13]
-      ].required == "Required";
-      attr(input, "class", "svelte-1pnm85l");
+        t[13]
+      ].required == "Required", p(e, "class", "svelte-t7trdn");
     },
-    m(target, anchor) {
-      insert(target, input, anchor);
-      set_input_value(
-        input,
+    m(u, c) {
+      g(u, e, c), x(
+        e,
         /*fields*/
-        ctx[0][
+        t[0][
           /*field*/
-          ctx[13]
+          t[13]
+        ]
+      ), i || (o = U(e, "input", r), i = !0);
+    },
+    p(u, c) {
+      t = u, c & /*props, String, Object*/
+      2 && n !== (n = /*field*/
+      t[13]) && p(e, "name", n), c & /*props, String, Object*/
+      2 && l !== (l = /*props*/
+      t[1][
+        /*field*/
+        t[13]
+      ].required) && p(e, "placeholder", l), c & /*props, String, Object*/
+      2 && s !== (s = /*props*/
+      t[1][
+        /*field*/
+        t[13]
+      ].required == "Required") && (e.required = s), c & /*fields, Object, props, String*/
+      3 && e.value !== /*fields*/
+      t[0][
+        /*field*/
+        t[13]
+      ] && x(
+        e,
+        /*fields*/
+        t[0][
+          /*field*/
+          t[13]
         ]
       );
-      if (!mounted) {
-        dispose = listen(input, "input", input_input_handler);
-        mounted = true;
-      }
     },
-    p(new_ctx, dirty) {
-      ctx = new_ctx;
-      if (dirty & /*props, String, Object*/
-      2 && input_name_value !== (input_name_value = /*field*/
-      ctx[13])) {
-        attr(input, "name", input_name_value);
-      }
-      if (dirty & /*props, String, Object*/
-      2 && input_placeholder_value !== (input_placeholder_value = /*props*/
-      ctx[1][
-        /*field*/
-        ctx[13]
-      ].required)) {
-        attr(input, "placeholder", input_placeholder_value);
-      }
-      if (dirty & /*props, String, Object*/
-      2 && input_required_value !== (input_required_value = /*props*/
-      ctx[1][
-        /*field*/
-        ctx[13]
-      ].required == "Required")) {
-        input.required = input_required_value;
-      }
-      if (dirty & /*fields, Object, props, String*/
-      3 && input.value !== /*fields*/
-      ctx[0][
-        /*field*/
-        ctx[13]
-      ]) {
-        set_input_value(
-          input,
-          /*fields*/
-          ctx[0][
-            /*field*/
-            ctx[13]
-          ]
-        );
-      }
-    },
-    d(detaching) {
-      if (detaching) {
-        detach(input);
-      }
-      mounted = false;
-      dispose();
+    d(u) {
+      u && b(e), i = !1, o();
     }
   };
 }
-function create_if_block$1(ctx) {
-  let select;
-  let mounted;
-  let dispose;
-  let each_value_1 = ensure_array_like(
+function xt(t) {
+  let e, n, l, s = D(
     /*props*/
-    ctx[1][
+    t[1][
       /*field*/
-      ctx[13]
+      t[13]
     ].choices
-  );
-  let each_blocks = [];
-  for (let i = 0; i < each_value_1.length; i += 1) {
-    each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
-  }
-  function select_change_handler() {
-    ctx[6].call(
-      select,
+  ), i = [];
+  for (let r = 0; r < s.length; r += 1)
+    i[r] = at(ft(t, s, r));
+  function o() {
+    t[6].call(
+      e,
       /*field*/
-      ctx[13]
+      t[13]
     );
   }
   return {
     c() {
-      select = element("select");
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        each_blocks[i].c();
-      }
-      attr(select, "class", "svelte-1pnm85l");
-      if (
-        /*fields*/
-        ctx[0][
-          /*field*/
-          ctx[13]
-        ] === void 0
-      )
-        add_render_callback(select_change_handler);
+      e = d("select");
+      for (let r = 0; r < i.length; r += 1)
+        i[r].c();
+      p(e, "class", "svelte-t7trdn"), /*fields*/
+      t[0][
+        /*field*/
+        t[13]
+      ] === void 0 && $e(o);
     },
-    m(target, anchor) {
-      insert(target, select, anchor);
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        if (each_blocks[i]) {
-          each_blocks[i].m(select, null);
-        }
-      }
-      select_option(
-        select,
+    m(r, u) {
+      g(r, e, u);
+      for (let c = 0; c < i.length; c += 1)
+        i[c] && i[c].m(e, null);
+      He(
+        e,
         /*fields*/
-        ctx[0][
+        t[0][
           /*field*/
-          ctx[13]
+          t[13]
         ],
-        true
-      );
-      if (!mounted) {
-        dispose = listen(select, "change", select_change_handler);
-        mounted = true;
-      }
+        !0
+      ), n || (l = U(e, "change", o), n = !0);
     },
-    p(new_ctx, dirty) {
-      ctx = new_ctx;
-      if (dirty & /*String, props, Object*/
+    p(r, u) {
+      if (t = r, u & /*String, props, Object*/
       2) {
-        each_value_1 = ensure_array_like(
+        s = D(
           /*props*/
-          ctx[1][
+          t[1][
             /*field*/
-            ctx[13]
+            t[13]
           ].choices
         );
-        let i;
-        for (i = 0; i < each_value_1.length; i += 1) {
-          const child_ctx = get_each_context_1(ctx, each_value_1, i);
-          if (each_blocks[i]) {
-            each_blocks[i].p(child_ctx, dirty);
-          } else {
-            each_blocks[i] = create_each_block_1(child_ctx);
-            each_blocks[i].c();
-            each_blocks[i].m(select, null);
-          }
+        let c;
+        for (c = 0; c < s.length; c += 1) {
+          const f = ft(t, s, c);
+          i[c] ? i[c].p(f, u) : (i[c] = at(f), i[c].c(), i[c].m(e, null));
         }
-        for (; i < each_blocks.length; i += 1) {
-          each_blocks[i].d(1);
-        }
-        each_blocks.length = each_value_1.length;
+        for (; c < i.length; c += 1)
+          i[c].d(1);
+        i.length = s.length;
       }
-      if (dirty & /*fields, Object, props, String*/
-      3) {
-        select_option(
-          select,
-          /*fields*/
-          ctx[0][
-            /*field*/
-            ctx[13]
-          ]
-        );
-      }
+      u & /*fields, Object, props, String*/
+      3 && He(
+        e,
+        /*fields*/
+        t[0][
+          /*field*/
+          t[13]
+        ]
+      );
     },
-    d(detaching) {
-      if (detaching) {
-        detach(select);
-      }
-      destroy_each(each_blocks, detaching);
-      mounted = false;
-      dispose();
+    d(r) {
+      r && b(e), V(i, r), n = !1, l();
     }
   };
 }
-function create_each_block_1(ctx) {
-  let option;
-  let t_value = String(
+function at(t) {
+  let e, n = String(
     /*choice*/
-    ctx[16]
-  ) + "";
-  let t;
-  let option_value_value;
+    t[16]
+  ) + "", l, s;
   return {
     c() {
-      option = element("option");
-      t = text(t_value);
-      option.__value = option_value_value = String(
+      e = d("option"), l = q(n), e.__value = s = String(
         /*choice*/
-        ctx[16]
-      );
-      set_input_value(option, option.__value);
+        t[16]
+      ), x(e, e.__value);
     },
-    m(target, anchor) {
-      insert(target, option, anchor);
-      append(option, t);
+    m(i, o) {
+      g(i, e, o), a(e, l);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*props*/
-      2 && t_value !== (t_value = String(
+    p(i, o) {
+      o & /*props*/
+      2 && n !== (n = String(
         /*choice*/
-        ctx2[16]
-      ) + ""))
-        set_data(t, t_value);
-      if (dirty & /*props, String, Object*/
-      2 && option_value_value !== (option_value_value = String(
+        i[16]
+      ) + "") && N(l, n), o & /*props, String, Object*/
+      2 && s !== (s = String(
         /*choice*/
-        ctx2[16]
-      ))) {
-        option.__value = option_value_value;
-        set_input_value(option, option.__value);
-      }
+        i[16]
+      )) && (e.__value = s, x(e, e.__value));
     },
-    d(detaching) {
-      if (detaching) {
-        detach(option);
-      }
+    d(i) {
+      i && b(e);
     }
   };
 }
-function create_each_block(ctx) {
-  let div;
-  let b;
-  let t0_value = (
+function pt(t) {
+  let e, n, l = (
     /*field*/
-    ctx[13] + ""
-  );
-  let t0;
-  let t1;
-  let t2_value = (
+    t[13] + ""
+  ), s, i, o = (
     /*props*/
-    ctx[1][
+    t[1][
       /*field*/
-      ctx[13]
+      t[13]
     ].type + ""
-  );
-  let t2;
-  let t3;
-  let t4;
-  let t5;
-  let p;
-  let t6_value = (
+  ), r, u, c, f, _, m = (
     /*props*/
-    ctx[1][
+    t[1][
       /*field*/
-      ctx[13]
+      t[13]
     ].help + ""
-  );
-  let t6;
-  function select_block_type(ctx2, dirty) {
-    if (
+  ), w;
+  function C(v, y) {
+    return (
       /*props*/
-      ctx2[1][
+      v[1][
         /*field*/
-        ctx2[13]
-      ].choices
-    )
-      return create_if_block$1;
-    return create_else_block$1;
+        v[13]
+      ].choices ? xt : Zt
+    );
   }
-  let current_block_type = select_block_type(ctx);
-  let if_block = current_block_type(ctx);
+  let T = C(t), h = T(t);
   return {
     c() {
-      div = element("div");
-      b = element("b");
-      t0 = text(t0_value);
-      t1 = text(" [");
-      t2 = text(t2_value);
-      t3 = text("]:");
-      t4 = space();
-      if_block.c();
-      t5 = space();
-      p = element("p");
-      t6 = text(t6_value);
-      attr(div, "class", "col-start-1 my-auto mr-auto");
-      attr(p, "class", "col-start-2 col-span-3 mb-2 text-sm");
+      e = d("div"), n = d("b"), s = q(l), i = q(" ["), r = q(o), u = q("]:"), c = k(), h.c(), f = k(), _ = d("p"), w = q(m), p(e, "class", "col-start-1 my-auto mr-auto"), p(_, "class", "col-start-2 col-span-3 mb-2 text-sm");
     },
-    m(target, anchor) {
-      insert(target, div, anchor);
-      append(div, b);
-      append(b, t0);
-      append(div, t1);
-      append(div, t2);
-      append(div, t3);
-      insert(target, t4, anchor);
-      if_block.m(target, anchor);
-      insert(target, t5, anchor);
-      insert(target, p, anchor);
-      append(p, t6);
+    m(v, y) {
+      g(v, e, y), a(e, n), a(n, s), a(e, i), a(e, r), a(e, u), g(v, c, y), h.m(v, y), g(v, f, y), g(v, _, y), a(_, w);
     },
-    p(ctx2, dirty) {
-      if (dirty & /*props*/
-      2 && t0_value !== (t0_value = /*field*/
-      ctx2[13] + ""))
-        set_data(t0, t0_value);
-      if (dirty & /*props*/
-      2 && t2_value !== (t2_value = /*props*/
-      ctx2[1][
+    p(v, y) {
+      y & /*props*/
+      2 && l !== (l = /*field*/
+      v[13] + "") && N(s, l), y & /*props*/
+      2 && o !== (o = /*props*/
+      v[1][
         /*field*/
-        ctx2[13]
-      ].type + ""))
-        set_data(t2, t2_value);
-      if (current_block_type === (current_block_type = select_block_type(ctx2)) && if_block) {
-        if_block.p(ctx2, dirty);
-      } else {
-        if_block.d(1);
-        if_block = current_block_type(ctx2);
-        if (if_block) {
-          if_block.c();
-          if_block.m(t5.parentNode, t5);
-        }
-      }
-      if (dirty & /*props*/
-      2 && t6_value !== (t6_value = /*props*/
-      ctx2[1][
+        v[13]
+      ].type + "") && N(r, o), T === (T = C(v)) && h ? h.p(v, y) : (h.d(1), h = T(v), h && (h.c(), h.m(f.parentNode, f))), y & /*props*/
+      2 && m !== (m = /*props*/
+      v[1][
         /*field*/
-        ctx2[13]
-      ].help + ""))
-        set_data(t6, t6_value);
+        v[13]
+      ].help + "") && N(w, m);
     },
-    d(detaching) {
-      if (detaching) {
-        detach(div);
-        detach(t4);
-        detach(t5);
-        detach(p);
-      }
-      if_block.d(detaching);
+    d(v) {
+      v && (b(e), b(c), b(f), b(_)), h.d(v);
     }
   };
 }
-function create_fragment$1(ctx) {
-  let form;
-  let div0;
-  let pre;
-  let t0_value = (
+function en(t) {
+  let e, n, l, s = (
     /*service*/
-    ctx[2].desc + ""
-  );
-  let t0;
-  let t1;
-  let h20;
-  let t3;
-  let div1;
-  let input0;
-  let t4;
-  let h21;
-  let t6;
-  let t7;
-  let div2;
-  let mounted;
-  let dispose;
-  let each_value = ensure_array_like(Object.keys(
+    t[2].desc + ""
+  ), i, o, r, u, c, f, _, m, w, C, T, h, v, y = D(Object.keys(
     /*props*/
-    ctx[1]
-  ));
-  let each_blocks = [];
-  for (let i = 0; i < each_value.length; i += 1) {
-    each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
-  }
+    t[1]
+  )), j = [];
+  for (let $ = 0; $ < y.length; $ += 1)
+    j[$] = pt(ct(t, y, $));
   return {
     c() {
-      form = element("form");
-      div0 = element("div");
-      pre = element("pre");
-      t0 = text(t0_value);
-      t1 = space();
-      h20 = element("h2");
-      h20.textContent = "Job ID";
-      t3 = space();
-      div1 = element("div");
-      input0 = element("input");
-      t4 = space();
-      h21 = element("h2");
-      h21.textContent = "Payload";
-      t6 = space();
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        each_blocks[i].c();
-      }
-      t7 = space();
-      div2 = element("div");
-      div2.innerHTML = `<input class="btn" type="submit" name="submit" value="Submit Job"/> <input class="btn" type="submit" name="status" value="Check Status"/> <input class="btn" type="submit" name="cancel" value="Cancel Job"/>`;
-      attr(pre, "class", "wrap");
-      attr(div0, "class", "col-span-5 py-2 text-slate-500 text-sm");
-      attr(h20, "class", "col-span-5 my-2 border-b");
-      attr(input0, "class", "col-start-2 col-span-3 mt-2 text-sm svelte-1pnm85l");
-      attr(input0, "type", "text");
-      attr(input0, "placeholder", "Unique job ID");
-      input0.required = true;
-      attr(div1, "class", "col-start-2 col-span-2");
-      attr(h21, "class", "col-span-5 mb-2 mt-4 border-b");
-      attr(div2, "class", "col-start-2 col-span-4 mt-2");
-      attr(form, "class", "jobform svelte-1pnm85l");
+      e = d("form"), n = d("div"), l = d("pre"), i = q(s), o = k(), r = d("h2"), r.textContent = "Job ID", u = k(), c = d("div"), f = d("input"), _ = k(), m = d("h2"), m.textContent = "Payload", w = k();
+      for (let $ = 0; $ < j.length; $ += 1)
+        j[$].c();
+      C = k(), T = d("div"), T.innerHTML = '<input class="btn" type="submit" name="submit" value="Submit Job"/> <input class="btn" type="submit" name="status" value="Check Status"/> <input class="btn" type="submit" name="cancel" value="Cancel Job"/>', p(l, "class", "wrap"), p(n, "class", "col-span-5 py-2 text-slate-500 text-sm"), p(r, "class", "col-span-5 my-2 border-b"), p(f, "class", "col-start-2 col-span-3 mt-2 text-sm svelte-t7trdn"), p(f, "type", "text"), p(f, "placeholder", "Unique job ID"), f.required = !0, p(c, "class", "col-start-2 col-span-2"), p(m, "class", "col-span-5 mb-2 mt-4 border-b"), p(T, "class", "col-start-2 col-span-4 mt-2"), p(e, "class", "jobform svelte-t7trdn");
     },
-    m(target, anchor) {
-      insert(target, form, anchor);
-      append(form, div0);
-      append(div0, pre);
-      append(pre, t0);
-      append(form, t1);
-      append(form, h20);
-      append(form, t3);
-      append(form, div1);
-      append(div1, input0);
-      set_input_value(
-        input0,
+    m($, L) {
+      g($, e, L), a(e, n), a(n, l), a(l, i), a(e, o), a(e, r), a(e, u), a(e, c), a(c, f), x(
+        f,
         /*$selected_job*/
-        ctx[3]
-      );
-      append(form, t4);
-      append(form, h21);
-      append(form, t6);
-      for (let i = 0; i < each_blocks.length; i += 1) {
-        if (each_blocks[i]) {
-          each_blocks[i].m(form, null);
-        }
-      }
-      append(form, t7);
-      append(form, div2);
-      if (!mounted) {
-        dispose = [
-          listen(
-            input0,
-            "input",
-            /*input0_input_handler*/
-            ctx[5]
-          ),
-          listen(form, "submit", prevent_default(
-            /*handleRequest*/
-            ctx[4]
-          ))
-        ];
-        mounted = true;
-      }
+        t[3]
+      ), a(e, _), a(e, m), a(e, w);
+      for (let O = 0; O < j.length; O += 1)
+        j[O] && j[O].m(e, null);
+      a(e, C), a(e, T), h || (v = [
+        U(
+          f,
+          "input",
+          /*input0_input_handler*/
+          t[5]
+        ),
+        U(e, "submit", bt(
+          /*handleRequest*/
+          t[4]
+        ))
+      ], h = !0);
     },
-    p(ctx2, [dirty]) {
-      if (dirty & /*service*/
-      4 && t0_value !== (t0_value = /*service*/
-      ctx2[2].desc + ""))
-        set_data(t0, t0_value);
-      if (dirty & /*$selected_job*/
-      8 && input0.value !== /*$selected_job*/
-      ctx2[3]) {
-        set_input_value(
-          input0,
-          /*$selected_job*/
-          ctx2[3]
-        );
-      }
-      if (dirty & /*props, Object, fields, String*/
+    p($, [L]) {
+      if (L & /*service*/
+      4 && s !== (s = /*service*/
+      $[2].desc + "") && N(i, s), L & /*$selected_job*/
+      8 && f.value !== /*$selected_job*/
+      $[3] && x(
+        f,
+        /*$selected_job*/
+        $[3]
+      ), L & /*props, Object, fields, String*/
       3) {
-        each_value = ensure_array_like(Object.keys(
+        y = D(Object.keys(
           /*props*/
-          ctx2[1]
+          $[1]
         ));
-        let i;
-        for (i = 0; i < each_value.length; i += 1) {
-          const child_ctx = get_each_context(ctx2, each_value, i);
-          if (each_blocks[i]) {
-            each_blocks[i].p(child_ctx, dirty);
-          } else {
-            each_blocks[i] = create_each_block(child_ctx);
-            each_blocks[i].c();
-            each_blocks[i].m(form, t7);
-          }
+        let O;
+        for (O = 0; O < y.length; O += 1) {
+          const X = ct($, y, O);
+          j[O] ? j[O].p(X, L) : (j[O] = pt(X), j[O].c(), j[O].m(e, C));
         }
-        for (; i < each_blocks.length; i += 1) {
-          each_blocks[i].d(1);
-        }
-        each_blocks.length = each_value.length;
+        for (; O < j.length; O += 1)
+          j[O].d(1);
+        j.length = y.length;
       }
     },
-    i: noop,
-    o: noop,
-    d(detaching) {
-      if (detaching) {
-        detach(form);
-      }
-      destroy_each(each_blocks, detaching);
-      mounted = false;
-      run_all(dispose);
+    i: E,
+    o: E,
+    d($) {
+      $ && b(e), V(j, $), h = !1, te(v);
     }
   };
 }
-function instance$1($$self, $$props, $$invalidate) {
-  let $selected_job;
-  let $selected_service;
-  let $job_list;
-  let $job_fields;
-  let $job_definition;
-  component_subscribe($$self, selected_job, ($$value) => $$invalidate(3, $selected_job = $$value));
-  component_subscribe($$self, selected_service, ($$value) => $$invalidate(8, $selected_service = $$value));
-  component_subscribe($$self, job_list, ($$value) => $$invalidate(9, $job_list = $$value));
-  component_subscribe($$self, job_fields, ($$value) => $$invalidate(10, $job_fields = $$value));
-  component_subscribe($$self, job_definition, ($$value) => $$invalidate(11, $job_definition = $$value));
-  let fields = {};
-  let defn = JSON.parse($job_definition);
-  let props = {};
-  let service = {};
-  onMount(() => {
-    $$invalidate(2, service.message = "", service);
-    $$invalidate(2, service.name = defn["name"], service);
-    $$invalidate(2, service.desc = defn["desc"], service);
-    $$invalidate(0, fields = $job_fields);
-    let items = defn["fields"];
-    Object.entries(items).map((list, i) => {
-      let field = list[0];
-      let defn2 = list[1];
-      if (field in fields == false) {
-        $$invalidate(0, fields[field] = "default" in defn2 ? String(defn2["default"]) : "", fields);
-      }
-      $$invalidate(
+function tn(t, e, n) {
+  let l, s, i, o, r;
+  J(t, ce, (h) => n(3, l = h)), J(t, we, (h) => n(8, s = h)), J(t, ye, (h) => n(9, i = h)), J(t, Ee, (h) => n(10, o = h)), J(t, Se, (h) => n(11, r = h));
+  let u = {}, c = JSON.parse(r), f = {}, _ = {};
+  gt(() => {
+    n(2, _.message = "", _), n(2, _.name = c.name, _), n(2, _.desc = c.desc, _), n(0, u = o);
+    let h = c.fields;
+    Object.entries(h).map((v, y) => {
+      let j = v[0], $ = v[1];
+      j in u || n(0, u[j] = "default" in $ ? String($.default) : "", u), n(
         1,
-        props[field] = {
-          type: defn2["type"],
-          help: defn2["help"],
-          required: defn2["required"] ? "Required" : "Optional",
-          choices: defn2["choices"] ? defn2["choices"] : null
+        f[j] = {
+          type: $.type,
+          help: $.help,
+          required: $.required ? "Required" : "Optional",
+          choices: $.choices ? $.choices : null
         },
-        props
+        f
       );
-    });
-    job_fields.set(fields);
+    }), Ee.set(u);
   });
-  function handleRequest(event) {
-    clear();
-    const { submitter: submitButton } = event;
-    if (submitButton.name == "submit") {
-      if ($job_list && $job_list.includes($selected_job)) {
-        alert.set("Please choose a new job ID.");
+  function m(h) {
+    Te();
+    const { submitter: v } = h;
+    if (v.name == "submit") {
+      if (i && i.includes(l)) {
+        ee.set("Please choose a new job ID.");
         return;
       }
-      $$invalidate(2, service.message = JSON.stringify(fields), service);
+      let y = {};
+      Object.keys(f).forEach((j) => {
+        y[j] = u[j];
+      }), n(2, _.message = JSON.stringify(y), _);
     }
-    job_fields.set(fields);
-    send(submitButton.name, $selected_service, $selected_job, service.message);
+    Ee.set(u), ae(v.name, s, l, _.message);
   }
-  function input0_input_handler() {
-    $selected_job = this.value;
-    selected_job.set($selected_job);
+  function w() {
+    l = this.value, ce.set(l);
   }
-  function select_change_handler(field) {
-    fields[field] = select_value(this);
-    $$invalidate(0, fields);
-    $$invalidate(1, props);
+  function C(h) {
+    u[h] = Ot(this), n(0, u), n(1, f);
   }
-  function input_input_handler(field) {
-    fields[field] = this.value;
-    $$invalidate(0, fields);
-    $$invalidate(1, props);
+  function T(h) {
+    u[h] = this.value, n(0, u), n(1, f);
   }
   return [
-    fields,
-    props,
-    service,
-    $selected_job,
-    handleRequest,
-    input0_input_handler,
-    select_change_handler,
-    input_input_handler
+    u,
+    f,
+    _,
+    l,
+    m,
+    w,
+    C,
+    T
   ];
 }
-class JobInput extends SvelteComponent {
-  constructor(options) {
-    super();
-    init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+class nn extends ie {
+  constructor(e) {
+    super(), se(this, e, tn, en, H, {});
   }
 }
-function create_if_block_3(ctx) {
-  let h3;
-  let t;
+function _t(t) {
+  let e, n;
   return {
     c() {
-      h3 = element("h3");
-      t = text(
+      e = d("h3"), n = q(
         /*$alert*/
-        ctx[0]
+        t[0]
+      ), p(e, "class", "mx-auto text-red-500 w-full text-left px-10");
+    },
+    m(l, s) {
+      g(l, e, s), a(e, n);
+    },
+    p(l, s) {
+      s & /*$alert*/
+      1 && N(
+        n,
+        /*$alert*/
+        l[0]
       );
-      attr(h3, "class", "mx-auto text-red-500 w-full text-left px-10");
     },
-    m(target, anchor) {
-      insert(target, h3, anchor);
-      append(h3, t);
-    },
-    p(ctx2, dirty) {
-      if (dirty & /*$alert*/
-      1)
-        set_data(
-          t,
-          /*$alert*/
-          ctx2[0]
-        );
-    },
-    d(detaching) {
-      if (detaching) {
-        detach(h3);
-      }
+    d(l) {
+      l && b(e);
     }
   };
 }
-function create_else_block(ctx) {
-  let servicelist;
-  let current;
-  servicelist = new ServiceList({});
-  return {
+function ln(t) {
+  let e, n;
+  return e = new Yt({}), {
     c() {
-      create_component(servicelist.$$.fragment);
+      fe(e.$$.fragment);
     },
-    m(target, anchor) {
-      mount_component(servicelist, target, anchor);
-      current = true;
+    m(l, s) {
+      ne(e, l, s), n = !0;
     },
-    p: noop,
-    i(local) {
-      if (current)
-        return;
-      transition_in(servicelist.$$.fragment, local);
-      current = true;
+    p: E,
+    i(l) {
+      n || (P(e.$$.fragment, l), n = !0);
     },
-    o(local) {
-      transition_out(servicelist.$$.fragment, local);
-      current = false;
+    o(l) {
+      z(e.$$.fragment, l), n = !1;
     },
-    d(detaching) {
-      destroy_component(servicelist, detaching);
+    d(l) {
+      le(e, l);
     }
   };
 }
-function create_if_block_1(ctx) {
-  let t;
-  let servicedetails;
-  let current;
-  let if_block = (
+function sn(t) {
+  let e, n, l, s = (
     /*$job_definition*/
-    ctx[3] && create_if_block_2()
+    t[3] && dt()
   );
-  servicedetails = new ServiceDetails({});
-  return {
+  return n = new Vt({}), {
     c() {
-      if (if_block)
-        if_block.c();
-      t = space();
-      create_component(servicedetails.$$.fragment);
+      s && s.c(), e = k(), fe(n.$$.fragment);
     },
-    m(target, anchor) {
-      if (if_block)
-        if_block.m(target, anchor);
-      insert(target, t, anchor);
-      mount_component(servicedetails, target, anchor);
-      current = true;
+    m(i, o) {
+      s && s.m(i, o), g(i, e, o), ne(n, i, o), l = !0;
     },
-    p(ctx2, dirty) {
-      if (
-        /*$job_definition*/
-        ctx2[3]
-      ) {
-        if (if_block) {
-          if (dirty & /*$job_definition*/
-          8) {
-            transition_in(if_block, 1);
-          }
-        } else {
-          if_block = create_if_block_2();
-          if_block.c();
-          transition_in(if_block, 1);
-          if_block.m(t.parentNode, t);
-        }
-      } else if (if_block) {
-        group_outros();
-        transition_out(if_block, 1, 1, () => {
-          if_block = null;
-        });
-        check_outros();
-      }
+    p(i, o) {
+      /*$job_definition*/
+      i[3] ? s ? o & /*$job_definition*/
+      8 && P(s, 1) : (s = dt(), s.c(), P(s, 1), s.m(e.parentNode, e)) : s && (kt(), z(s, 1, 1, () => {
+        s = null;
+      }), $t());
     },
-    i(local) {
-      if (current)
-        return;
-      transition_in(if_block);
-      transition_in(servicedetails.$$.fragment, local);
-      current = true;
+    i(i) {
+      l || (P(s), P(n.$$.fragment, i), l = !0);
     },
-    o(local) {
-      transition_out(if_block);
-      transition_out(servicedetails.$$.fragment, local);
-      current = false;
+    o(i) {
+      z(s), z(n.$$.fragment, i), l = !1;
     },
-    d(detaching) {
-      if (detaching) {
-        detach(t);
-      }
-      if (if_block)
-        if_block.d(detaching);
-      destroy_component(servicedetails, detaching);
+    d(i) {
+      i && b(e), s && s.d(i), le(n, i);
     }
   };
 }
-function create_if_block(ctx) {
-  let jobstatus;
-  let current;
-  jobstatus = new JobStatus({
+function on(t) {
+  let e, n;
+  return e = new Gt({
     props: { status: (
       /*$job_status*/
-      ctx[1]
+      t[1]
     ) }
-  });
-  return {
+  }), {
     c() {
-      create_component(jobstatus.$$.fragment);
+      fe(e.$$.fragment);
     },
-    m(target, anchor) {
-      mount_component(jobstatus, target, anchor);
-      current = true;
+    m(l, s) {
+      ne(e, l, s), n = !0;
     },
-    p(ctx2, dirty) {
-      const jobstatus_changes = {};
-      if (dirty & /*$job_status*/
-      2)
-        jobstatus_changes.status = /*$job_status*/
-        ctx2[1];
-      jobstatus.$set(jobstatus_changes);
+    p(l, s) {
+      const i = {};
+      s & /*$job_status*/
+      2 && (i.status = /*$job_status*/
+      l[1]), e.$set(i);
     },
-    i(local) {
-      if (current)
-        return;
-      transition_in(jobstatus.$$.fragment, local);
-      current = true;
+    i(l) {
+      n || (P(e.$$.fragment, l), n = !0);
     },
-    o(local) {
-      transition_out(jobstatus.$$.fragment, local);
-      current = false;
+    o(l) {
+      z(e.$$.fragment, l), n = !1;
     },
-    d(detaching) {
-      destroy_component(jobstatus, detaching);
+    d(l) {
+      le(e, l);
     }
   };
 }
-function create_if_block_2(ctx) {
-  let jobinput;
-  let current;
-  jobinput = new JobInput({});
-  return {
+function dt(t) {
+  let e, n;
+  return e = new nn({}), {
     c() {
-      create_component(jobinput.$$.fragment);
+      fe(e.$$.fragment);
     },
-    m(target, anchor) {
-      mount_component(jobinput, target, anchor);
-      current = true;
+    m(l, s) {
+      ne(e, l, s), n = !0;
     },
-    i(local) {
-      if (current)
-        return;
-      transition_in(jobinput.$$.fragment, local);
-      current = true;
+    i(l) {
+      n || (P(e.$$.fragment, l), n = !0);
     },
-    o(local) {
-      transition_out(jobinput.$$.fragment, local);
-      current = false;
+    o(l) {
+      z(e.$$.fragment, l), n = !1;
     },
-    d(detaching) {
-      destroy_component(jobinput, detaching);
+    d(l) {
+      le(e, l);
     }
   };
 }
-function create_fragment(ctx) {
-  let topbar;
-  let t0;
-  let t1;
-  let current_block_type_index;
-  let if_block1;
-  let if_block1_anchor;
-  let current;
-  topbar = new TopBar({});
-  let if_block0 = (
+function rn(t) {
+  let e, n, l, s, i, o, r;
+  e = new Mt({});
+  let u = (
     /*$alert*/
-    ctx[0] && create_if_block_3(ctx)
+    t[0] && _t(t)
   );
-  const if_block_creators = [create_if_block, create_if_block_1, create_else_block];
-  const if_blocks = [];
-  function select_block_type(ctx2, dirty) {
-    if (
+  const c = [on, sn, ln], f = [];
+  function _(m, w) {
+    return (
       /*$job_status*/
-      ctx2[1]
-    )
-      return 0;
-    if (
-      /*$job_list*/
-      ctx2[2]
-    )
-      return 1;
-    return 2;
+      m[1] ? 0 : (
+        /*$job_list*/
+        m[2] ? 1 : 2
+      )
+    );
   }
-  current_block_type_index = select_block_type(ctx);
-  if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-  return {
+  return s = _(t), i = f[s] = c[s](t), {
     c() {
-      create_component(topbar.$$.fragment);
-      t0 = space();
-      if (if_block0)
-        if_block0.c();
-      t1 = space();
-      if_block1.c();
-      if_block1_anchor = empty();
+      fe(e.$$.fragment), n = k(), u && u.c(), l = k(), i.c(), o = W();
     },
-    m(target, anchor) {
-      mount_component(topbar, target, anchor);
-      insert(target, t0, anchor);
-      if (if_block0)
-        if_block0.m(target, anchor);
-      insert(target, t1, anchor);
-      if_blocks[current_block_type_index].m(target, anchor);
-      insert(target, if_block1_anchor, anchor);
-      current = true;
+    m(m, w) {
+      ne(e, m, w), g(m, n, w), u && u.m(m, w), g(m, l, w), f[s].m(m, w), g(m, o, w), r = !0;
     },
-    p(ctx2, [dirty]) {
-      if (
-        /*$alert*/
-        ctx2[0]
-      ) {
-        if (if_block0) {
-          if_block0.p(ctx2, dirty);
-        } else {
-          if_block0 = create_if_block_3(ctx2);
-          if_block0.c();
-          if_block0.m(t1.parentNode, t1);
-        }
-      } else if (if_block0) {
-        if_block0.d(1);
-        if_block0 = null;
-      }
-      let previous_block_index = current_block_type_index;
-      current_block_type_index = select_block_type(ctx2);
-      if (current_block_type_index === previous_block_index) {
-        if_blocks[current_block_type_index].p(ctx2, dirty);
-      } else {
-        group_outros();
-        transition_out(if_blocks[previous_block_index], 1, 1, () => {
-          if_blocks[previous_block_index] = null;
-        });
-        check_outros();
-        if_block1 = if_blocks[current_block_type_index];
-        if (!if_block1) {
-          if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
-          if_block1.c();
-        } else {
-          if_block1.p(ctx2, dirty);
-        }
-        transition_in(if_block1, 1);
-        if_block1.m(if_block1_anchor.parentNode, if_block1_anchor);
-      }
+    p(m, [w]) {
+      /*$alert*/
+      m[0] ? u ? u.p(m, w) : (u = _t(m), u.c(), u.m(l.parentNode, l)) : u && (u.d(1), u = null);
+      let C = s;
+      s = _(m), s === C ? f[s].p(m, w) : (kt(), z(f[C], 1, 1, () => {
+        f[C] = null;
+      }), $t(), i = f[s], i ? i.p(m, w) : (i = f[s] = c[s](m), i.c()), P(i, 1), i.m(o.parentNode, o));
     },
-    i(local) {
-      if (current)
-        return;
-      transition_in(topbar.$$.fragment, local);
-      transition_in(if_block1);
-      current = true;
+    i(m) {
+      r || (P(e.$$.fragment, m), P(i), r = !0);
     },
-    o(local) {
-      transition_out(topbar.$$.fragment, local);
-      transition_out(if_block1);
-      current = false;
+    o(m) {
+      z(e.$$.fragment, m), z(i), r = !1;
     },
-    d(detaching) {
-      if (detaching) {
-        detach(t0);
-        detach(t1);
-        detach(if_block1_anchor);
-      }
-      destroy_component(topbar, detaching);
-      if (if_block0)
-        if_block0.d(detaching);
-      if_blocks[current_block_type_index].d(detaching);
+    d(m) {
+      m && (b(n), b(l), b(o)), le(e, m), u && u.d(m), f[s].d(m);
     }
   };
 }
-function instance($$self, $$props, $$invalidate) {
-  let $alert;
-  let $job_status;
-  let $job_list;
-  let $job_definition;
-  component_subscribe($$self, alert, ($$value) => $$invalidate(0, $alert = $$value));
-  component_subscribe($$self, job_status, ($$value) => $$invalidate(1, $job_status = $$value));
-  component_subscribe($$self, job_list, ($$value) => $$invalidate(2, $job_list = $$value));
-  component_subscribe($$self, job_definition, ($$value) => $$invalidate(3, $job_definition = $$value));
-  onMount(() => {
-    send("listall", null, null, null);
-  });
-  return [$alert, $job_status, $job_list, $job_definition];
+function un(t, e, n) {
+  let l, s, i, o;
+  return J(t, ee, (r) => n(0, l = r)), J(t, je, (r) => n(1, s = r)), J(t, ye, (r) => n(2, i = r)), J(t, Se, (r) => n(3, o = r)), gt(() => {
+    ae("listall", null, null, null);
+  }), [l, s, i, o];
 }
-class Main extends SvelteComponent {
-  constructor(options) {
-    super();
-    init(this, options, instance, create_fragment, safe_not_equal, {});
+class cn extends ie {
+  constructor(e) {
+    super(), se(this, e, un, rn, H, {});
   }
 }
-const app = new Main({
+const an = new cn({
   target: document.getElementById("app")
 });
 export {
-  app as default
+  an as default
 };
 //# sourceMappingURL=main.js.map
