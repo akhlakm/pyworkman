@@ -298,16 +298,16 @@ def start_worker(service : type, mgr_url, key_file):
     """
 
     # Use the class name as service name.
-    try: svcName = service.__name__
+    try: svcName = service._name
     except AttributeError:
-        svcName = service.__class__.__name__
+        svcName = service.__name__
 
     # The service must define a run function to process a job and payload.
     assert hasattr(service, "run") and callable(service.run), \
         f"{svcName} must define run(send : Send, job : {svcName}) staticmethod"
 
     # Fallback to docstring if not defined.
-    try: svcDesc = service.__desc__
+    try: svcDesc = service._desc
     except AttributeError:
         svcDesc = service.__doc__
 

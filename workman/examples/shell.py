@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 from workman.worker import start_worker, Send
 from workman.util import shell
 
@@ -10,6 +11,7 @@ class ShellService:
     Directly execute a terminal command.
     WARN! Be careful using this service!
     """
+    _name = 'Shell:'+os.uname().nodename
 
     command : str = \
         dict(help="Command to execute.", default="conda info", required=1)
