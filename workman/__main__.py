@@ -27,7 +27,7 @@ def main():
     elif cmd == "update":
         # Reinstall pyworkman.
         from workman.util import shell
-        repo = "git+pip install git+https://github.com/akhlakm/pyworkman.git"
+        repo = "git+https://github.com/akhlakm/pyworkman.git"
         shell.execute_command(f"pip install -U {repo}", capture=False)
 
     elif cmd == "copy":
