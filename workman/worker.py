@@ -188,7 +188,7 @@ class ServiceWorker(object):
 
 
             payload["job"] = msg.job
-            defn = namedtuple(service, [k for k in payload.keys()])
+            defn = namedtuple("Job", [k for k in payload.keys()])
             return defn(**payload)
 
     def reply(self, message : str):
