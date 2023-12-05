@@ -1,6 +1,6 @@
 [project]
 name = "pyworkman"
-version = "0.2.12"
+version = "0.2.13"
 authors = [
     { name="Akhlak Mahmood", email="akhlakm@gatech.edu" },
 ]
