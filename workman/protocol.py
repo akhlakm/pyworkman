@@ -21,7 +21,7 @@ UPDATE  = b'U'
 
 # Timing
 ZMQ_LINGER          = 2000  # msec
-HBEAT_TIMEOUT       = 120   # sec
+HBEAT_TIMEOUT       = 600   # sec
 HBEAT_INTERVAL      = 30    # sec
 WORKER_BUSY_TIMEOUT = 900
 
