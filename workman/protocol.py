@@ -22,7 +22,7 @@ UPDATE  = b'U'
 # Timing
 ZMQ_LINGER          = 2000  # msec
 HBEAT_TIMEOUT       = 600   # sec
-HBEAT_INTERVAL      = 30    # sec
+HBEAT_INTERVAL      = 60    # sec
 
 Encryptor = None
 
