@@ -3,9 +3,6 @@ import os
 from workman.worker import start_worker, Send
 from workman.util import shell
 
-MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
-KEY = "mgr.key"                 # Download from MGR.
-
 class PyWMService:
     """
     Directly execute a terminal command.
@@ -23,4 +20,7 @@ class PyWMService:
 
 # Specify --pywm to start as a service worker
 # ----------------------------------------------
-start_worker(PyWMService, MGR, KEY)
+if __name__ == '__main__':
+    MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
+    KEY = "mgr.key"                 # Download from MGR.
+    start_worker(PyWMService, MGR, KEY)

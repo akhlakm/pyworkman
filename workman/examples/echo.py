@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 from workman.worker import start_worker, Send
 
-MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
-KEY = "mgr.key"                 # Download from MGR.
-
 class EchoService:
     """
 A simple echo service for test purposes.
@@ -32,4 +29,7 @@ with the Worker handler and job inputs.
 
 # Specify --pywm to start as a service worker
 # ----------------------------------------------
-start_worker(EchoService, MGR, KEY)
+if __name__ == '__main__':
+    MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
+    KEY = "mgr.key"                 # Download from MGR.
+    start_worker(EchoService, MGR, KEY)
