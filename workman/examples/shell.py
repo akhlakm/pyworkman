@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from workman.worker import start_worker, Send
+from workman.worker import start_worker
 from workman.util import shell
 
 class PyWMService:
@@ -14,7 +14,7 @@ class PyWMService:
         dict(help="Command to execute.", default="conda info", required=1)
     
     @staticmethod
-    def run(send : Send, job : 'PyWMService'):
+    def run(job : 'PyWMService', send):
         for output in shell.watch_stdout(job.command):
             send.update(output)
 

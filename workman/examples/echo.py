@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from workman.worker import start_worker, Send
+from workman.worker import start_worker
 
 class EchoService:
     """
@@ -20,7 +20,7 @@ with the Worker handler and job inputs.
         dict(help="Reverse the message.", default=False)
 
     @staticmethod
-    def run(send : Send, job : 'EchoService'):
+    def run(job : 'EchoService', send):
         send.update("Input: " + job.message)
         if job.reverse:
             send.reply(job.message[::-1])

@@ -321,7 +321,7 @@ def start_worker(service : type, mgr_url, key_file):
     # Create commandline argument parser
     cmdline = argparse.ArgumentParser(prog=svcName, description=svcDesc)
     cmdline.add_argument("--pywm", default=False, action='store_true',
-                        help="Run as a pyworkman service worker.")
+                            help="Run as a pyworkman service worker.")
 
     # Make sure the fields are valid.
     for k, v in fields.items():
@@ -343,7 +343,7 @@ def start_worker(service : type, mgr_url, key_file):
 
     # if --pywm not specified, do not start the worker.
     if not args.pywm:
-        return service.run(Send, args)
+        return service.run(args, Send)
 
     # Start the worker.
     with ServiceWorker(mgr_url, svcName, key_file) as worker:
@@ -355,7 +355,7 @@ def start_worker(service : type, mgr_url, key_file):
             print("\nRunning job:", payload.job)
 
             try:
-                reply = service.run(Send, payload)
+                reply = service.run(payload, Send)
                 worker.done(str(reply))
             except Exception as err:
                 print(err)
