@@ -30,13 +30,6 @@ with the Worker handler and job inputs.
         else:
             send.reply(job.message)
 
-# -----------------------------------------------
-start_worker(EchoService, MGR, KEY) # No Return
-
-# For testing, we can directly call the run function.
-# Comment the start_worker call to run the tests below.
-# -----------------------------------------------------
-test = EchoService()
-test.message = "hello world"
-test.reverse = True
-EchoService.run(Send, test)
+# Specify --pywm to start as a service worker
+# ----------------------------------------------
+start_worker(EchoService, MGR, KEY)

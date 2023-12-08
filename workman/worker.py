@@ -2,6 +2,7 @@ import zmq
 import time
 import random
 import signal
+import argparse
 from collections import namedtuple
 from workman import protocol as pr
 
@@ -317,9 +318,18 @@ def start_worker(service : type, mgr_url, key_file):
         if not k.startswith("_") and not callable(v)
     }
 
+    # Create commandline argument parser
+    cmdline = argparse.ArgumentParser(prog=svcName, description=svcDesc)
+    cmdline.add_argument("--pywm", default=False, action='store_true',
+                        help="Run as a pyworkman service worker.")
+
     # Make sure the fields are valid.
     for k, v in fields.items():
         assert type(v) == dict, f"Field {k} must be a dictionary."
+        cmdline.add_argument('--' + k, choices=v.get('choices'),
+            default=v.get('default'), help=v.get('help'), type=v.get('type'))
+
+    args = cmdline.parse_args()
 
     # Handle termination
     shutdown = False
@@ -330,6 +340,10 @@ def start_worker(service : type, mgr_url, key_file):
 
     signal.signal(signal.SIGINT, _sig_handler)
     signal.signal(signal.SIGTERM, _sig_handler)
+
+    # if --pywm not specified, do not start the worker.
+    if not args.pywm:
+        return service.run(Send, args)
 
     # Start the worker.
     with ServiceWorker(mgr_url, svcName, key_file) as worker:
@@ -348,5 +362,3 @@ def start_worker(service : type, mgr_url, key_file):
                 worker.done_with_error(str(err))
 
             print("Job done:", payload.job)
-
-    exit(0)

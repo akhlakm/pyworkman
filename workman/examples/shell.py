@@ -6,7 +6,7 @@ from workman.util import shell
 MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
 KEY = "mgr.key"                 # Download from MGR.
 
-class ShellService:
+class PyWMService:
     """
     Directly execute a terminal command.
     WARN! Be careful using this service!
@@ -17,16 +17,10 @@ class ShellService:
         dict(help="Command to execute.", default="conda info", required=1)
     
     @staticmethod
-    def run(send : Send, job : 'ShellService'):
+    def run(send : Send, job : 'PyWMService'):
         for output in shell.watch_stdout(job.command):
             send.update(output)
 
-# -----------------------------------------------
-start_worker(ShellService, MGR, KEY) # No Return
-
-# For testing, we can directly call the run function.
-# Comment the start_worker call to run the tests below.
-# -----------------------------------------------------
-test = ShellService()
-test.command = "bash -i -c 'echo $PWD'"
-ShellService.run(Send, test)
+# Specify --pywm to start as a service worker
+# ----------------------------------------------
+start_worker(PyWMService, MGR, KEY)
