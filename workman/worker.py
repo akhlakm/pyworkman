@@ -187,6 +187,21 @@ class ServiceWorker(object):
                 if field["type"] == "bool":
                     payload[name] = self._make_bool(payload[name])
 
+                elif field["type"] == "int":
+                    try:
+                        payload[name] = int(payload[name])
+                    except Exception as err:
+                        self.done_with_error(
+                            f"Invalid int {name}: '{payload[name]}' ({err})")
+                        return None
+
+                elif field["type"] == "float":
+                    try:
+                        payload[name] = float(payload[name])
+                    except Exception as err:
+                        self.done_with_error(
+                            f"Invalid float {name}: '{payload[name]}' ({err})")
+                        return None
 
             payload["job"] = msg.job
             defn = namedtuple("Job", [k for k in payload.keys()])
