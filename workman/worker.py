@@ -281,14 +281,14 @@ class Send:
     @staticmethod
     def update(*msg : any):
         message = " ".join([str(m) for m in msg])
-        print("-- Update:", message)
+        print("-- Update:", message, flush=True)
         if Send.worker:
             Send.worker.update(message)
     
     @staticmethod
     def reply(*msg : any):
         message = " ".join([str(m) for m in msg])
-        print("--- Reply:", message)
+        print("--- Reply:", message, flush=True)
         if Send.worker:
             Send.worker.reply(message)
 
