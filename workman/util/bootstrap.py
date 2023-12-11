@@ -25,7 +25,7 @@ class Error:
         print("\n", str(problem).upper())
         for sol in solutions:
             print("\t" + sol)
-        print()
+        print(flush=True)
         raise err
 
     @classmethod
@@ -35,6 +35,6 @@ class Error:
             print("\n", str(problem).upper())
             for sol in solutions:
                 print("\t" + str(sol))
-            print()
+            print(flush=True)
             raise RuntimeError(problem)
 
