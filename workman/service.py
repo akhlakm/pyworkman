@@ -215,6 +215,8 @@ class Service(object):
         if msg.job not in self.jobs:
             r = {'error': 'Job not found'}
             self.log.error("{} queried unknown job {}", msg.identity, msg.job)
+            self.log.error("Currently listed jobs: {}",
+                            ", ".join([s for s in self.jobs.keys()]))
         else:
             r = self.jobs[msg.job].status()
         return pr.serialize(r)
