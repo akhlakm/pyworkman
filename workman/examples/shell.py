@@ -18,9 +18,9 @@ class PyWMService:
         for output in shell.watch_stdout(job.command):
             send.update(output)
 
-# Specify --pywm to start as a service worker
+# Specify --pywm to start as a service worker.
 # ----------------------------------------------
 if __name__ == '__main__':
-    MGR = "tcp://127.0.0.1:5455"    # Setup SSH tunnel: workman tunnel
-    KEY = "mgr.key"                 # Download from MGR.
+    MGR = "tcp://127.0.0.1:5455"            # Setup SSH tunnel: workman tunnel
+    KEY = os.path.expanduser("~/mgr.key")   # Download from MGR.
     start_worker(PyWMService, MGR, KEY)
